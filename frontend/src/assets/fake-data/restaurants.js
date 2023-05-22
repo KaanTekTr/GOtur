@@ -1,8 +1,8 @@
-import product_01_image_01 from "../images/product_01.jpg";
+import product_01_image_01 from "../images/burgerking.png";
 import product_01_image_02 from "../images/product_01.1.jpg";
 import product_01_image_03 from "../images/product_01.3.jpg";
 
-import product_02_image_01 from "../images/product_2.1.jpg";
+import product_02_image_01 from "../images/dominos.png";
 import product_02_image_02 from "../images/product_2.2.jpg";
 import product_02_image_03 from "../images/product_2.3.jpg";
 

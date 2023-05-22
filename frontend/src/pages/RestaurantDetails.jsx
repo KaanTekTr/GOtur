@@ -88,7 +88,7 @@ const RestaurantDetails = () => {
 
   return (
     <Helmet title="All-Foods">
-      <CommonSection title={restaurant.title} desc={restaurant.minPrice} />
+      <CommonSection title={restaurant.title} desc={restaurant.minPrice} image={restaurant.image01} />
 
       <section>
         <Container>

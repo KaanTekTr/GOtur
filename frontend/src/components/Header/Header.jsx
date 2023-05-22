@@ -23,6 +23,10 @@ const nav__links = [
     path: "/restaurants",
   },
   {
+    display: "Past Orders",
+    path: "/pastOrders",
+  },
+  {
     display: "Cart",
     path: "/cart",
   },

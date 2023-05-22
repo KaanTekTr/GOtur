@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
-import { Container } from "reactstrap";
+import { Container, Button, Modal, ModalHeader, ModalBody, ModalFooter, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText } from 'reactstrap';
 import logo from "../../assets/images/res-logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,6 +33,9 @@ const nav__links = [
 ];
 
 const Header = () => {
+  const [modal, setModal] = useState(false);
+
+  const toggle = () => setModal(!modal);
   const menuRef = useRef(null);
   const headerRef = useRef(null);
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
@@ -83,6 +86,51 @@ const Header = () => {
                 </NavLink>
               ))}
             </div>
+          </div>
+
+          <div>
+            <Button color="danger" onClick={toggle}>
+              Address 1
+            </Button>
+            <Modal isOpen={modal} toggle={toggle} >
+              <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
+              <ModalBody>   
+                <ListGroup>
+                  <ListGroupItem active>
+                    <ListGroupItemHeading>
+                      Address 1
+                    </ListGroupItemHeading>
+                    <ListGroupItemText>
+                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
+                    </ListGroupItemText>
+                  </ListGroupItem>
+                  <ListGroupItem>
+                    <ListGroupItemHeading>
+                      Address 1
+                    </ListGroupItemHeading>
+                    <ListGroupItemText>
+                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
+                    </ListGroupItemText>
+                  </ListGroupItem>
+                  <ListGroupItem>
+                    <ListGroupItemHeading>
+                      Address 1
+                    </ListGroupItemHeading>
+                    <ListGroupItemText>
+                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
+                    </ListGroupItemText>
+                  </ListGroupItem>
+                </ListGroup>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onClick={toggle}>
+                  Do Something
+                </Button>{' '}
+                <Button color="secondary" onClick={toggle}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </Modal>
           </div>
 
           {/* ======== nav right icons ========= */}

@@ -4,7 +4,6 @@ import CommonSection from "../components/UI/common-section/CommonSection";
 
 import { Container, Row, Col } from "reactstrap";
 
-import products from "../assets/fake-data/products";
 import ProductCard from "../components/UI/product-card/ProductCard";
 import ReactPaginate from "react-paginate";
 
@@ -17,18 +16,26 @@ import { useParams } from "react-router-dom";
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import restaurants from "../assets/fake-data/restaurants";
+import { useDispatch, useSelector } from "react-redux";
+import { restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const RestaurantDetails = () => {
   const [category, setCategory] = useState("ALL");
-  const [allProducts, setAllProducts] = useState(products);
-
+  
   const { id } = useParams();
-
+  
   const restaurant = restaurants.find((restaurant) => restaurant.id === id);
-
+  
   const [searchTerm, setSearchTerm] = useState("");
-
   const [pageNumber, setPageNumber] = useState(0);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(restaurantActions.getProducts())
+  })
+  
+  const products = useSelector(state => state.restaurant.products);
+  const [allProducts, setAllProducts] = useState(products);
 
   const searchedProduct = allProducts.filter((item) => {
     if (searchTerm.value === "") {
@@ -82,9 +89,7 @@ const RestaurantDetails = () => {
 
       setAllProducts(filteredProducts);
     }
-  }, [category]);
-
-  console.log(restaurant.minPrice);
+  }, [category, products]);
 
   return (
     <Helmet title="All-Foods">

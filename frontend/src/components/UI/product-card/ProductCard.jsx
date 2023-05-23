@@ -2,7 +2,7 @@ import React from "react";
 
 import "../../../styles/product-card.css";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useDispatch } from "react-redux";
 import { cartActions } from "../../../store/shopping-cart/cartSlice";
@@ -22,9 +22,14 @@ const ProductCard = (props) => {
     );
   };
 
+  const navigate = useNavigate();
+  const navToFood = () => {
+    navigate(`/foods/${id}`)
+  }
+
   return (
     <div className="product__item">
-      <div className="product__img">
+      <div className="product__img" onClick={navToFood}>
         <img src={image01} alt="product-img" className="w-50" />
       </div>
 

@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
 import { Container, Row, Col } from "reactstrap";
 
-import restaurants from "../assets/fake-data/restaurants";
 import ReactPaginate from "react-paginate";
 
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import RestaurantCard from "../components/UI/restaurant/RestaurantCard";
+import { useDispatch, useSelector } from "react-redux";
+import { restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const AllRestaurants = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [pageNumber, setPageNumber] = useState(0);
+
+  const dispatch = useDispatch();
+
+  const restaurants = useSelector((state) => state.restaurant.restaurants);
+
+  useEffect(() => {
+    dispatch(
+      restaurantActions.getRestaurants()
+    );
+  });
 
   const searchedRestaurant = restaurants.filter((item) => {
     if (searchTerm.value === "") {

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import { Container, Row, Col } from "reactstrap";
@@ -11,12 +11,18 @@ const Login = () => {
   const loginNameRef = useRef();
   const loginPasswordRef = useRef();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(authActions.login());
+    dispatch(authActions.login({
+      email,
+      password
+    }));
     navigate("/home")
   };
 
@@ -33,6 +39,8 @@ const Login = () => {
                     type="email"
                     placeholder="Email"
                     required
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                     ref={loginNameRef}
                   />
                 </div>
@@ -41,6 +49,8 @@ const Login = () => {
                     type="password"
                     placeholder="Password"
                     required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     ref={loginPasswordRef}
                   />
                 </div>

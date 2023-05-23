@@ -1,16 +1,32 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import { Container, Row, Col } from "reactstrap";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { authActions } from "../store/authSlice";
 
 const Register = () => {
   const signupNameRef = useRef();
   const signupPasswordRef = useRef();
   const signupEmailRef = useRef();
 
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
+
   const submitHandler = (e) => {
     e.preventDefault();
+
+    dispatch(
+      authActions.register({
+        email,
+        fullName,
+        password
+      })
+      );
   };
 
   return (
@@ -26,6 +42,8 @@ const Register = () => {
                     type="text"
                     placeholder="Full name"
                     required
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
                     ref={signupNameRef}
                   />
                 </div>
@@ -34,6 +52,8 @@ const Register = () => {
                     type="email"
                     placeholder="Email"
                     required
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                     ref={signupEmailRef}
                   />
                 </div>
@@ -42,6 +62,8 @@ const Register = () => {
                     type="password"
                     placeholder="Password"
                     required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     ref={signupPasswordRef}
                   />
                 </div>

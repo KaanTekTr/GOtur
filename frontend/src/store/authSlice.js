@@ -11,7 +11,18 @@ const authSlice = createSlice({
 
   reducers: {
     login(state, action) {
+      const { email, password } = action.payload;
+      console.log(email, "::", password);
       state.status = "authenticated";
+      localStorage.setItem('userId', 1);
+    },
+    logout(state, action){
+      state.status = "not-authenticated";
+      localStorage.removeItem('userId');
+    },
+    register(state, action) {
+      const { fullName, email, password } = action.payload;
+      console.log(fullName, "::", email, "::", password);
     }
   },
 });

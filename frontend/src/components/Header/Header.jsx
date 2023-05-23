@@ -8,6 +8,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 
 import "../../styles/header.css";
+import { authActions } from "../../store/authSlice";
+import { addressActions } from "../../store/user/adressSlice";
 
 const nav__links = [
   {
@@ -45,11 +47,32 @@ const Header = () => {
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const dispatch = useDispatch();
 
+  const addresses = useSelector(state => state.address.address);
+  const selectedAddress = useSelector(state => state.address.selectedAddress);
+
+  useEffect(() => {
+    dispatch(addressActions.getAddresses());
+  })
+
   const toggleMenu = () => menuRef.current.classList.toggle("show__menu");
 
   const toggleCart = () => {
     dispatch(cartUiActions.toggle());
   };
+
+  const logOut = () => {
+    dispatch(authActions.logout());
+  }
+
+  const eventHandler = () => {
+    // Your event handling logic goes here
+    // For example, you can log a message when the scroll event occurs
+    console.log("Scroll event occurred");
+  };
+
+  const changeSelAddress = id => {
+    dispatch(addressActions.changeSelectedAddress({id}));
+  }
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
@@ -63,7 +86,7 @@ const Header = () => {
       }
     });
 
-    return () => window.removeEventListener("scroll");
+    return () => window.removeEventListener("scroll", eventHandler);
   }, []);
 
   return (
@@ -94,36 +117,22 @@ const Header = () => {
 
           <div>
             <Button color="danger" onClick={toggle}>
-              Address 1
+              Address
             </Button>
             <Modal isOpen={modal} toggle={toggle} >
               <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>
-                  <ListGroupItem active>
-                    <ListGroupItemHeading>
-                      Address 1
-                    </ListGroupItemHeading>
-                    <ListGroupItemText>
-                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
-                    </ListGroupItemText>
-                  </ListGroupItem>
-                  <ListGroupItem>
-                    <ListGroupItemHeading>
-                      Address 1
-                    </ListGroupItemHeading>
-                    <ListGroupItemText>
-                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
-                    </ListGroupItemText>
-                  </ListGroupItem>
-                  <ListGroupItem>
-                    <ListGroupItemHeading>
-                      Address 1
-                    </ListGroupItemHeading>
-                    <ListGroupItemText>
-                      Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
-                    </ListGroupItemText>
-                  </ListGroupItem>
+                  {addresses.length > 0 ? addresses.map(address => (
+                    <ListGroupItem style={{cursor: "pointer"}} active={address.id === selectedAddress.id} onClick={() => changeSelAddress(address.id)}>
+                      <ListGroupItemHeading>
+                        {address.title}
+                      </ListGroupItemHeading>
+                      <ListGroupItemText>
+                        {address.desc}
+                      </ListGroupItemText>
+                    </ListGroupItem>
+                  )) : <span>No Address To Select</span>}
                 </ListGroup>
               </ModalBody>
               <ModalFooter>
@@ -144,7 +153,7 @@ const Header = () => {
               <span className="cart__badge">{totalQuantity}</span>
             </span>
 
-            <span className="user">
+            <span className="user" onClick={logOut}>
               <Link to="/login">
                 <i class="ri-user-line"></i>
               </Link>

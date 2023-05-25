@@ -59,8 +59,8 @@ public class InitializerController {
                         "    FOREIGN KEY (customer2_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (customer1_id, customer2_id));",
                 "CREATE TABLE Address(\n" +
+                        "    address_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    customer_id int,\n" +
-                        "    address_id int,\n" +
                         "    is_primary boolean,\n" +
                         "    city varchar(255),\n" +
                         "    district varchar(255),\n" +
@@ -69,7 +69,36 @@ public class InitializerController {
                         "    building_num varchar(255),\n" +
                         "    detailed_desc text,\n" +
                         "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (customer_id, address_id));"};
+                        "    PRIMARY KEY (address_id));",
+                "CREATE TABLE Restaurant(\n" +
+                        "    restaurant_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    restaurant_name varchar(255),\n" +
+                        "    district varchar(255),\n" +
+                        "    total_earnings float DEFAULT 0,\n" +
+                        "    open_hour varchar(255),\n" +
+                        "    close_hour varchar(255),\n" +
+                        "    min_delivery_price int,\n" +
+                        "    is_top_restaurant boolean,\n" +
+                        "    rating float,\n" +
+                        "    PRIMARY KEY (restaurant_id));",
+                "CREATE TABLE Shopping(\n" +
+                        "    shopping_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    customer_id int,\n" +
+                        "    address_id int,\n" +
+                        "    restaurant_id int,\n" +
+                        "    customer_note varchar(255),\n" +
+                        "    is_paid boolean,\n" +
+                        "    is_group_order boolean,\n" +
+                        "    being_prepared boolean,\n" +
+                        "    is_departed boolean,\n" +
+                        "    is_delivered boolean,\n" +
+                        "    is_canceled boolean,\n" +
+                        "    order_time datetime,\n" +
+                        "    total_price float,\n" +
+                        "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (address_id) REFERENCES Address(address_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (shopping_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

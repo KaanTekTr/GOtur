@@ -161,7 +161,23 @@ public class InitializerController {
                         "    restaurant_owner_id int NOT NULL,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_owner_id) REFERENCES RestaurantOwner(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (restaurant_id, restaurant_owner_id));"};
+                        "    PRIMARY KEY (restaurant_id, restaurant_owner_id));",
+                "CREATE TABLE Promoter(\n" +
+                        "    promoter_id int NOT NULL,\n" +
+                        "    income int,\n" +
+                        "    FOREIGN KEY (promoter_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (promoter_id));",
+                "CREATE TABLE Promote(\n" +
+                        "    promotion_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    promoter_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    promotion_code varchar(30),\n" +
+                        "    profit_rate int,\n" +
+                        "    expiration_date date,\n" +
+                        "    user_quota int,\n" +
+                        "    FOREIGN KEY (promoter_id) REFERENCES Promoter(promoter_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (promotion_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

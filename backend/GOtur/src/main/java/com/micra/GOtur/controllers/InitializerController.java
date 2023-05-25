@@ -138,7 +138,30 @@ public class InitializerController {
                         "    report_type varchar(255),\n" +
                         "    report_date datetime,\n" +
                         "    FOREIGN KEY (admin_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (report_id));"};
+                        "    PRIMARY KEY (report_id));",
+                "CREATE TABLE Analyzes(\n" +
+                        "    report_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (report_id) REFERENCES Report(report_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (report_id, restaurant_id));",
+                "CREATE TABLE Favorites(\n" +
+                        "    customer_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (customer_id, restaurant_id));",
+                "CREATE TABLE RestaurantOwner(\n" +
+                        "    user_id int NOT NULL,\n" +
+                        "    restaurant_count int DEFAULT 0,\n" +
+                        "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (user_id));",
+                "CREATE TABLE ManagedBy(\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    restaurant_owner_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_owner_id) REFERENCES RestaurantOwner(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (restaurant_id, restaurant_owner_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

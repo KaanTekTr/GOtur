@@ -214,7 +214,14 @@ public class InitializerController {
                         "    FOREIGN KEY (food_category_id) REFERENCES FoodCategory(food_category_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (menu_category_id) REFERENCES MenuCategory(menu_category_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (food_id));"};
+                        "    PRIMARY KEY (food_id));",
+                "CREATE TABLE Ingredient(\n" +
+                        "    ingredient_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    food_id int NOT NULL,\n" +
+                        "    ingredient_name varchar(255),\n" +
+                        "    price int,\n" +
+                        "    FOREIGN KEY (food_id) REFERENCES Food(food_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (ingredient_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

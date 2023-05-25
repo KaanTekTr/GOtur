@@ -51,7 +51,25 @@ public class InitializerController {
                         "    total_points float DEFAULT 0,\n" +
                         "    payment_method varchar(255),\n" +
                         "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (user_id));"};
+                        "    PRIMARY KEY (user_id));",
+                "CREATE TABLE Friend(\n" +
+                        "    customer1_id int,\n" +
+                        "    customer2_id int,\n" +
+                        "    FOREIGN KEY (customer1_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (customer2_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (customer1_id, customer2_id));",
+                "CREATE TABLE Address(\n" +
+                        "    customer_id int,\n" +
+                        "    address_id int,\n" +
+                        "    is_primary boolean,\n" +
+                        "    city varchar(255),\n" +
+                        "    district varchar(255),\n" +
+                        "    street_num varchar(255),\n" +
+                        "    street_name varchar(255),\n" +
+                        "    building_num varchar(255),\n" +
+                        "    detailed_desc text,\n" +
+                        "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (customer_id, address_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

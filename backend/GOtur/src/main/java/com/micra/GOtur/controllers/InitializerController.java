@@ -177,7 +177,44 @@ public class InitializerController {
                         "    user_quota int,\n" +
                         "    FOREIGN KEY (promoter_id) REFERENCES Promoter(promoter_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (promotion_id));"};
+                        "    PRIMARY KEY (promotion_id));",
+                "CREATE TABLE DiscountCoupon(\n" +
+                        "    coupon_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    coupon_owner_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    discount_percentage int,\n" +
+                        "    expiration_date date,\n" +
+                        "    FOREIGN KEY (coupon_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (coupon_id));",
+                "CREATE TABLE FoodCategory(\n" +
+                        "    food_category_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    food_category_name varchar(255),\n" +
+                        "    PRIMARY KEY (food_category_id));",
+                "CREATE TABLE Serves(\n" +
+                        "    food_category_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (food_category_id) REFERENCES FoodCategory(food_category_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (food_category_id, restaurant_id));",
+                "CREATE TABLE MenuCategory(\n" +
+                        "    menu_category_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    menu_category_name varchar(255),\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (menu_category_id));",
+                "CREATE TABLE Food(\n" +
+                        "    food_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    food_category_id int NOT NULL,\n" +
+                        "    restaurant_id int NOT NULL,\n" +
+                        "    menu_category_id int NOT NULL,\n" +
+                        "    food_name varchar(255),\n" +
+                        "    fixed_ingredients varchar(255),\n" +
+                        "    price int,\n" +
+                        "    FOREIGN KEY (food_category_id) REFERENCES FoodCategory(food_category_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (menu_category_id) REFERENCES MenuCategory(menu_category_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (food_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

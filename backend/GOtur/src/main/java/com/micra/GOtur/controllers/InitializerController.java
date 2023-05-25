@@ -81,8 +81,8 @@ public class InitializerController {
                         "    is_top_restaurant boolean,\n" +
                         "    rating float,\n" +
                         "    PRIMARY KEY (restaurant_id));",
-                "CREATE TABLE Shopping(\n" +
-                        "    shopping_id int NOT NULL AUTO_INCREMENT,\n" +
+                "CREATE TABLE Purchase(\n" +
+                        "    purchase_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    customer_id int,\n" +
                         "    address_id int,\n" +
                         "    restaurant_id int,\n" +
@@ -98,7 +98,22 @@ public class InitializerController {
                         "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (address_id) REFERENCES Address(address_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (shopping_id));"};
+                        "    PRIMARY KEY (purchase_id));",
+                "CREATE TABLE Review(\n" +
+                        "    review_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    purchase_id int NOT NULL,\n" +
+                        "    comment varchar(255),\n" +
+                        "    rate float,\n" +
+                        "    review_date datetime,\n" +
+                        "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (review_id));",
+                "CREATE TABLE PurchaseGroup(\n" +
+                        "    group_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    group_owner_id int NOT NULL,\n" +
+                        "    group_name varchar(255),\n" +
+                        "    group_balance float DEFAULT 0,\n" +
+                        "    FOREIGN KEY (group_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (group_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

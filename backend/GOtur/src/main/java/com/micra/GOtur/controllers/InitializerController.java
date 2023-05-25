@@ -113,7 +113,32 @@ public class InitializerController {
                         "    group_name varchar(255),\n" +
                         "    group_balance float DEFAULT 0,\n" +
                         "    FOREIGN KEY (group_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (group_id));"};
+                        "    PRIMARY KEY (group_id));",
+                "CREATE TABLE PurchasedInGroup(\n" +
+                        "    purchase_id int NOT NULL,\n" +
+                        "    group_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (group_id) REFERENCES PurchaseGroup(group_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (purchase_id, group_id));",
+                "CREATE TABLE Forms(\n" +
+                        "    group_id int NOT NULL,\n" +
+                        "    group_member_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (group_id) REFERENCES PurchaseGroup(group_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (group_member_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (group_id, group_member_id));",
+                "CREATE TABLE Admin(\n" +
+                        "    user_id int NOT NULL,\n" +
+                        "    report_count int,\n" +
+                        "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (user_id));",
+                "CREATE TABLE Report(\n" +
+                        "    report_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    admin_id int NOT NULL,\n" +
+                        "    details text,\n" +
+                        "    report_type varchar(255),\n" +
+                        "    report_date datetime,\n" +
+                        "    FOREIGN KEY (admin_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (report_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

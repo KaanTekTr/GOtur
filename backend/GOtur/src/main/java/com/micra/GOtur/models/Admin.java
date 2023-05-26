@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Admin {
+public class Admin extends User {
 
     private int user_id;
     private int report_count;

@@ -128,7 +128,7 @@ public class InitializerController {
                         "    PRIMARY KEY (group_id, group_member_id));",
                 "CREATE TABLE Admin(\n" +
                         "    user_id int NOT NULL,\n" +
-                        "    report_count int,\n" +
+                        "    report_count int DEFAULT 0,\n" +
                         "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (user_id));",
                 "CREATE TABLE Report(\n" +

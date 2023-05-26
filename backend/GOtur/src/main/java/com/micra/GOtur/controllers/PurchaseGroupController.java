@@ -1,11 +1,14 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.PurchaseGroupMapper;
 import com.micra.GOtur.models.PurchaseGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/purchaseGroup")
@@ -17,6 +20,22 @@ public class PurchaseGroupController {
 
     public PurchaseGroupController(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @GetMapping("/all")
+    public List<PurchaseGroup> getAllRestaurantOwners() {
+        String sql = "SELECT * FROM PurchaseGroup P;";
+
+        List<PurchaseGroup> list = jdbcTemplate.query(sql, new PurchaseGroupMapper());
+
+        return list;
+    }
+
+    @GetMapping("/{groupId}")
+    public PurchaseGroup getRestaurantOwner(@PathVariable("groupId") int groupId) {
+        String sql = "SELECT * FROM PurchaseGroup P WHERE P.group_id = ?;";
+
+        return jdbcTemplate.queryForObject(sql, new PurchaseGroupMapper(), groupId);
     }
 
     @PostMapping("/add")

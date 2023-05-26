@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/purchaseGroup")
@@ -40,13 +43,23 @@ public class PurchaseGroupController {
 
     @PostMapping("/add")
     public ResponseEntity<String> addPurchaseGroup(@RequestBody PurchaseGroup purchaseGroup) {
-        String sql = "INSERT INTO PurchaseGroup(group_owner_id, group_name) VALUES (?, ?);";
 
-        System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, purchaseGroup.getGroup_owner_id(), purchaseGroup.getGroup_name());
+        SimpleJdbcInsert insertIntoGroup = new SimpleJdbcInsert(jdbcTemplate).withTableName("PurchaseGroup").usingGeneratedKeyColumns("group_id");
+        final Map<String, Object> parameters = new HashMap<>();
+        parameters.put("group_owner_id", purchaseGroup.getGroup_owner_id());
+        parameters.put("group_name", purchaseGroup.getGroup_name());
+
+        int groupId = insertIntoGroup.executeAndReturnKey(parameters).intValue();
+
+        String sql1 = "INSERT INTO Forms(group_id, group_member_id) VALUES (?, ?);";
+
+        System.out.println(">>" + sql1);
+        jdbcTemplate.update(sql1, groupId, purchaseGroup.getGroup_owner_id());
 
         return new ResponseEntity<>("Purchase Group Successfully Inserted!", HttpStatus.OK);
     }
+
+    @PostMapping
 
     @DeleteMapping("/delete/{groupId}")
     public ResponseEntity<String> deletePurchaseGroup(@PathVariable("groupId") int groupId) {

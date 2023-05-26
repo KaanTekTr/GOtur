@@ -88,12 +88,12 @@ public class InitializerController {
                         "    restaurant_id int,\n" +
                         "    customer_note varchar(255),\n" +
                         "    is_paid boolean,\n" +
-                        "    is_group_order boolean,\n" +
+                        "    is_group_purchase boolean,\n" +
                         "    being_prepared boolean,\n" +
                         "    is_departed boolean,\n" +
                         "    is_delivered boolean,\n" +
                         "    is_canceled boolean,\n" +
-                        "    order_time datetime,\n" +
+                        "    purchase_time datetime,\n" +
                         "    total_price float,\n" +
                         "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (address_id) REFERENCES Address(address_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
@@ -114,7 +114,7 @@ public class InitializerController {
                         "    group_balance float DEFAULT 0,\n" +
                         "    FOREIGN KEY (group_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (group_id));",
-                "CREATE TABLE PurchasedInGroup(\n" +
+                "CREATE TABLE PurchaseInGroup(\n" +
                         "    purchase_id int NOT NULL,\n" +
                         "    group_id int NOT NULL,\n" +
                         "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
@@ -221,7 +221,19 @@ public class InitializerController {
                         "    ingredient_name varchar(255),\n" +
                         "    price int,\n" +
                         "    FOREIGN KEY (food_id) REFERENCES Food(food_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (ingredient_id));"};
+                        "    PRIMARY KEY (ingredient_id));",
+                "CREATE TABLE FoodInPurchase(\n" +
+                        "    food_id int NOT NULL,\n" +
+                        "    purchase_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (food_id) REFERENCES Food(food_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (food_id, purchase_id));",
+                "CREATE TABLE IngredientInPurchase(\n" +
+                        "    ingredient_id int NOT NULL,\n" +
+                        "    purchase_id int NOT NULL,\n" +
+                        "    FOREIGN KEY (ingredient_id) REFERENCES Ingredient(ingredient_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (ingredient_id, purchase_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

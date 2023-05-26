@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Serves {
 
-    private int category_id;
+    private int food_category_id;
     private String restaurant_id;
 
 }

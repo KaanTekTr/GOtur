@@ -10,10 +10,11 @@ import lombok.Setter;
 public class User {
 
     private int user_id;
-    private int age;
-    private String gender;
     private String username;
+    private String hashed_password;
+    private String password_salt;
     private String email;
     private String phone_number;
-
+    private int age;
+    private String gender;
 }

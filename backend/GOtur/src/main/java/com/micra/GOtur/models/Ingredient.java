@@ -11,6 +11,6 @@ public class Ingredient {
 
     private int ingredient_id;
     private int food_id;
+    private String ingredient_name;
     private int price;
-
 }

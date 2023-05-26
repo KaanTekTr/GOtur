@@ -18,6 +18,24 @@ const initialState = {
     ],
     selectedAddress: {
         id: 1,
+    },
+    groupAddress: [
+        {
+            id: 1,
+            title: "Group Address 1",
+            desc: "Üniversiteler Mah. Bilkent Üniversitesi 78. Yurt"
+        },{
+            id: 2,
+            title: "Group Address 2",
+            desc: "Üniversiteler Mah. Bilkent Üniversitesi 78. Yurt"
+        },{
+            id: 3,
+            title: "Group Address 3",
+            desc: "Üniversiteler Mah. Bilkent Üniversitesi 78. Yurt"
+        }
+    ],
+    selectedGroupAddress: {
+        id: 1,
     }
 };
 
@@ -33,6 +51,13 @@ const addressSlice = createSlice({
     changeSelectedAddress(state, action) {
         const { id } = action.payload;
         state.selectedAddress.id = id;
+    },
+    getGroupAddresses(state, action) {
+        console.log("get group addresses");
+    },
+    changeSelectedGroupAddress(state, action) {
+        const { id } = action.payload;
+        state.selectedGroupAddress.id = id;
     }
   },
 });

@@ -25,6 +25,10 @@ const nav__links = [
     path: "/restaurants",
   },
   {
+    display: "Groups",
+    path: "/groups",
+  },
+  {
     display: "Past Orders",
     path: "/pastOrders",
   },
@@ -54,7 +58,7 @@ const Header = () => {
     dispatch(addressActions.getAddresses());
   })
 
-  const toggleMenu = () => menuRef.current.classList.toggle("show__menu");
+  const toggleMenu = () => menuRef.current?.classList.toggle("show__menu");
 
   const toggleCart = () => {
     dispatch(cartUiActions.toggle());
@@ -80,9 +84,9 @@ const Header = () => {
         document.body.scrollTop > 80 ||
         document.documentElement.scrollTop > 80
       ) {
-        headerRef.current.classList.add("header__shrink");
+        headerRef?.current?.classList.add("header__shrink");
       } else {
-        headerRef.current.classList.remove("header__shrink");
+        headerRef?.current?.classList.remove("header__shrink");
       }
     });
 
@@ -95,7 +99,7 @@ const Header = () => {
         <div className="nav__wrapper d-flex align-items-center justify-content-between">
           <div className="logo">
             <img src={logo} alt="logo" />
-            <h5>Tasty Treat</h5>
+            <h5>GOtur</h5>
           </div>
 
           {/* ======= menu ======= */}
@@ -119,7 +123,7 @@ const Header = () => {
             <Button color="danger" onClick={toggle}>
               Address
             </Button>
-            <Modal isOpen={modal} toggle={toggle} >
+            <Modal className="modal-x" isOpen={modal} toggle={toggle} >
               <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>

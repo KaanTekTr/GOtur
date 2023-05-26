@@ -12,6 +12,9 @@ import Register from "../pages/Register";
 import AllRestaurants from "../pages/AllRestaurants";
 import RestaurantDetails from "../pages/RestaurantDetails"
 import PastOrders from "../pages/PastOrders";
+import Groups from "../pages/Groups";
+import GroupDetails from "../pages/GroupDetails";
+import GroupCart from "../components/UI/groupCart/GroupCart";
 
 const Routers = () => {
   return (
@@ -23,6 +26,9 @@ const Routers = () => {
       <Route path="/restaurants" element={<AllRestaurants />} />
       <Route path="/restaurants/:id" element={<RestaurantDetails />} />
       <Route path="/pastOrders" element={<PastOrders />} />
+      <Route path="/groups" element={<Groups />} />
+      <Route path="/groups/:id" element={<GroupDetails />} />
+      <Route path="/groupCart/:id" element={<GroupCart />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/login" element={<Login />} />

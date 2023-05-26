@@ -4,8 +4,6 @@ import CommonSection from "../components/UI/common-section/CommonSection";
 
 import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle } from "reactstrap";
 
-import products from "../assets/fake-data/products";
-import ProductCard from "../components/UI/product-card/ProductCard";
 import ReactPaginate from "react-paginate";
 
 import "../styles/all-foods.css";

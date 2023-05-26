@@ -27,3 +27,27 @@
     font-size: 0.8rem;
   }
 }
+
+.cart__icon {
+  position: relative;
+}
+
+.cart__badge_x {
+  position: absolute;
+  top: 10px;
+  right: -10px;
+  background: #df2020;
+  color: #fff;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-x {
+  top: 100px;
+}

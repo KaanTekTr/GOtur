@@ -32,6 +32,13 @@ public class RestaurantOwnerController {
         return list;
     }
 
+    @GetMapping("/{restaurantOwnerId}")
+    public RestaurantOwner getRestaurantOwner(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String sql = "SELECT * FROM RestaurantOwner R, User U WHERE U.user_id = R.user_id AND U.user_id = ?;";
+
+        return jdbcTemplate.queryForObject(sql, new RestaurantOwnerMapper(), restaurantOwnerId);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addRestaurantOwner(@RequestBody RestaurantOwner restaurantOwner) {
         String sql = "INSERT INTO User(username, hashed_password, password_salt, email, phone_number, age, gender) VALUES (?, ?, ?, ?, ?, ?, ?);";
@@ -52,5 +59,14 @@ public class RestaurantOwnerController {
     public int getIdByEmail(String email) {
         String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email);
+    }
+
+    @DeleteMapping("/delete/{restaurantOwnerId}")
+    public ResponseEntity<String> deleteRestaurantOwner(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String sql = "DELETE FROM USER U WHERE U.user_id = ?;";
+        jdbcTemplate.update(sql, restaurantOwnerId);
+
+        return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " has been deleted!",
+                HttpStatus.OK);
     }
 }

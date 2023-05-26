@@ -1,11 +1,14 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.models.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/customer")
@@ -19,6 +22,21 @@ public class CustomerController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @GetMapping("/all")
+    public List<Customer> getAllCustomers() {
+        String sql = "SELECT * FROM Customer R, User U WHERE U.user_id = R.user_id;";
+
+        List<Customer> list = jdbcTemplate.query(sql, new CustomerMapper());
+
+        return list;
+    }
+
+    @GetMapping("/{customerId}")
+    public Customer getCustomer(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Customer R, User U WHERE U.user_id = R.user_id AND U.user_id = ?;";
+
+        return jdbcTemplate.queryForObject(sql, new CustomerMapper(), customerId);
+    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@RequestBody Customer customer) {
@@ -43,7 +61,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/delete/{customerId}")
-    public ResponseEntity<String> deleteRestaurantOwner(@PathVariable("customerId") int customerId) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable("customerId") int customerId) {
         String sql = "DELETE FROM USER U WHERE U.user_id = ?;";
         jdbcTemplate.update(sql, customerId);
 

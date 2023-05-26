@@ -55,6 +55,23 @@ public class CustomerController {
         return new ResponseEntity<>("Customer Successfully Inserted!", HttpStatus.OK);
     }
 
+    @PostMapping("/addFriends/{customerId1}/{customerId2}")
+    public ResponseEntity<String> addFriends(@PathVariable("customerId1") int customerId1,
+                                             @PathVariable("customerId2") int customerId2) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Friend F WHERE (F.customer1_id = ? AND F.customer2_id = ?) OR (F.customer1_id = ? AND F.customer2_id = ?));";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId1, customerId2, customerId2, customerId1);
+
+        if (exists) {
+            return new ResponseEntity<>("The friendship already exists!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql2 = "INSERT INTO Friend(customer1_id, customer2_id) VALUES (?, ?);";
+        System.out.println(">>" + sql2);
+        jdbcTemplate.update(sql2, customerId1, customerId2);
+
+        return new ResponseEntity<>("Friendship successfully added!", HttpStatus.OK);
+    }
+
     public int getIdByEmail(String email) {
         String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email);
@@ -67,5 +84,22 @@ public class CustomerController {
 
         return new ResponseEntity<>("Customer With ID: " + customerId + " has been deleted!",
                 HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteFriends/{customerId1}/{customerId2}")
+    public ResponseEntity<String> deleteFriends(@PathVariable("customerId1") int customerId1,
+                                             @PathVariable("customerId2") int customerId2) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Friend F WHERE (F.customer1_id = ? AND F.customer2_id = ?) OR (F.customer1_id = ? AND F.customer2_id = ?));";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId1, customerId2, customerId2, customerId1);
+
+        if (!exists) {
+            return new ResponseEntity<>("The friendship does not exists!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql2 = "DELETE FROM Friend F WHERE (F.customer1_id = ? AND F.customer2_id = ?) OR (F.customer1_id = ? AND F.customer2_id = ?);";
+        System.out.println(">>" + sql2);
+        jdbcTemplate.update(sql2, customerId1, customerId2, customerId2, customerId1);
+
+        return new ResponseEntity<>("Friendship is successfully deleted!", HttpStatus.OK);
     }
 }

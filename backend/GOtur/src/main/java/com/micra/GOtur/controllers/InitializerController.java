@@ -88,12 +88,12 @@ public class InitializerController {
                         "    address_id int,\n" +
                         "    restaurant_id int,\n" +
                         "    customer_note varchar(255),\n" +
-                        "    is_paid boolean,\n" +
+                        "    is_paid boolean DEFAULT 0,\n" +
                         "    is_group_purchase boolean,\n" +
-                        "    being_prepared boolean,\n" +
-                        "    is_departed boolean,\n" +
-                        "    is_delivered boolean,\n" +
-                        "    is_canceled boolean,\n" +
+                        "    being_prepared boolean DEFAULT 0,\n" +
+                        "    is_departed boolean DEFAULT 0,\n" +
+                        "    is_delivered boolean DEFAULT 0,\n" +
+                        "    is_canceled boolean DEFAULT 0,\n" +
                         "    purchase_time datetime,\n" +
                         "    total_price float,\n" +
                         "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +

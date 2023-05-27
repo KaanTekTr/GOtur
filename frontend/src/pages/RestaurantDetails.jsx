@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Alert } from "reactstrap";
 
 import ProductCard from "../components/UI/product-card/ProductCard";
 import ReactPaginate from "react-paginate";
@@ -91,6 +91,10 @@ const RestaurantDetails = () => {
     }
   }, [category, products]);
 
+  const [visible, setVisible] = useState(true);
+
+  const onDismiss = () => setVisible(false);
+
   return (
     <Helmet title="All-Foods">
       <CommonSection title={restaurant.title} desc={restaurant.minPrice} image={restaurant.image01} />
@@ -166,11 +170,9 @@ const RestaurantDetails = () => {
 
               {displayPage.map((item) => (
                   <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
-                      <ProductCard item={item} />
+                      <ProductCard item={item} setVisible={setVisible} visible={visible}/>
                   </Col>
-              ))}
-
-              
+              ))}  
             <div>
               <ReactPaginate
                 pageCount={pageCount}
@@ -183,6 +185,9 @@ const RestaurantDetails = () => {
           </Row>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="info" isOpen={visible} toggle={onDismiss}>
+        Product added to cart!
+      </Alert>
     </Helmet>
   );
 };

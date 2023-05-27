@@ -8,9 +8,10 @@ import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, Modal
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
 import { groupsActions } from "../store/group/groupSlice";
+import { orderActions } from "../store/user/orderSlice";
 
 const GroupDetails = () => {
 
@@ -32,6 +33,7 @@ const GroupDetails = () => {
     const toggleGroupCart = () => setModalGroupCart(!modalGroupCart);
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const changeSelAddress = id => {
         dispatch(addressActions.changeSelectedGroupAddress({id}));
@@ -42,7 +44,10 @@ const GroupDetails = () => {
       setGroup(groups.find(group => `${group.id}` === id))
     }, [groups, id, dispatch, userId])
     
-    
+    const seeRestaurants = id => {
+      dispatch(orderActions.updateCurrentCart({id}));
+      navigate("/restaurants");
+    }
   return (
     <Helmet title={group.title}>
       <CommonSection title={group.title} />
@@ -87,6 +92,11 @@ const GroupDetails = () => {
                     </Card>
                 </Col>
                 ))}
+            </Row>
+            <Row>
+              <Col>
+                <Button onClick={() => seeRestaurants(group.id)}>Restaurants</Button>
+              </Col>
             </Row>
             {/** GROUP ADDRESS SELECTION MODAL */}
             <Modal className="modal-x" isOpen={modal} toggle={toggle} >

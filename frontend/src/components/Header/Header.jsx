@@ -10,6 +10,7 @@ import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 import "../../styles/header.css";
 import { authActions } from "../../store/authSlice";
 import { addressActions } from "../../store/user/adressSlice";
+import { orderActions } from "../../store/user/orderSlice";
 
 const nav__links = [
   {
@@ -93,6 +94,12 @@ const Header = () => {
     return () => window.removeEventListener("scroll", eventHandler);
   }, []);
 
+  const linkClicked = item => {
+    if (item.display === "Restaurants") {
+      dispatch(orderActions.updateCurrentCart({id: 0}));
+    }
+  }
+
   return (
     <header className="header" ref={headerRef}>
       <Container>
@@ -112,6 +119,7 @@ const Header = () => {
                   className={(navClass) =>
                     navClass.isActive ? "active__menu" : ""
                   }
+                  onClick={() => linkClicked(item)}
                 >
                   {item.display}
                 </NavLink>

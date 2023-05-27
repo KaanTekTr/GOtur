@@ -6,12 +6,13 @@ import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import { Container, Row, Col } from "reactstrap";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../store/shopping-cart/cartSlice";
 
 import "../styles/product-details.css";
 
 import ProductCard from "../components/UI/product-card/ProductCard";
+import { groupsActions } from "../store/group/groupSlice";
 
 const FoodDetails = () => {
   const [tab, setTab] = useState("desc");
@@ -27,15 +28,31 @@ const FoodDetails = () => {
 
   const relatedProduct = products.filter((item) => category === item.category);
 
-  const addItem = () => {
-    dispatch(
-      cartActions.addItem({
-        id,
-        title,
-        price,
-        image01,
-      })
-    );
+  const selectedCart = useSelector(state => state.order.currentCart);
+
+  const addToCart = () => {
+    if (selectedCart === 0) {
+      dispatch(
+        cartActions.addItem({
+          id,
+          title,
+          image01,
+          price,
+        })
+      );
+    } else {
+      dispatch(
+        groupsActions.addItem({ 
+          newItem: {
+            id,
+            title,
+            image01,
+            price,
+          },
+          groupId: selectedCart
+        })
+      );
+    }
   };
 
   const submitHandler = (e) => {
@@ -100,7 +117,7 @@ const FoodDetails = () => {
                   Category: <span>{category}</span>
                 </p>
 
-                <button onClick={addItem} className="addTOCart__btn">
+                <button onClick={addToCart} className="addTOCart__btn">
                   Add to Cart
                 </button>
               </div>

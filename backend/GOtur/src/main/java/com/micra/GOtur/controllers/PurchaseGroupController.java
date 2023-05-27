@@ -179,4 +179,35 @@ public class PurchaseGroupController {
 
         return new ResponseEntity<>("Customer is Successfully Deleted From The Purchase Group!", HttpStatus.OK);
     }
+
+    @DeleteMapping("/deleteAddress/{groupId}/{addressId}")
+    public ResponseEntity<String> deleteAddressFromPurchaseGroup(@PathVariable("groupId") int groupId,
+                                                            @PathVariable("addressId") int addressId) {
+        // Check if the group exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Get the ID of the group owner
+        String groupOwnerSql = "SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?;";
+        int groupOwnerId = jdbcTemplate.queryForObject(groupOwnerSql, Integer.class, groupId);
+
+        // Check if the address exists
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Address A WHERE A.address_id = ? AND A.customer_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, addressId, groupOwnerId);
+
+        if (!exists1) { // such address does not exist!
+            return new ResponseEntity<>("Address With ID: " + addressId + " does not exist in Purchase Group With ID: " + groupId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Address A WHERE A.address_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, addressId);
+
+        return new ResponseEntity<>("Address Is Successfully Deleted From The Purchase Group!", HttpStatus.OK);
+    }
 }

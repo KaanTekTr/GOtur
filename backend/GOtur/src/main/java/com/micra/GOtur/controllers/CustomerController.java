@@ -132,4 +132,31 @@ public class CustomerController {
 
         return new ResponseEntity<>("Friendship is successfully deleted!", HttpStatus.OK);
     }
+
+    @DeleteMapping("/deleteAddress/{customerId}/{addressId}")
+    public ResponseEntity<String> deleteAddressFromCustomer(@PathVariable("customerId") int customerId,
+                                                       @PathVariable("addressId") int addressId) {
+        // Check if the customer exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Check if the address exists
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Address A WHERE A.address_id = ? AND A.customer_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, addressId, customerId);
+
+        if (!exists1) { // such address does not exist!
+            return new ResponseEntity<>("Address With ID: " + addressId + " does not exist in Customer With ID: " + customerId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Address A WHERE A.address_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, addressId);
+
+        return new ResponseEntity<>("Address Is Successfully Deleted From The Customer!", HttpStatus.OK);
+    }
 }

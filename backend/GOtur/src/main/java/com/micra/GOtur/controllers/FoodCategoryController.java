@@ -1,8 +1,10 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.FoodCategoryMapper;
+import com.micra.GOtur.mappers.RestaurantOwnerMapper;
 import com.micra.GOtur.mappers.ReviewMapper;
 import com.micra.GOtur.models.FoodCategory;
+import com.micra.GOtur.models.RestaurantOwner;
 import com.micra.GOtur.models.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,17 @@ public class FoodCategoryController {
         String sql = "SELECT * FROM FoodCategory F;";
         List<FoodCategory> allFoodCategories = jdbcTemplate.query(sql, new FoodCategoryMapper());
         return allFoodCategories;
+    }
+
+    @GetMapping("/{foodCategoryId}")
+    public FoodCategory getFoodCategory(@PathVariable("foodCategoryId") int foodCategoryId) {
+        String sql = "SELECT * FROM FoodCategory F WHERE F.food_category_id = ? ;";
+
+        try {
+            return jdbcTemplate.queryForObject(sql, new FoodCategoryMapper(), foodCategoryId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @PostMapping("/add")

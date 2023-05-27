@@ -79,7 +79,11 @@ public class RestaurantOwnerController {
         String sql = "INSERT INTO ManagedBy(restaurant_id, restaurant_owner_id) VALUES (?, ?);";
 
         System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
+        try {
+            jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error! Make sure restaurantId or RestaurantOwnerID is valid!", HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
     }

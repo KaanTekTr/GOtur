@@ -51,6 +51,12 @@ public class PurchaseGroupController {
         return list;
     }
 
+    @GetMapping("/groupOwner/{groupId}")
+    public Customer getGroupOwnerByGroupId(@PathVariable("groupId") int groupId) {
+        String sql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND C.user_id IN (SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?)";
+        return jdbcTemplate.queryForObject(sql, new CustomerMapper(), groupId);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addPurchaseGroup(@RequestBody PurchaseGroup purchaseGroup) {
 

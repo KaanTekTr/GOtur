@@ -84,6 +84,38 @@ public class RestaurantOwnerController {
         return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
     }
 
+    @PostMapping("/addRestaurantOwner/{restaurantId}/{restaurantOwnerId}")
+    public ResponseEntity<String> addRestaurantOwnerToRestaurant(@PathVariable("restaurantId") int restaurantId,
+                                                                 @PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, restaurantId);
+
+        if (!exists) { // if restaurant does not exist
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM RestaurantOwner R WHERE R.user_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, restaurantOwnerId);
+
+        if (!exists1) { // if restaurant owner does not exist
+            return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM ManagedBy M WHERE M.restaurant_id = ? AND M.restaurant_owner_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, restaurantId, restaurantOwnerId);
+
+        if (exists2) { // if restaurant owner, restaurant pair already exists
+            return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " already manages Restaurant With ID: " + restaurantId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "INSERT INTO ManagedBy(restaurant_id, restaurant_owner_id) VALUES (?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
+
+        return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
+    }
+
     public int getIdByEmail(String email) {
         String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email);

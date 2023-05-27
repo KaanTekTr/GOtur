@@ -22,7 +22,7 @@ const Register = () => {
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [userType, setUserType] = useState("");
+  const [authType, setUserType] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const dispatch = useDispatch();
@@ -42,7 +42,7 @@ const Register = () => {
         password,
         birthdate,
         gender,
-        userType,
+        authType,
         phoneNumber
       })
     );
@@ -132,7 +132,7 @@ const Register = () => {
                 <div className="form__group">
                   <select
                     required
-                    value={userType}
+                    value={authType}
                     onChange={e => setUserType(e.target.value)}
                     ref={signupUserTypeRef}
                   >

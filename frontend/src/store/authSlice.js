@@ -7,7 +7,14 @@ const authSlice = createSlice({
     status: localStorage.getItem('userId') ? 'authenticated' : 'not-authenticated',
     key: localStorage.getItem('key'),
     userId: localStorage.getItem('userId'),
+    email: localStorage.getItem('email'),
+    fullName: localStorage.getItem('fullName'),
+    password: localStorage.getItem('password'),
+    birthdate: localStorage.getItem('birthdate'),
+    gender: localStorage.getItem('gender'),
+    phoneNumber: localStorage.getItem('phoneNumber'),
   },
+
 
   reducers: {
     login(state, action) {
@@ -21,9 +28,10 @@ const authSlice = createSlice({
       localStorage.removeItem('userId');
     },
     register(state, action) {
-      const { fullName, email, password } = action.payload;
-      console.log(fullName, "::", email, "::", password);
+      const { fullName, email, password, birthdate, gender, authType, phoneNumber } = action.payload;
+      console.log(fullName, "::", email, "::", password, "::", birthdate, "::", gender, "::", authType, "::", phoneNumber);
     }
+    
   },
 });
 

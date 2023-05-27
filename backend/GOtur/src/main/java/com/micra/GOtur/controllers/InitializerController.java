@@ -61,6 +61,7 @@ public class InitializerController {
                 "CREATE TABLE Address(\n" +
                         "    address_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    customer_id int,\n" +
+                        "    address_name varchar(255),\n" +
                         "    is_primary boolean,\n" +
                         "    city varchar(255),\n" +
                         "    district varchar(255),\n" +

@@ -2,6 +2,7 @@ package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.mappers.PurchaseGroupMapper;
+import com.micra.GOtur.models.Address;
 import com.micra.GOtur.models.Customer;
 import com.micra.GOtur.models.PurchaseGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class PurchaseGroupController {
     }
 
     @PostMapping("/add/{groupId}/{customerId}")
-    public ResponseEntity<String> addCustomerToGrouo(@PathVariable("groupId") int groupId, @PathVariable("customerId") int customerId) {
+    public ResponseEntity<String> addCustomerToGroup(@PathVariable("groupId") int groupId, @PathVariable("customerId") int customerId) {
         String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
         boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
 
@@ -105,6 +106,31 @@ public class PurchaseGroupController {
         jdbcTemplate.update(sql, groupId, customerId);
 
         return new ResponseEntity<>("Customer is Successfully Inserted Into The Purchase Group!", HttpStatus.OK);
+    }
+
+    @PostMapping("/addAddress/{groupId}")
+    public ResponseEntity<String> addAddressByPurchaseGroupId(@PathVariable("groupId") int groupId,
+                                                              @RequestBody Address address) {
+        // Check if the group exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if (!exists) { // if group does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Get the ID of the group owner
+        String groupOwnerSql = "SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?;";
+        int groupOwnerId = jdbcTemplate.queryForObject(groupOwnerSql, Integer.class, groupId);
+
+        String sql = "INSERT INTO Address(customer_id, address_name, is_primary, city, district, street_num, street_name, building_num, detailed_desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        System.out.println(">>" + sql);
+        System.out.println(address.getIs_primary());
+        jdbcTemplate.update(sql, groupOwnerId, address.getAddress_name(), address.getIs_primary(), address.getCity(), address.getDistrict(), address.getStreet_num(),
+                address.getStreet_name(), address.getBuilding_num(), address.getDetailed_desc());
+
+        return new ResponseEntity<>("Address Is Successfully Added To The Purchase Group!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{groupId}")

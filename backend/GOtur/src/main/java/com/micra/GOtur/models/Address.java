@@ -11,7 +11,8 @@ public class Address {
 
     private int address_id;
     private int customer_id;
-    private boolean is_primary;
+    private String address_name;
+    private Boolean is_primary;
     private String city;
     private String district;
     private String street_num;

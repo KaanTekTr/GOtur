@@ -1,6 +1,7 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.CustomerMapper;
+import com.micra.GOtur.models.Address;
 import com.micra.GOtur.models.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,27 @@ public class CustomerController {
         return new ResponseEntity<>("Customer Successfully Inserted!", HttpStatus.OK);
     }
 
+    @PostMapping("/addAddress/{customerId}")
+    public ResponseEntity<String> addAddressToCustomer(@PathVariable("customerId") int customerId,
+                                                       @RequestBody Address address) {
+        // Check if the customer exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "INSERT INTO Address(customer_id, address_name, is_primary, city, district, street_num, street_name, building_num, detailed_desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        System.out.println(">>" + sql);
+        System.out.println(address.getIs_primary());
+        jdbcTemplate.update(sql, customerId, address.getAddress_name(), address.getIs_primary(), address.getCity(), address.getDistrict(), address.getStreet_num(),
+                address.getStreet_name(), address.getBuilding_num(), address.getDetailed_desc());
+
+        return new ResponseEntity<>("Address Is Successfully Added To The Customer!", HttpStatus.OK);
+    }
+
     @PostMapping("/addFriends/{customerId1}/{customerId2}")
     public ResponseEntity<String> addFriends(@PathVariable("customerId1") int customerId1,
                                              @PathVariable("customerId2") int customerId2) {
@@ -109,5 +131,32 @@ public class CustomerController {
         jdbcTemplate.update(sql2, customerId1, customerId2, customerId2, customerId1);
 
         return new ResponseEntity<>("Friendship is successfully deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteAddress/{customerId}/{addressId}")
+    public ResponseEntity<String> deleteAddressFromCustomer(@PathVariable("customerId") int customerId,
+                                                       @PathVariable("addressId") int addressId) {
+        // Check if the customer exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Check if the address exists
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Address A WHERE A.address_id = ? AND A.customer_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, addressId, customerId);
+
+        if (!exists1) { // such address does not exist!
+            return new ResponseEntity<>("Address With ID: " + addressId + " does not exist in Customer With ID: " + customerId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Address A WHERE A.address_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, addressId);
+
+        return new ResponseEntity<>("Address Is Successfully Deleted From The Customer!", HttpStatus.OK);
     }
 }

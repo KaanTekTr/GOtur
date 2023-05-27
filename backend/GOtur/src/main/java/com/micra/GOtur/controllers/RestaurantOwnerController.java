@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/restaurantOwner")
@@ -60,11 +63,23 @@ public class RestaurantOwnerController {
     @PostMapping("/addRestaurant/{restaurantOwnerId}")
     public ResponseEntity<String> addRestaurantByRestaurantOwnerId(@PathVariable("restaurantOwnerId") int restaurantOwnerId,
                                                                    @RequestBody Restaurant restaurant) {
-        String sql = "INSERT INTO Restaurant(restaurant_name, district, open_hour, close_hour, min_delivery_price, is_top_restaurant) VALUES (?, ?, ?, ?, ?, ?);";
+        SimpleJdbcInsert insertIntoRestaurant = new SimpleJdbcInsert(jdbcTemplate).withTableName("Restaurant").usingColumns("restaurant_name", "district",
+                "open_hour", "close_hour", "min_delivery_price", "is_top_restaurant").usingGeneratedKeyColumns("restaurant_id");
+        final Map<String, Object> parameters = new HashMap<>();
+        parameters.put("restaurant_name", restaurant.getRestaurant_name());
+        parameters.put("district", restaurant.getDistrict());
+        parameters.put("open_hour", restaurant.getOpen_hour());
+        parameters.put("close_hour", restaurant.getClose_hour());
+        parameters.put("min_delivery_price", restaurant.getMin_delivery_price());
+        parameters.put("is_top_restaurant", Boolean.FALSE);
+
+        // Get the inserted id back
+        int restaurantId = insertIntoRestaurant.executeAndReturnKey(parameters).intValue();
+
+        String sql = "INSERT INTO ManagedBy(restaurant_id, restaurant_owner_id) VALUES (?, ?);";
 
         System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, restaurant.getRestaurant_name(), restaurant.getDistrict(), restaurant.getOpen_hour(),
-                restaurant.getClose_hour(), restaurant.getMin_delivery_price(), Boolean.FALSE);
+        jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
 
         return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
     }

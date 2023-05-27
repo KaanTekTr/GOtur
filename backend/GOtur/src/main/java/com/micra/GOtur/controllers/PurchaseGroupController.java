@@ -126,7 +126,6 @@ public class PurchaseGroupController {
         String sql = "INSERT INTO Address(customer_id, address_name, is_primary, city, district, street_num, street_name, building_num, detailed_desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         System.out.println(">>" + sql);
-        System.out.println(address.getIs_primary());
         jdbcTemplate.update(sql, groupOwnerId, address.getAddress_name(), address.getIs_primary(), address.getCity(), address.getDistrict(), address.getStreet_num(),
                 address.getStreet_name(), address.getBuilding_num(), address.getDetailed_desc());
 

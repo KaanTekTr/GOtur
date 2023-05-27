@@ -13,6 +13,7 @@ public class Review {
 
     private int review_id;
     private int purchase_id;
+    private int reviewer_id;
     private String comment;
     private float rate;
     private LocalDate review_date;

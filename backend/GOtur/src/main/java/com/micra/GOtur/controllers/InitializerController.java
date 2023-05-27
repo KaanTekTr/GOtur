@@ -103,6 +103,7 @@ public class InitializerController {
                 "CREATE TABLE Review(\n" +
                         "    review_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    purchase_id int NOT NULL,\n" +
+                        "    reviewer_id int NOT NULL,\n" +
                         "    comment varchar(255),\n" +
                         "    rate float,\n" +
                         "    review_date datetime,\n" +

@@ -1,6 +1,8 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.mappers.PurchaseGroupMapper;
+import com.micra.GOtur.models.Customer;
 import com.micra.GOtur.models.PurchaseGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,7 @@ public class PurchaseGroupController {
     }
 
     @GetMapping("/all")
-    public List<PurchaseGroup> getAllRestaurantOwners() {
+    public List<PurchaseGroup> getAllPurchaseGroups() {
         String sql = "SELECT * FROM PurchaseGroup P;";
 
         List<PurchaseGroup> list = jdbcTemplate.query(sql, new PurchaseGroupMapper());
@@ -35,10 +37,18 @@ public class PurchaseGroupController {
     }
 
     @GetMapping("/{groupId}")
-    public PurchaseGroup getRestaurantOwner(@PathVariable("groupId") int groupId) {
+    public PurchaseGroup getPurchaseGroup(@PathVariable("groupId") int groupId) {
         String sql = "SELECT * FROM PurchaseGroup P WHERE P.group_id = ?;";
 
         return jdbcTemplate.queryForObject(sql, new PurchaseGroupMapper(), groupId);
+    }
+
+    @GetMapping("/allMembers/{groupId}")
+    public List<Customer> getAllGroupMembers(@PathVariable("groupId") int groupId) {
+        String sql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND C.user_id IN (SELECT F.group_member_id FROM Forms F WHERE F.group_id = ?)";
+        List<Customer> list = jdbcTemplate.query(sql, new CustomerMapper(), groupId);
+
+        return list;
     }
 
     @PostMapping("/add")

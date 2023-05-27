@@ -38,6 +38,14 @@ public class CustomerController {
         return jdbcTemplate.queryForObject(sql, new CustomerMapper(), customerId);
     }
 
+    @GetMapping("/allFriends/{customerId}")
+    public List<Customer> getAllFriendsOfCustomer(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND C.user_id IN ((SELECT F.customer2_id FROM Friend F WHERE F.customer1_id = ?) UNION (SELECT F.customer1_id FROM Friend F WHERE F.customer2_id = ?))";
+        List<Customer> list = jdbcTemplate.query(sql, new CustomerMapper(), customerId, customerId);
+
+        return list;
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@RequestBody Customer customer) {
         String sql = "INSERT INTO User(username, hashed_password, password_salt, email, phone_number, age, gender) VALUES (?, ?, ?, ?, ?, ?, ?);";

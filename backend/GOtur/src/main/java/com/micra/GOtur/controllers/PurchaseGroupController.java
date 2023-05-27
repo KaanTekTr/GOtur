@@ -48,6 +48,7 @@ public class PurchaseGroupController {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("group_owner_id", purchaseGroup.getGroup_owner_id());
         parameters.put("group_name", purchaseGroup.getGroup_name());
+        parameters.put("group_balance", 0f);
 
         int groupId = insertIntoGroup.executeAndReturnKey(parameters).intValue();
 
@@ -59,7 +60,36 @@ public class PurchaseGroupController {
         return new ResponseEntity<>("Purchase Group Successfully Inserted!", HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/add/{groupId}/{customerId}")
+    public ResponseEntity<String> addCustomerToGrouo(@PathVariable("groupId") int groupId, @PathVariable("customerId") int customerId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if (!exists) { // if group does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, customerId);
+
+        if (!exists1) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM PurchaseGroup P, Forms F WHERE P.group_id = F.group_id AND F.group_member_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, customerId);
+
+        if (exists2) { // if the customer is already in the group
+            return new ResponseEntity<>("Customer With ID: " + customerId + " already exists in the Purchase Group!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "INSERT INTO Forms(group_id, group_member_id) VALUES (?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, groupId, customerId);
+
+        return new ResponseEntity<>("Customer is Successfully Inserted Into The Purchase Group!", HttpStatus.OK);
+    }
 
     @DeleteMapping("/delete/{groupId}")
     public ResponseEntity<String> deletePurchaseGroup(@PathVariable("groupId") int groupId) {
@@ -76,5 +106,36 @@ public class PurchaseGroupController {
 
         return new ResponseEntity<>("Purchase Group With ID: " + groupId + " has been deleted!",
                 HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{groupId}/{customerId}")
+    public ResponseEntity<String> deleteCustomerFromGrouo(@PathVariable("groupId") int groupId, @PathVariable("customerId") int customerId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if (!exists) { // if group does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, customerId);
+
+        if (!exists1) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM PurchaseGroup P, Forms F WHERE P.group_id = F.group_id AND F.group_member_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, customerId);
+
+        if (!exists2) { // if the customer is already in the group
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist in the Purchase Group!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Forms F WHERE F.group_id = ? AND F.group_member_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, groupId, customerId);
+
+        return new ResponseEntity<>("Customer is Successfully Deleted From The Purchase Group!", HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.AddressMapper;
 import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.mappers.PurchaseGroupMapper;
 import com.micra.GOtur.models.Address;
@@ -56,6 +57,19 @@ public class PurchaseGroupController {
     public Customer getGroupOwnerByGroupId(@PathVariable("groupId") int groupId) {
         String sql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND C.user_id IN (SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?)";
         return jdbcTemplate.queryForObject(sql, new CustomerMapper(), groupId);
+    }
+
+    @GetMapping("/allAddress/{groupId}")
+    public List<Address> getAllAddressOfCustomer(@PathVariable("groupId") int groupId) {
+        // Get the ID of the group owner
+        String groupOwnerSql = "SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?;";
+        int groupOwnerId = jdbcTemplate.queryForObject(groupOwnerSql, Integer.class, groupId);
+
+        // get addresses of the group owner
+        String sql = "SELECT * FROM Address A WHERE A.customer_id = ?;";
+        List<Address> list = jdbcTemplate.query(sql, new AddressMapper(), groupOwnerId);
+
+        return list;
     }
 
     @PostMapping("/add")

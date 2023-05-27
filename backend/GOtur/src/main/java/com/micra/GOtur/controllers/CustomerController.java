@@ -1,5 +1,6 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.AddressMapper;
 import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.models.Address;
 import com.micra.GOtur.models.Customer;
@@ -43,6 +44,14 @@ public class CustomerController {
     public List<Customer> getAllFriendsOfCustomer(@PathVariable("customerId") int customerId) {
         String sql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND C.user_id IN ((SELECT F.customer2_id FROM Friend F WHERE F.customer1_id = ?) UNION (SELECT F.customer1_id FROM Friend F WHERE F.customer2_id = ?))";
         List<Customer> list = jdbcTemplate.query(sql, new CustomerMapper(), customerId, customerId);
+
+        return list;
+    }
+
+    @GetMapping("/allAddress/{customerId}")
+    public List<Address> getAllAddressOfCustomer(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Address A WHERE A.customer_id = ?;";
+        List<Address> list = jdbcTemplate.query(sql, new AddressMapper(), customerId);
 
         return list;
     }

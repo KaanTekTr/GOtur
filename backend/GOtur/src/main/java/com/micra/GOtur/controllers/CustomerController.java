@@ -111,6 +111,41 @@ public class CustomerController {
         return new ResponseEntity<>("Friendship successfully added!", HttpStatus.OK);
     }
 
+    @PostMapping("/addFavoriteRestaurant/{customerId}/{restaurantId}")
+    public ResponseEntity<String> addFavoriteRestaurantToCustomer(@PathVariable("customerId") int customerId,
+                                                                  @PathVariable("restaurantId") int restaurantId) {
+        // Check if the customer exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if restaurant exists
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, restaurantId);
+
+        if (!exists1) { // if restaurant does not exist
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the restaurant is already favorited
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM Favorites F WHERE F.restaurant_id = ? AND F.customer_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, restaurantId, customerId);
+
+        if (exists2) { // if restaurant, customer pair already exists
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " already favorited by Customer With ID: " + customerId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "INSERT INTO Favorites(customer_id, restaurant_id) VALUES (?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, customerId, restaurantId);
+
+        return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " is Successfully Favorited By The Customer With ID: " + customerId + "!", HttpStatus.OK);
+    }
+
     public int getIdByEmail(String email) {
         String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email);
@@ -167,5 +202,40 @@ public class CustomerController {
         jdbcTemplate.update(sql, addressId);
 
         return new ResponseEntity<>("Address Is Successfully Deleted From The Customer!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteFavoriteRestaurant/{customerId}/{restaurantId}")
+    public ResponseEntity<String> deleteFavoriteRestaurantFromCustomer(@PathVariable("customerId") int customerId,
+                                                                  @PathVariable("restaurantId") int restaurantId) {
+        // Check if the customer exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) { // if customer does not exist
+            return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if restaurant exists
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, restaurantId);
+
+        if (!exists1) { // if restaurant does not exist
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if restaurant is favorited
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM Favorites F WHERE F.restaurant_id = ? AND F.customer_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, restaurantId, customerId);
+
+        if (!exists2) { // if restaurant, customer pair already exists
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " is not favorited by Customer With ID: " + customerId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Favorites F WHERE F.customer_id = ? AND F.restaurant_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, customerId, restaurantId);
+
+        return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " is Successfully Deleted From The Favorites Of The Customer With ID: " + customerId + "!", HttpStatus.OK);
     }
 }

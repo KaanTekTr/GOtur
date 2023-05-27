@@ -80,7 +80,7 @@ public class InitializerController {
                         "    close_hour varchar(255),\n" +
                         "    min_delivery_price int,\n" +
                         "    is_top_restaurant boolean,\n" +
-                        "    rating float,\n" +
+                        "    rating float DEFAULT 0,\n" +
                         "    PRIMARY KEY (restaurant_id));",
                 "CREATE TABLE Purchase(\n" +
                         "    purchase_id int NOT NULL AUTO_INCREMENT,\n" +

@@ -1,6 +1,7 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.RestaurantOwnerMapper;
+import com.micra.GOtur.models.Restaurant;
 import com.micra.GOtur.models.RestaurantOwner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,18 @@ public class RestaurantOwnerController {
         jdbcTemplate.update(sql2, insertedId);
 
         return new ResponseEntity<>("Restaurant Owner Successfully Inserted!", HttpStatus.OK);
+    }
+
+    @PostMapping("/addRestaurant/{restaurantOwnerId}")
+    public ResponseEntity<String> addRestaurantByRestaurantOwnerId(@PathVariable("restaurantOwnerId") int restaurantOwnerId,
+                                                                   @RequestBody Restaurant restaurant) {
+        String sql = "INSERT INTO Restaurant(restaurant_name, district, open_hour, close_hour, min_delivery_price, is_top_restaurant) VALUES (?, ?, ?, ?, ?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, restaurant.getRestaurant_name(), restaurant.getDistrict(), restaurant.getOpen_hour(),
+                restaurant.getClose_hour(), restaurant.getMin_delivery_price(), Boolean.FALSE);
+
+        return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
     }
 
     public int getIdByEmail(String email) {

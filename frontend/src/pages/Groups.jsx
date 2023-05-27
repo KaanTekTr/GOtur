@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
@@ -7,59 +7,17 @@ import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button, Moda
 
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { groupsActions } from "../store/group/groupSlice";
 
 const Groups = () => {
 
-    const groups = [
-        {
-            id: 1,
-            balance: 300,
-            title: "Bros",
-            members: [
-                {
-                    id: 1,
-                    name: "Ali",
-                    email: "ali@gmail.com"
-                },
-                {
-                    id: 2,
-                    name: "Korhan",
-                    email: "korhan@gmail.com"
-                },
-                {
-                    id: 3,
-                    name: "Kaan",
-                    email: "kaan@gmail.com"
-                },
-            ]
-        },
-        {
-            id: 1,
-            balance: 300,
-            title: "Family",
-            members: [
-                {
-                    id: 1,
-                    name: "Ali",
-                    email: "ali@gmail.com"
-                },
-                {
-                    id: 2,
-                    name: "Korhan",
-                    email: "korhan@gmail.com"
-                },
-                {
-                    id: 3,
-                    name: "Kaan",
-                    email: "kaan@gmail.com"
-                },
-            ]
-        }
-    ];
+    const groups = useSelector(state => state.groups.groups);
+    const userId = useSelector(state => state.auth.userId);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
@@ -67,6 +25,10 @@ const Groups = () => {
     const orderTog = id => {
         navigate(`/groups/${id}`)
     }
+
+    useEffect(() => {
+      dispatch(groupsActions.getGroups({userId}));
+    })
     
   return (
     <Helmet title="My Groups">

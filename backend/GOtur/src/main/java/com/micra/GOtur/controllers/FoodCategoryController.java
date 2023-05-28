@@ -45,6 +45,13 @@ public class FoodCategoryController {
         }
     }
 
+    @GetMapping("/restaurantId/{restaurantId}")
+    public List<FoodCategory> getFoodCategoriesOfRestaurant(@PathVariable("restaurantId") int restaurantId) {
+        String sql = "SELECT * FROM FoodCategory F WHERE F.food_category_id IN (SELECT S.food_category_id FROM SERVES S WHERE S.restaurant_id = ?);";
+        List<FoodCategory> list = jdbcTemplate.query(sql, new FoodCategoryMapper(), restaurantId);
+        return list;
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addFoodCategory(
             @RequestBody FoodCategory foodCategory
@@ -65,20 +72,20 @@ public class FoodCategoryController {
         String checkFoodCategory = "SELECT EXISTS (SELECT * FROM FoodCategory F WHERE F.food_category_id = ?);";
         boolean existsFoodCategory = jdbcTemplate.queryForObject(checkFoodCategory, Boolean.class, foodCategoryId);
         if (!existsFoodCategory) {
-            return new ResponseEntity<>("Food Category with id: " + foodCategoryId + "does not exist! Add failed!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Food Category with id: " + foodCategoryId + " does not exist! Add failed!", HttpStatus.BAD_REQUEST);
         }
 
         String checkRestaurant = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
         boolean existsRestaurant = jdbcTemplate.queryForObject(checkRestaurant, Boolean.class, restaurantId);
         if (!existsRestaurant) {
-            return new ResponseEntity<>("Restaurant with id: " + restaurantId + "does not exist! Add failed!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Restaurant with id: " + restaurantId + " does not exist! Add failed!", HttpStatus.BAD_REQUEST);
         }
 
         String sql = "INSERT INTO Serves(food_category_id, restaurant_id) VALUES (?,?);";
         jdbcTemplate.update(sql, foodCategoryId, restaurantId);
 
         return new ResponseEntity<>("FoodCategory with id: " + foodCategoryId +
-                "is added to Restaurant with id: " + restaurantId, HttpStatus.OK);
+                " is added to Restaurant with id: " + restaurantId, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/id/{foodCategoryId}")

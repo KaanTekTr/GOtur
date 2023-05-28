@@ -108,6 +108,7 @@ public class InitializerController {
                         "    rate float,\n" +
                         "    review_date datetime,\n" +
                         "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (reviewer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (review_id));",
                 "CREATE TABLE PurchaseGroup(\n" +
                         "    group_id int NOT NULL AUTO_INCREMENT,\n" +

@@ -133,4 +133,36 @@ public class RestaurantOwnerController {
         return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " has been deleted!",
                 HttpStatus.OK);
     }
+
+    @DeleteMapping("/deleteRestaurantOwner/{restaurantId}/{restaurantOwnerId}")
+    public ResponseEntity<String> deleteRestaurantOwnerFromRestaurant(@PathVariable("restaurantId") int restaurantId,
+                                                                 @PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, restaurantId);
+
+        if (!exists) { // if restaurant does not exist
+            return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql1 = "SELECT EXISTS (SELECT * FROM RestaurantOwner R WHERE R.user_id = ?);";
+        boolean exists1 = jdbcTemplate.queryForObject(checkSql1, Boolean.class, restaurantOwnerId);
+
+        if (!exists1) { // if restaurant owner does not exist
+            return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkSql2 = "SELECT EXISTS (SELECT * FROM ManagedBy M WHERE M.restaurant_id = ? AND M.restaurant_owner_id = ?);";
+        boolean exists2 = jdbcTemplate.queryForObject(checkSql2, Boolean.class, restaurantId, restaurantOwnerId);
+
+        if (!exists2) { // if restaurant owner, restaurant pair does not exist
+            return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " already does not manage Restaurant With ID: " + restaurantId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM ManagedBy M WHERE M.restaurant_id = ? AND M.restaurant_owner_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // delete from the ManagedBy table
+
+        return new ResponseEntity<>("Restaurant Owner Is Successfully Removed From The Restaurant!", HttpStatus.OK);
+    }
 }

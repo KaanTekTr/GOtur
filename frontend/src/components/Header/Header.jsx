@@ -30,6 +30,10 @@ const nav__links = [
     path: "/groups",
   },
   {
+    display: "Friends",
+    path: "/friends",
+  },
+  {
     display: "Past Orders",
     path: "/pastOrders",
   },

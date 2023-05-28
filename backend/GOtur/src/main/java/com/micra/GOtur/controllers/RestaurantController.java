@@ -1,11 +1,11 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.FoodMapper;
 import com.micra.GOtur.mappers.MenuCategoryMapper;
 import com.micra.GOtur.mappers.RestaurantMapper;
-import com.micra.GOtur.mappers.RestaurantOwnerMapper;
+import com.micra.GOtur.models.Food;
 import com.micra.GOtur.models.MenuCategory;
 import com.micra.GOtur.models.Restaurant;
-import com.micra.GOtur.models.RestaurantOwner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,11 +42,46 @@ public class RestaurantController {
         return jdbcTemplate.queryForObject(sql, new RestaurantMapper(), restaurantId);
     }
 
+    @GetMapping("/foodId/{foodId}")
+    public Food getFoodByFoodId(@PathVariable("foodId") int foodId) {
+        String sql = "SELECT * FROM Food F WHERE F.food_id = ?;";
+
+        return jdbcTemplate.queryForObject(sql, new FoodMapper(), foodId);
+    }
+
     @GetMapping("/allMenuCategories/{restaurantId}")
     public List<MenuCategory> getAllMenuCategoriesByRestaurantId(@PathVariable("restaurantId") int restaurantId) {
         String sql = "SELECT * FROM MenuCategory M WHERE M.restaurant_id = ?;";
 
         List<MenuCategory> list = jdbcTemplate.query(sql, new MenuCategoryMapper(), restaurantId);
+
+        return list;
+    }
+
+    @GetMapping("/allFood/restaurantId/{restaurantId}")
+    public List<Food> getAllFoodsByRestaurantId(@PathVariable("restaurantId") int restaurantId) {
+        String sql = "SELECT * FROM Food F WHERE F.restaurant_id = ?;";
+
+        List<Food> list = jdbcTemplate.query(sql, new FoodMapper(), restaurantId);
+
+        return list;
+    }
+
+    @GetMapping("/allFood/menuCategoryId/{menuCategoryId}")
+    public List<Food> getAllFoodsByMenuCategoryId(@PathVariable("menuCategoryId") int menuCategoryId) {
+        String sql = "SELECT * FROM Food F WHERE F.menu_category_id = ?;";
+
+        List<Food> list = jdbcTemplate.query(sql, new FoodMapper(), menuCategoryId);
+
+        return list;
+    }
+
+    @GetMapping("/allFood/restaurantId/{restaurantId}/menuCategoryId/{menuCategoryId}")
+    public List<Food> getAllFoodsByRestaurantIdAndMenuCategoryId(@PathVariable("restaurantId") int restaurantId,
+                                                                 @PathVariable("menuCategoryId") int menuCategoryId) {
+        String sql = "SELECT * FROM Food F WHERE F.restaurant_id = ? AND F.menu_category_id = ?;";
+
+        List<Food> list = jdbcTemplate.query(sql, new FoodMapper(), restaurantId, menuCategoryId);
 
         return list;
     }
@@ -59,6 +94,16 @@ public class RestaurantController {
         jdbcTemplate.update(sql, menuCategory.getRestaurant_id(), menuCategory.getMenu_category_name());
 
         return new ResponseEntity<>("Menu Category Is Successfully Added To The Restaurant With ID: " + menuCategory.getRestaurant_id() + "!", HttpStatus.OK);
+    }
+
+    @PostMapping("/addFood")
+    public ResponseEntity<String> addFoodToRestaurant(@RequestBody Food food) {
+        String sql = "INSERT INTO Food(food_category_id, restaurant_id, menu_category_id, food_name, fixed_ingredients, price) VALUES (?, ?, ?, ?, ?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, food.getFood_category_id(), food.getRestaurant_id(), food.getMenu_category_id(), food.getFood_name(), food.getFixed_ingredients(), food.getPrice());
+
+        return new ResponseEntity<>("Food Is Successfully Added To The Restaurant With ID: " + food.getRestaurant_id() + "!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{restaurantId}")

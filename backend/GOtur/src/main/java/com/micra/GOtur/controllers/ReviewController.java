@@ -64,6 +64,12 @@ public class ReviewController {
             return new ResponseEntity<>("Purchase with id: " + review.getPurchase_id() + " does not exist! Add review failed!", HttpStatus.BAD_REQUEST);
         }
 
+        String checkReviewer = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean existsReviewer = jdbcTemplate.queryForObject(checkReviewer, Boolean.class, review.getReviewer_id());
+        if (!existsReviewer) {
+            return new ResponseEntity<>("Customer (Reviewer) with id: " + review.getReviewer_id() + " does not exist! Add review failed!", HttpStatus.BAD_REQUEST);
+        }
+
         String checkGroup = "SELECT EXISTS (SELECT * FROM Review R WHERE R.reviewer_id = ? AND R.purchase_id = ?);";
         boolean existsGroup = jdbcTemplate.queryForObject(checkGroup, Boolean.class, review.getReviewer_id(), review.getPurchase_id());
         if (existsGroup) {

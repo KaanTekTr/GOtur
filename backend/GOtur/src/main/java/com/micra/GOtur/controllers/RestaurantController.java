@@ -1,9 +1,11 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.FoodMapper;
+import com.micra.GOtur.mappers.IngredientMapper;
 import com.micra.GOtur.mappers.MenuCategoryMapper;
 import com.micra.GOtur.mappers.RestaurantMapper;
 import com.micra.GOtur.models.Food;
+import com.micra.GOtur.models.Ingredient;
 import com.micra.GOtur.models.MenuCategory;
 import com.micra.GOtur.models.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +88,13 @@ public class RestaurantController {
         return list;
     }
 
+    @GetMapping("/ingredientId/{ingredientId}")
+    public Ingredient getIngredientByIngredientId(@PathVariable("ingredientId") int ingredientId) {
+        String sql = "SELECT * FROM Ingredient I WHERE I.ingredient_id = ?;";
+
+        return jdbcTemplate.queryForObject(sql, new IngredientMapper(), ingredientId);
+    }
+
     @PostMapping("/addMenuCategory")
     public ResponseEntity<String> addMenuCategoryByRestaurantId(@RequestBody MenuCategory menuCategory) {
         String sql = "INSERT INTO MenuCategory(restaurant_id, menu_category_name) VALUES (?, ?);";
@@ -104,6 +113,16 @@ public class RestaurantController {
         jdbcTemplate.update(sql, food.getFood_category_id(), food.getRestaurant_id(), food.getMenu_category_id(), food.getFood_name(), food.getFixed_ingredients(), food.getPrice());
 
         return new ResponseEntity<>("Food Is Successfully Added To The Restaurant With ID: " + food.getRestaurant_id() + "!", HttpStatus.OK);
+    }
+
+    @PostMapping("/addIngredient")
+    public ResponseEntity<String> addIngredientToFood(@RequestBody Ingredient ingredient) {
+        String sql = "INSERT INTO Ingredient(food_id, ingredient_name, price) VALUES (?, ?, ?);";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, ingredient.getFood_id(), ingredient.getIngredient_name(), ingredient.getPrice());
+
+        return new ResponseEntity<>("Ingredient Has Been Successfully Added To The Food With ID: " + ingredient.getFood_id() + "!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{restaurantId}")
@@ -138,5 +157,22 @@ public class RestaurantController {
         jdbcTemplate.update(sql, menuCategoryId);
 
         return new ResponseEntity<>("Menu Category With ID: " + menuCategoryId + " Is Successfully Deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteFood/{foodId}")
+    public ResponseEntity<String> deleteFoodFromRestaurantByFoodId(@PathVariable("foodId") int foodId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Food F WHERE F.food_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, foodId);
+
+        if (!exists) { // if restaurant does not exist
+            return new ResponseEntity<>("Food With ID: " + foodId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Food F WHERE F.food_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, foodId);
+
+        return new ResponseEntity<>("Food With ID: " + foodId + " Has Been Successfully Deleted!", HttpStatus.OK);
     }
 }

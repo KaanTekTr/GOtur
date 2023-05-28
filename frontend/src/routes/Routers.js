@@ -14,6 +14,8 @@ import RestaurantDetails from "../pages/RestaurantDetails"
 import PastOrders from "../pages/PastOrders";
 import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
+import RestaurantOwnerHome from "../pages/RestaurantOwnerHome";
+
 
 const Routers = () => {
   return (
@@ -32,6 +34,8 @@ const Routers = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/restaurantOwnerHome" element={<RestaurantOwnerHome />} />
+
     </Routes>
   );
 };

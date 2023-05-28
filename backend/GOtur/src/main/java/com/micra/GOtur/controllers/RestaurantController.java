@@ -1,5 +1,6 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.MenuCategoryMapper;
 import com.micra.GOtur.mappers.RestaurantMapper;
 import com.micra.GOtur.mappers.RestaurantOwnerMapper;
 import com.micra.GOtur.models.MenuCategory;
@@ -41,6 +42,15 @@ public class RestaurantController {
         return jdbcTemplate.queryForObject(sql, new RestaurantMapper(), restaurantId);
     }
 
+    @GetMapping("/allMenuCategories/{restaurantId}")
+    public List<MenuCategory> getAllMenuCategoriesByRestaurantId(@PathVariable("restaurantId") int restaurantId) {
+        String sql = "SELECT * FROM MenuCategory M WHERE M.restaurant_id = ?;";
+
+        List<MenuCategory> list = jdbcTemplate.query(sql, new MenuCategoryMapper(), restaurantId);
+
+        return list;
+    }
+
     @PostMapping("/addMenuCategory")
     public ResponseEntity<String> addMenuCategoryByRestaurantId(@RequestBody MenuCategory menuCategory) {
         String sql = "INSERT INTO MenuCategory(restaurant_id, menu_category_name) VALUES (?, ?);";
@@ -66,5 +76,22 @@ public class RestaurantController {
         jdbcTemplate.update(deleteSql, restaurantId); // delete the restaurant
 
         return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " has been successfully deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteMenuCategory/{menuCategoryId}")
+    public ResponseEntity<String> deleteMenuCategoryByMenuCategoryId(@PathVariable("menuCategoryId") int menuCategoryId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM MenuCategory M WHERE M.menu_category_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, menuCategoryId);
+
+        if (!exists) { // if restaurant does not exist
+            return new ResponseEntity<>("Menu Category With ID: " + menuCategoryId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM MenuCategory M WHERE M.menu_category_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, menuCategoryId);
+
+        return new ResponseEntity<>("Menu Category With ID: " + menuCategoryId + " Is Successfully Deleted!", HttpStatus.OK);
     }
 }

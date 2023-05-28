@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText } from "reactstrap";
+import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 
-
+import crown_image from "../assets/images/crown.jpeg"
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +16,7 @@ import { orderActions } from "../store/user/orderSlice";
 const GroupDetails = () => {
 
     const groups = useSelector(state => state.groups.groups);
+    const friends = useSelector(state => state.friends.friends);
     const userId = useSelector(state => state.auth.userId);
 
     const { id } = useParams();
@@ -27,10 +28,12 @@ const GroupDetails = () => {
     const [modal, setModal] = useState(false);
     const [modalAddMoney, setModalAddMoney] = useState(false);
     const [modalGroupCart, setModalGroupCart] = useState(false);
+    const [modalAddMember, setModalAddMember] = useState(false);
 
     const toggle = () => setModal(!modal);
     const toggleAddMoney = () => setModalAddMoney(!modalAddMoney);
     const toggleGroupCart = () => setModalGroupCart(!modalGroupCart);
+    const toggleAddMember = () => setModalAddMember(!modalAddMember);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -47,6 +50,14 @@ const GroupDetails = () => {
     const seeRestaurants = id => {
       dispatch(orderActions.updateCurrentCart({id}));
       navigate("/restaurants");
+    }
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [selectedFriend, setSelectedFriend] = useState("Select Friend");
+
+    const toggleDropDown = () => setDropdownOpen((prevState) => !prevState);
+    const addMember = () => {
+
     }
   return (
     <Helmet title={group.title}>
@@ -77,6 +88,9 @@ const GroupDetails = () => {
             </Row>
             <Row>
                 <h2 className="mb-4">Members</h2>
+                <Col>
+                  <Button color="success" className="mb-4" onClick={toggleAddMember}>Add Member</Button>
+                </Col>
                 {group?.members?.map((member, index) => (
                 <Col lg="12" md="12" sm="6" xs="6" key={member.id} className="mb-4">
                     <Card className="p-4">
@@ -84,6 +98,7 @@ const GroupDetails = () => {
                             <Row style={{display: "flex"}}>
                                 <Col lg="10" md="10">
                                     <CardTitle tag="h3">
+                                      { group.groupLeader === member.id ? <img src={crown_image} alt="crown" style={{width: "40px", height: "40px", marginRight :"5px"}} /> : null }
                                         {member.name}
                                     </CardTitle>
                                 </Col>
@@ -200,6 +215,40 @@ const GroupDetails = () => {
               </ModalBody>
               <ModalFooter>
                 <Button color="secondary" onClick={toggleGroupCart}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </Modal>
+            {/** ADD MONEY TO GROUP BALANCE MODAL */}
+            <Modal className="modal-x" isOpen={modalAddMember} toggle={toggleAddMember} >
+              <ModalHeader toggle={toggleAddMember}>Add Member</ModalHeader>
+              <ModalBody>   
+                <Container>
+                  <Row>
+                    <Col lg="4" md="4"></Col>
+                    <Col>
+                      <Dropdown isOpen={dropdownOpen} toggle={toggleDropDown} >
+                        <DropdownToggle caret>{selectedFriend}</DropdownToggle>
+                        <DropdownMenu>
+                          {friends?.map((friend, index) => (
+                            <DropdownItem onClick={() => setSelectedFriend(friend.name)} key={friend.id}>{friend.name}</DropdownItem>
+                          ))}
+                        </DropdownMenu>
+                      </Dropdown>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col lg="4" md="4"></Col>
+                    <Col>
+                      <Button className="mt-4" color="primary" onClick={addMember}>
+                        Add Member
+                      </Button>
+                    </Col>
+                  </Row>
+                </Container>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="secondary" onClick={toggleAddMember}>
                   Cancel
                 </Button>
               </ModalFooter>

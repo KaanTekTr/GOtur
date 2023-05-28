@@ -47,6 +47,7 @@ const initialState = {
             groupCartItems: items(1),
             groupTotalAmount: totalAmount(1),
             groupTotalQuantity: totalQuantity(1),
+            groupLeader: 1
         },
         {
             id: 2,
@@ -72,6 +73,7 @@ const initialState = {
             groupCartItems: items(2),
             groupTotalAmount: totalAmount(2),
             groupTotalQuantity: totalQuantity(2),
+            groupLeader: 3
         }
     ]
 };

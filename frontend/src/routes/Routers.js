@@ -15,7 +15,7 @@ import PastOrders from "../pages/PastOrders";
 import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
 import RestaurantOwnerHome from "../pages/RestaurantOwnerHome";
-
+import Friends from "../pages/Friends";
 
 const Routers = () => {
   return (
@@ -28,6 +28,7 @@ const Routers = () => {
       <Route path="/restaurants/:id" element={<RestaurantDetails />} />
       <Route path="/pastOrders" element={<PastOrders />} />
       <Route path="/groups" element={<Groups />} />
+      <Route path="/friends" element={<Friends />} />
       <Route path="/groups/:id" element={<GroupDetails />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />

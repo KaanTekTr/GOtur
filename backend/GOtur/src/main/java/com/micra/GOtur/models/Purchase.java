@@ -16,12 +16,12 @@ public class Purchase {
     private int address_id;
     private int restaurant_id;
     private String customer_note;
-    private boolean is_paid;
-    private boolean is_group_purchase;
-    private boolean being_prepared;
-    private boolean is_departed;
-    private boolean is_delivered;
-    private boolean is_canceled;
+    private Boolean is_paid;
+    private Boolean is_group_purchase;
+    private Boolean being_prepared;
+    private Boolean is_departed;
+    private Boolean is_delivered;
+    private Boolean is_canceled;
     private LocalDate purchase_time;
     private float total_price;
 

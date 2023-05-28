@@ -16,7 +16,7 @@ public class Restaurant {
     private String open_hour;
     private String close_hour;
     private int min_delivery_price;
-    private boolean is_top_restaurant;
+    private Boolean is_top_restaurant;
     private float rating;
 
 }

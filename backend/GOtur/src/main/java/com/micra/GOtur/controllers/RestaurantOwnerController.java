@@ -1,5 +1,6 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.mappers.RestaurantMapper;
 import com.micra.GOtur.mappers.RestaurantOwnerMapper;
 import com.micra.GOtur.models.Restaurant;
 import com.micra.GOtur.models.RestaurantOwner;
@@ -41,6 +42,15 @@ public class RestaurantOwnerController {
         String sql = "SELECT * FROM RestaurantOwner R, User U WHERE U.user_id = R.user_id AND U.user_id = ?;";
 
         return jdbcTemplate.queryForObject(sql, new RestaurantOwnerMapper(), restaurantOwnerId);
+    }
+
+    @GetMapping("/restaurants/{restaurantOwnerId}")
+    public List<Restaurant> getRestaurantsOfRestaurantOwner(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String sql = "SELECT * FROM Restaurant R WHERE R.restaurant_id IN (SELECT M.restaurant_id FROM ManagedBy M WHERE M.restaurant_owner_id = ?);";
+
+        List<Restaurant> list = jdbcTemplate.query(sql, new RestaurantMapper(), restaurantOwnerId);
+
+        return list;
     }
 
     @PostMapping("/add")

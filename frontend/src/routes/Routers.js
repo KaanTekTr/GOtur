@@ -16,6 +16,12 @@ import Groups from "../pages/Groups";
 import GroupDetails from "../pages/GroupDetails";
 import RestaurantOwnerHome from "../pages/RestaurantOwnerHome";
 import Friends from "../pages/Friends";
+import RestaurantOwnerBalance from "../pages/RestaurantOwnerBalance";
+import RestaurantOwnerProfile from "../pages/RestaurantOwnerProfile";
+import RestaurantInfoPage from "../pages/RestaurantInfoPage";
+
+
+
 
 const Routers = () => {
   return (
@@ -36,6 +42,13 @@ const Routers = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/restaurantOwnerHome" element={<RestaurantOwnerHome />} />
+      <Route path="/balance" element={<RestaurantOwnerBalance />} />
+      <Route path="/profile" element={<RestaurantOwnerProfile />} />
+      <Route path="/restaurant-info" element={<RestaurantInfoPage />} />
+
+
+      
+
 
     </Routes>
   );

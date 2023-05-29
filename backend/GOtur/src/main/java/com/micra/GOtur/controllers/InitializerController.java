@@ -246,7 +246,7 @@ public class InitializerController {
     }
 
     public void initializeTriggers() throws DataAccessException {
-        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count"};
+        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -262,6 +262,33 @@ public class InitializerController {
                         "    UPDATE RestaurantOwner R\n" +
                         "    SET restaurant_count = restaurant_count - 1\n" +
                         "    WHERE R.user_id IN (SELECT M.restaurant_owner_id FROM ManagedBy M WHERE M.restaurant_id = OLD.restaurant_id);\n" +
+                        "END;",
+                "CREATE TRIGGER update_restaurant_rating\n" +
+                        "AFTER INSERT ON Review\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    DECLARE size INT;\n" +
+                        "    DECLARE total INT;\n" +
+                        "    DECLARE updated_restaurant_id INT;\n" +
+                        "\n" +
+                        "    SELECT Purchase.restaurant_id\n" +
+                        "    INTO updated_restaurant_id\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Review.review_id = NEW.review_id;\n" +
+                        "\n" +
+                        "    SELECT COUNT(*)\n" +
+                        "    INTO size\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Purchase.restaurant_id = updated_restaurant_id;\n" +
+                        "\n" +
+                        "    SELECT SUM(Review.rate)\n" +
+                        "    INTO total\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Purchase.restaurant_id = updated_restaurant_id;\n" +
+                        "\n" +
+                        "    UPDATE Restaurant R\n" +
+                        "    SET R.rating = total / size\n" +
+                        "    WHERE R.restaurant_id = updated_restaurant_id;\n" +
                         "END;"};
 
         for (String curTrigger : triggerNames) {

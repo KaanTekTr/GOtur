@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -77,7 +78,7 @@ public class ReviewController {
         }
 
         String sql = "INSERT INTO Review(purchase_id, reviewer_id, comment, rate, review_date) VALUES (?,?,?,?,?);";
-        jdbcTemplate.update(sql, review.getPurchase_id(), review.getReviewer_id(), review.getComment(), review.getRate(), review.getReview_date());
+        jdbcTemplate.update(sql, review.getPurchase_id(), review.getReviewer_id(), review.getComment(), review.getRate(), LocalDate.now());
 
         return new ResponseEntity<>("Review is successfully inserted!", HttpStatus.OK);
 

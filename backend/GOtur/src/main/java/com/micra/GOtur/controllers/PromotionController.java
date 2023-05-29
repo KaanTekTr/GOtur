@@ -63,8 +63,8 @@ public class PromotionController {
     public ResponseEntity<String> addPromoter(
             @RequestBody Promoter promoter
     ) {
-        String sqlPromoter = "INSERT INTO Promoter(promoter_id, income) VALUES (?,?);";
-        jdbcTemplate.update(sqlPromoter, promoter.getPromoter_id(), promoter.getIncome());
+        String sqlPromoter = "INSERT INTO Promoter(income) VALUES (?);";
+        jdbcTemplate.update(sqlPromoter, promoter.getIncome());
 
         return new ResponseEntity<>("Promoter is successfully added!", HttpStatus.OK);
     }

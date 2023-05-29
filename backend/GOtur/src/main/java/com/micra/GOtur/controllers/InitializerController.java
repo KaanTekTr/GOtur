@@ -169,7 +169,7 @@ public class InitializerController {
                 "CREATE TABLE Promoter(\n" +
                         "    promoter_id int NOT NULL,\n" +
                         "    income int,\n" +
-                        "    FOREIGN KEY (promoter_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (promoter_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (promoter_id));",
                 "CREATE TABLE Promote(\n" +
                         "    promotion_id int NOT NULL AUTO_INCREMENT,\n" +

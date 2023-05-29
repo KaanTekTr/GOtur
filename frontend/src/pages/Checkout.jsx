@@ -1,39 +1,20 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Card, CardTitle, Input, CardSubtitle, Table } from "reactstrap";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
 
 import "../styles/checkout.css";
 
 const Checkout = () => {
-  const [enterName, setEnterName] = useState("");
-  const [enterEmail, setEnterEmail] = useState("");
-  const [enterNumber, setEnterNumber] = useState("");
-  const [enterCountry, setEnterCountry] = useState("");
-  const [enterCity, setEnterCity] = useState("");
-  const [postalCode, setPostalCode] = useState("");
 
-  const shippingInfo = [];
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
   const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
   const shippingCost = 30;
 
   const totalAmount = cartTotalAmount + Number(shippingCost);
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-    const userShippingAddress = {
-      name: enterName,
-      email: enterEmail,
-      phone: enterNumber,
-      country: enterCountry,
-      city: enterCity,
-      postalCode: postalCode,
-    };
-
-    shippingInfo.push(userShippingAddress);
-    console.log(shippingInfo);
-  };
 
   return (
     <Helmet title="Checkout">
@@ -42,61 +23,48 @@ const Checkout = () => {
         <Container>
           <Row>
             <Col lg="8" md="6">
-              <h6 className="mb-4">Shipping Address</h6>
-              <form className="checkout__form" onSubmit={submitHandler}>
-                <div className="form__group">
-                  <input
-                    type="text"
-                    placeholder="Enter your name"
-                    required
-                    onChange={(e) => setEnterName(e.target.value)}
-                  />
-                </div>
-
-                <div className="form__group">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                    onChange={(e) => setEnterEmail(e.target.value)}
-                  />
-                </div>
-                <div className="form__group">
-                  <input
-                    type="number"
-                    placeholder="Phone number"
-                    required
-                    onChange={(e) => setEnterNumber(e.target.value)}
-                  />
-                </div>
-                <div className="form__group">
-                  <input
-                    type="text"
-                    placeholder="Country"
-                    required
-                    onChange={(e) => setEnterCountry(e.target.value)}
-                  />
-                </div>
-                <div className="form__group">
-                  <input
-                    type="text"
-                    placeholder="City"
-                    required
-                    onChange={(e) => setEnterCity(e.target.value)}
-                  />
-                </div>
-                <div className="form__group">
-                  <input
-                    type="number"
-                    placeholder="Postal code"
-                    required
-                    onChange={(e) => setPostalCode(e.target.value)}
-                  />
-                </div>
-                <button type="submit" className="addTOCart__btn">
-                  Payment
-                </button>
-              </form>
+              <Card className="p-4">
+                <CardTitle tag="h3">
+                    Order 
+                </CardTitle>
+              
+                <Table>
+                    <thead>
+                        <tr>
+                        <th className="text-center">
+                            Image
+                        </th>
+                        <th className="text-center">
+                            Product Title
+                        </th>
+                        <th className="text-center">
+                            Price
+                        </th>
+                        <th className="text-center">
+                            Quantity
+                        </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {cartItems.map((item) => (
+                          <Tr item={item} key={item.id} />
+                        ))}
+                    </tbody>
+                    </Table>
+              <Card className="p-4 mt-4">
+                <CardTitle tag="h5">
+                    Customer Note
+                </CardTitle>
+                  <div>
+                    <Input placeholder="Add note..." className="mb-2"/>
+                  </div>
+                  <div>
+                    <button type="submit" className="addTOCart__btn">
+                      Payment
+                    </button>
+                  </div>
+              </Card>
+            </Card>
             </Col>
 
             <Col lg="4" md="6">
@@ -118,6 +86,21 @@ const Checkout = () => {
         </Container>
       </section>
     </Helmet>
+  );
+};
+
+const Tr = (props) => {
+  const { image01, title, price, quantity } = props.item;
+
+  return (
+    <tr>
+      <td className="text-center cart__img-box">
+        <img src={image01} alt="" />
+      </td>
+      <td className="text-center">{title}</td>
+      <td className="text-center">${price}</td>
+      <td className="text-center">{quantity}px</td>
+    </tr>
   );
 };
 

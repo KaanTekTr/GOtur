@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ModalFooter } from "reactstrap";
+import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ModalFooter, Input } from "reactstrap";
 
 
 import "../styles/all-foods.css";
@@ -71,14 +71,23 @@ const Groups = () => {
             </Col>
           </Row>
         </Container>
-            <Modal isOpen={modal} toggle={toggle} >
-              <ModalHeader toggle={toggle}>Group Address Selection</ModalHeader>
-              <ModalBody>   
-                
+            <Modal className="modal-x" isOpen={modal} toggle={toggle} >
+              <ModalHeader toggle={toggle}>Create Group</ModalHeader>
+              <ModalBody> 
+                <Container>
+                  <Row>
+                    <Col lg="5" md="5">
+                      <h5>Group Name:</h5>  
+                    </Col>
+                    <Col lg="6" md="6">
+                      <Input />
+                    </Col>
+                  </Row>
+                </Container>
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" onClick={toggle}>
-                  Do Something
+                  Create
                 </Button>{' '}
                 <Button color="secondary" onClick={toggle}>
                   Cancel

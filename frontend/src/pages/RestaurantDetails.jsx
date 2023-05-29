@@ -91,7 +91,7 @@ const RestaurantDetails = () => {
     }
   }, [category, products]);
 
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   const onDismiss = () => setVisible(false);
 

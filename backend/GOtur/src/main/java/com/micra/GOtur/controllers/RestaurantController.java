@@ -95,6 +95,15 @@ public class RestaurantController {
         return jdbcTemplate.queryForObject(sql, new IngredientMapper(), ingredientId);
     }
 
+    @GetMapping("/ingredients/{foodId}")
+    public List<Ingredient> getIngredientsByFoodId(@PathVariable("foodId") int foodId) {
+        String sql = "SELECT * FROM Ingredient I WHERE I.food_id = ?;";
+
+        List<Ingredient> list = jdbcTemplate.query(sql, new IngredientMapper(), foodId);
+
+        return list;
+    }
+
     @PostMapping("/addMenuCategory")
     public ResponseEntity<String> addMenuCategoryByRestaurantId(@RequestBody MenuCategory menuCategory) {
         String sql = "INSERT INTO MenuCategory(restaurant_id, menu_category_name) VALUES (?, ?);";
@@ -123,6 +132,18 @@ public class RestaurantController {
         jdbcTemplate.update(sql, ingredient.getFood_id(), ingredient.getIngredient_name(), ingredient.getPrice());
 
         return new ResponseEntity<>("Ingredient Has Been Successfully Added To The Food With ID: " + ingredient.getFood_id() + "!", HttpStatus.OK);
+    }
+
+    @PatchMapping("/updateIngredient/{ingredientId}")
+    public ResponseEntity<String> addIngredientToFood(@PathVariable("ingredientId") int ingredientId,
+                                                      @RequestParam String newIngredientName,
+                                                      @RequestParam int newPrice) {
+        String sql = "UPDATE Ingredient I SET I.ingredient_name = ?, I.price = ? WHERE I.ingredient_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, newIngredientName, newPrice, ingredientId);
+
+        return new ResponseEntity<>("Ingredient With ID: " + ingredientId + " Has Been Successfully Updated!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{restaurantId}")
@@ -174,5 +195,22 @@ public class RestaurantController {
         jdbcTemplate.update(sql, foodId);
 
         return new ResponseEntity<>("Food With ID: " + foodId + " Has Been Successfully Deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteIngredient/{ingredientId}")
+    public ResponseEntity<String> deleteIngredientFromFoodByIngredientId(@PathVariable("ingredientId") int ingredientId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Ingredient I WHERE I.ingredient_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, ingredientId);
+
+        if (!exists) { // if restaurant does not exist
+            return new ResponseEntity<>("Ingredient With ID: " + ingredientId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "DELETE FROM Ingredient I WHERE I.ingredient_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, ingredientId);
+
+        return new ResponseEntity<>("Ingredient With ID: " + ingredientId + " Has Been Successfully Deleted!", HttpStatus.OK);
     }
 }

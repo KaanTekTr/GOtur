@@ -1,5 +1,6 @@
 package com.micra.GOtur.controllers;
 
+import com.micra.GOtur.helpers.HashPasswordHelper;
 import com.micra.GOtur.mappers.AddressMapper;
 import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.models.Address;
@@ -61,7 +62,10 @@ public class CustomerController {
         String sql = "INSERT INTO User(username, hashed_password, password_salt, email, phone_number, age, gender) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
         System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, customer.getUsername(), customer.getHashed_password(), customer.getPassword_salt(),
+        HashPasswordHelper hashPasswordHelper = HashPasswordHelper.getInstance();
+        hashPasswordHelper.setPassword(customer.getPassword_salt());
+        String hashed_pass = hashPasswordHelper.Hash();
+        jdbcTemplate.update(sql, customer.getUsername(),hashed_pass, customer.getPassword_salt(),
                 customer.getEmail(), customer.getPhone_number(), customer.getAge(), customer.getGender());
 
         int insertedId = getIdByEmail(customer.getEmail());

@@ -237,7 +237,15 @@ public class InitializerController {
                         "    purchase_id int NOT NULL,\n" +
                         "    FOREIGN KEY (ingredient_id) REFERENCES Ingredient(ingredient_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (ingredient_id, purchase_id));"};
+                        "    PRIMARY KEY (ingredient_id, purchase_id));",
+                "CREATE TABLE Token(\n" +
+                        "    token_id int NOT NULL AUTO_INCREMENT,\n" +
+                        "    user_id int NOT NULL,\n"+
+                        "    token varchar(250),\n" +
+                        "    is_actively_used boolean,\n" +
+                        "    last_active date,\n" +
+                        "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (token_id));"};
 
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);

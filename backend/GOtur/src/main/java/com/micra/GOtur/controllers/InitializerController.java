@@ -29,6 +29,7 @@ public class InitializerController {
         jdbcTemplate.execute("USE gotur;");
 
         initializeTables();
+        initializeTriggers();
 
         return new ResponseEntity<>("Successfully Initialized The Database", HttpStatus.OK);
     }
@@ -241,6 +242,35 @@ public class InitializerController {
         for (String curQuery : tables) {
             System.out.println(">>" + curQuery);
             jdbcTemplate.execute(curQuery);
+        }
+    }
+
+    public void initializeTriggers() throws DataAccessException {
+        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count"};
+        String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
+                "AFTER INSERT ON ManagedBy\n" +
+                "FOR EACH ROW\n" +
+                "BEGIN\n" +
+                "    UPDATE RestaurantOwner R\n" +
+                "    SET restaurant_count = restaurant_count + 1\n" +
+                "    WHERE R.user_id = NEW.restaurant_owner_id;\n" +
+                "END;",
+                "CREATE TRIGGER decrease_restaurant_count\n" +
+                        "BEFORE DELETE ON Restaurant\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE RestaurantOwner R\n" +
+                        "    SET restaurant_count = restaurant_count - 1\n" +
+                        "    WHERE R.user_id IN (SELECT M.restaurant_owner_id FROM ManagedBy M WHERE M.restaurant_id = OLD.restaurant_id);\n" +
+                        "END;"};
+
+        for (String curTrigger : triggerNames) {
+            jdbcTemplate.execute("DROP TRIGGER IF EXISTS " + curTrigger);
+        }
+
+        for (String curTrigger : triggers) {
+            System.out.println(">>" + curTrigger);
+            jdbcTemplate.execute(curTrigger);
         }
     }
 }

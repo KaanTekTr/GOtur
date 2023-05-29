@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
+import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Table } from "reactstrap";
 
 import crown_image from "../assets/images/crown.jpeg"
 import "../styles/all-foods.css";
@@ -29,11 +29,13 @@ const GroupDetails = () => {
     const [modalAddMoney, setModalAddMoney] = useState(false);
     const [modalGroupCart, setModalGroupCart] = useState(false);
     const [modalAddMember, setModalAddMember] = useState(false);
+    const [modalGroupCheckout, setModalGroupCheckout] = useState(false);
 
     const toggle = () => setModal(!modal);
     const toggleAddMoney = () => setModalAddMoney(!modalAddMoney);
     const toggleGroupCart = () => setModalGroupCart(!modalGroupCart);
     const toggleAddMember = () => setModalAddMember(!modalAddMember);
+    const toggleGroupCheckout = () => setModalGroupCheckout(!modalGroupCheckout);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -50,6 +52,11 @@ const GroupDetails = () => {
     const seeRestaurants = id => {
       dispatch(orderActions.updateCurrentCart({id}));
       navigate("/restaurants");
+    }
+
+    const groupCheckout = () => {
+      toggleGroupCart();
+      toggleGroupCheckout();
     }
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -166,7 +173,7 @@ const GroupDetails = () => {
                 </Button>
               </ModalFooter>
             </Modal>
-             {/** ADD MONEY TO GROUP BALANCE MODAL */}
+             {/** GROUP CART MODAL */}
              <Modal className="modal-y" isOpen={modalGroupCart} toggle={toggleGroupCart} style={{ width: "%70"}} >
               <ModalHeader toggle={toggleGroupCart}>Group Cart</ModalHeader>
               <ModalBody>   
@@ -201,11 +208,11 @@ const GroupDetails = () => {
                       </h6>
                       <p>Taxes and shipping will calculate at checkout</p>
                       <div className="cart__page-btn">
-                        <button className="addTOCart__btn me-4">
-                          <Link to="/foods">Continue Shopping</Link>
+                        <button className="addTOCart__btn me-4" onClick={() => seeRestaurants(group.id)}>
+                          Continue Shopping
                         </button>
-                        <button className="addTOCart__btn">
-                          <Link to="/checkout">Proceed to checkout</Link>
+                        <button className="addTOCart__btn" onClick={groupCheckout}>
+                          Proceed to checkout
                         </button>
                       </div>
                     </div>
@@ -219,7 +226,82 @@ const GroupDetails = () => {
                 </Button>
               </ModalFooter>
             </Modal>
-            {/** ADD MONEY TO GROUP BALANCE MODAL */}
+            {/** GROUP CHECKOUT MODAL */}
+            <Modal className="modal-y" isOpen={modalGroupCheckout} toggle={toggleGroupCheckout} style={{ width: "%70"}} >
+              <ModalHeader toggle={toggleGroupCheckout}>Group Checkout</ModalHeader>
+              <ModalBody>   
+              <Container>
+                <Row>
+                  <Col lg="8" md="6">
+                    <Card className="p-4">
+                      <CardTitle tag="h3">
+                          Order 
+                      </CardTitle>
+                    
+                      <Table>
+                          <thead>
+                              <tr>
+                              <th className="text-center">
+                                  Image
+                              </th>
+                              <th className="text-center">
+                                  Product Title
+                              </th>
+                              <th className="text-center">
+                                  Price
+                              </th>
+                              <th className="text-center">
+                                  Quantity
+                              </th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {group.groupCartItems.map((item) => (
+                                <Tr item={item} key={item.id} />
+                              ))}
+                          </tbody>
+                          </Table>
+                    <Card className="p-4 mt-4">
+                      <CardTitle tag="h5">
+                          Customer Note
+                      </CardTitle>
+                        <div>
+                          <Input placeholder="Add note..." className="mb-2"/>
+                        </div>
+                        <div>
+                          <button type="submit" className="addTOCart__btn">
+                            Payment
+                          </button>
+                        </div>
+                    </Card>
+                  </Card>
+                  </Col>
+
+                  <Col lg="4" md="6">
+                    <div className="checkout__bill">
+                      <h6 className="d-flex align-items-center justify-content-between mb-3">
+                        Subtotal: <span>${group.groupTotalAmount}</span>
+                      </h6>
+                      <h6 className="d-flex align-items-center justify-content-between mb-3">
+                        Shipping: <span>${30}</span>
+                      </h6>
+                      <div className="checkout__total">
+                        <h5 className="d-flex align-items-center justify-content-between">
+                          Total: <span>${group.groupTotalAmount+30}</span>
+                        </h5>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              </Container>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="secondary" onClick={toggleGroupCheckout}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </Modal>
+            {/** ADD MEMBER TO GROUP BALANCE MODAL */}
             <Modal className="modal-x" isOpen={modalAddMember} toggle={toggleAddMember} >
               <ModalHeader toggle={toggleAddMember}>Add Member</ModalHeader>
               <ModalBody>   

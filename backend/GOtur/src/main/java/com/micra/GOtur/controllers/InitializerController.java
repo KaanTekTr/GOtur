@@ -246,7 +246,7 @@ public class InitializerController {
     }
 
     public void initializeTriggers() throws DataAccessException {
-        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating"};
+        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -288,6 +288,36 @@ public class InitializerController {
                         "\n" +
                         "    UPDATE Restaurant R\n" +
                         "    SET R.rating = total / size\n" +
+                        "    WHERE R.restaurant_id = updated_restaurant_id;\n" +
+                        "END;",
+                "CREATE TRIGGER update_restaurant_rating2\n" +
+                        "BEFORE DELETE ON Review\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    DECLARE size INT;\n" +
+                        "    DECLARE total INT;\n" +
+                        "    DECLARE updated_restaurant_id INT;\n" +
+                        "\n" +
+                        "    SELECT Purchase.restaurant_id\n" +
+                        "    INTO updated_restaurant_id\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Review.review_id = OLD.review_id;\n" +
+                        "\n" +
+                        "    SELECT COUNT(*)\n" +
+                        "    INTO size\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Purchase.restaurant_id = updated_restaurant_id AND Review.review_id != OLD.review_id;\n" +
+                        "\n" +
+                        "    SELECT SUM(Review.rate)\n" +
+                        "    INTO total\n" +
+                        "    FROM Review NATURAL JOIN Purchase\n" +
+                        "    WHERE Purchase.restaurant_id = updated_restaurant_id AND Review.review_id != OLD.review_id;\n" +
+                        "\n" +
+                        "    UPDATE Restaurant R\n" +
+                        "    SET R.rating = CASE \n" +
+                        "        WHEN size = 0 THEN 0\n" +
+                        "        ELSE total / size\n" +
+                        "    END \n" +
                         "    WHERE R.restaurant_id = updated_restaurant_id;\n" +
                         "END;"};
 

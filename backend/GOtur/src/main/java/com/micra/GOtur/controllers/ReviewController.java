@@ -91,7 +91,7 @@ public class ReviewController {
         String sql = "DELETE FROM Review R WHERE R.review_id = (?);";
         jdbcTemplate.update(sql, reviewId);
 
-        return new ResponseEntity<>("Review with id: " + reviewId + "has been deleted!",
+        return new ResponseEntity<>("Review with id: " + reviewId + " has been deleted!",
                 HttpStatus.OK);
     }
 }

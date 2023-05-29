@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle } from "reactstrap";
+import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button, Input } from "reactstrap";
 
 import ReactPaginate from "react-paginate";
 
@@ -12,19 +12,19 @@ import { useSelector } from "react-redux";
 
 const PastOrders = () => {
 
-  const cartItems = useSelector((state) => state.cart.cartItems);
+  const pastOrders = useSelector((state) => state.order.pastOrders);
 
 
   const [pageNumber, setPageNumber] = useState(0);
 
   const productPerPage = 5;
   const visitedPage = pageNumber * productPerPage;
-  const displayPage = cartItems.slice(
+  const displayPage = pastOrders.slice(
     visitedPage,
     visitedPage + productPerPage
   );
 
-  const pageCount = Math.ceil(cartItems.length / productPerPage);
+  const pageCount = Math.ceil(pastOrders.length / productPerPage);
 
   const changePage = ({ selected }) => {
     setPageNumber(selected);
@@ -68,7 +68,7 @@ const PastOrders = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {cartItems.map((item) => (
+                        {item.items.map((item) => (
                         <Tr item={item} key={item.id} />
                         ))}
                     </tbody>
@@ -78,6 +78,17 @@ const PastOrders = () => {
                         Subtotal: $
                         <span className="cart__subtotal">{100}</span>
                     </h6>
+
+                    <Card className="p-2 mt-4">
+                      <CardTitle tag="h5">
+                          Comment
+                      </CardTitle>
+                      {item.comment === "" ? (
+                        <div>
+                          <Input placeholder="Add comment..." className="mb-2"/>
+                          <Button>Add Comment</Button>
+                        </div>) :<span>{item.comment}</span>}
+                    </Card>
                 </Card>
                 
               </Col>

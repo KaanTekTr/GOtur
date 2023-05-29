@@ -124,6 +124,55 @@ public class ReportController {
 
     }
 
+    @PostMapping("/maxPurchaseInRegion/{adminId}")
+    public ResponseEntity<String> restaurantActiveCoupons(
+            @PathVariable("adminId") int adminId
+    ) {
+
+        String checkAdmin = "SELECT EXISTS (SELECT * FROM Admin A WHERE A.user_id = ?);";
+        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, adminId);
+        if (!existsAdmin) {
+            return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "WITH temp(restaurant_id, district, purchaseCount) AS" +
+                " (" +
+                " SELECT R.restaurant_id, R.district, count(purchase_id) AS purchaseCount" +
+                " FROM Purchase O, Restaurant R" +
+                " WHERE O.restaurant_id = R.restaurant_id" +
+                " GROUP BY R.restaurant_id, R.district" +
+                " )" +
+                " SELECT R.restaurant_name, T.district, T.purchaseCount" +
+                " FROM temp T NATURAL JOIN Restaurant R" +
+                " WHERE T.purchaseCount = (SELECT max(purchaseCount)" +
+                " FROM temp);";
+        List<Map<String, Object>> ls = jdbcTemplate.queryForList(sql);
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        String str1 = "";
+        String str2 = "";
+        String str3 = "";
+        for (Map<String, Object> map : ls) {
+            int ctr = 0;
+            for (String key : map.keySet()) {
+                if (ctr == 0) { str1 = map.get(key).toString(); }
+                if (ctr == 1) { str2 = map.get(key).toString(); }
+                if (ctr == 2) { str3 = map.get(key).toString(); }
+                ctr++;
+            }
+        }
+        System.out.println("ls length: " + ls.size());
+        detail.append("The restaurant with name '" + str1 + "' has most number of purchases in region '"
+                + str2  + "' " + "with a total of " + str3 + " purchases\n");
+
+        String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Most Number of Purchases in Region", LocalDate.now());
+
+        return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
+
+    }
+
+
 
     @DeleteMapping("/delete/{reportId}")
     public ResponseEntity<String> deleteReport(

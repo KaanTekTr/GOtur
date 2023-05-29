@@ -30,6 +30,9 @@ const authSlice = createSlice({
     register(state, action) {
       const { fullName, email, password, birthdate, gender, authType, phoneNumber } = action.payload;
       console.log(fullName, "::", email, "::", password, "::", birthdate, "::", gender, "::", authType, "::", phoneNumber);
+    }, 
+    changeAuthType(state, action) {
+      state.authType = action.payload;
     }
     
   },

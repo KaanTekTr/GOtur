@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-import { Container, Button, Modal, ModalHeader, ModalBody, ModalFooter, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText } from 'reactstrap';
+import { Container, Button, Modal, ModalHeader, ModalBody, ModalFooter, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, List } from 'reactstrap';
 import logo from "../../assets/images/res-logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,6 +11,13 @@ import "../../styles/header.css";
 import { authActions } from "../../store/authSlice";
 import { addressActions } from "../../store/user/adressSlice";
 import { orderActions } from "../../store/user/orderSlice";
+import { Drawer, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import StorefrontIcon from '@material-ui/icons/Storefront';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import HistoryIcon from '@material-ui/icons/History';
 
 const nav__links = [
   {
@@ -18,28 +25,8 @@ const nav__links = [
     path: "/home",
   },
   {
-    display: "Foods",
-    path: "/foods",
-  },
-  {
     display: "Restaurants",
     path: "/restaurants",
-  },
-  {
-    display: "Groups",
-    path: "/groups",
-  },
-  {
-    display: "Friends",
-    path: "/friends",
-  },
-  {
-    display: "Past Orders",
-    path: "/pastOrders",
-  },
-  {
-    display: "Cart",
-    path: "/cart",
   },
   {
     display: "Contact",
@@ -47,9 +34,33 @@ const nav__links = [
   },
 ];
 
+
+const ownerLinks = [
+  { display: 'My Balance', path: '/balance', icon: <AccountCircleIcon /> },
+  { display: 'My Profile', path: '/profile', icon: <AccountCircleIcon /> },
+  { display: 'My Restaurant', path: '/restaurant-info', icon: <StorefrontIcon /> },
+  { display: 'Incoming Orders', path: '/restaurantOwnerHome', icon: <LocalShippingIcon /> },
+  { display: 'Past Orders', path: '/pastOrders', icon: <HistoryIcon /> },
+  { display: 'Logout', path: '/login', icon: <ExitToAppIcon /> },
+];
+
+const customerLinks = [
+  { display: 'My Balance', path: '/balance', icon: <AccountCircleIcon /> },
+  { display: 'My Profile', path: '/profile', icon: <AccountCircleIcon /> },
+  { display: 'Cart', path: '/cart', icon: <HistoryIcon /> },
+  { display: 'Past Orders', path: '/pastOrders', icon: <HistoryIcon /> },
+  { display: 'Groups', path: '/groups', icon: <StorefrontIcon /> },
+  { display: 'Friends', path: '/friends', icon: <LocalShippingIcon /> },
+  { display: 'Logout', path: '/login', icon: <ExitToAppIcon /> },
+];
+
 const Header = () => {
   const [modal, setModal] = useState(false);
-
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
   const toggle = () => setModal(!modal);
   const menuRef = useRef(null);
   const headerRef = useRef(null);
@@ -58,6 +69,7 @@ const Header = () => {
 
   const addresses = useSelector(state => state.address.address);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
+  const authType = useSelector(state => state.auth.authType);
 
   useEffect(() => {
     dispatch(addressActions.getAddresses());
@@ -108,6 +120,9 @@ const Header = () => {
     <header className="header" ref={headerRef}>
       <Container>
         <div className="nav__wrapper d-flex align-items-center justify-content-between">
+          <Button color="secondary " onClick={toggleDrawer}>
+            <i className="ri-menu-line"></i>
+          </Button>
           <div className="logo">
             <img src={logo} alt="logo" />
             <h5>GOtur</h5>
@@ -181,6 +196,16 @@ const Header = () => {
           </div>
         </div>
       </Container>
+      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer}>
+        <List>
+          {(authType === "customer" ? customerLinks : ownerLinks).map((link, index) => (
+            <ListItem button key={index} onClick={toggleDrawer} component={Link} to={link.path}>
+              <ListItemIcon>{link.icon}</ListItemIcon>
+              <ListItemText primary={link.display} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
     </header>
   );
 };

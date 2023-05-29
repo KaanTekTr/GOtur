@@ -25,6 +25,7 @@ const Login = () => {
       email,
       password
     }));
+    dispatch(authActions.changeAuthType("customer"));
     navigate("/home");
   };
 
@@ -34,6 +35,7 @@ const Login = () => {
       email,
       password
     }));
+    dispatch(authActions.changeAuthType("restaurantOwner"));
     navigate("/RestaurantOwnerHome");
   };
 

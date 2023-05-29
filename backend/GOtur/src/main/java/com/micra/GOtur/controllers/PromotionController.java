@@ -32,14 +32,14 @@ public class PromotionController {
     @GetMapping("/allPromoters")
     public List<Promoter> getAllPromoters() {
 
-        String sql = "SELECT * FROM Promoter P;";
+        String sql = "SELECT * FROM Promoter NATURAL JOIN User;";
         List<Promoter> allPromoters = jdbcTemplate.query(sql, new PromoterMapper());
         return allPromoters;
     }
 
     @GetMapping("/getPromoter/{promoterId}")
     public Promoter getPromoter(@PathVariable("promoterId") int promoterId) {
-        String sql = "SELECT * FROM Promoter P WHERE P.promoter_id = ? ;";
+        String sql = "SELECT * FROM Promoter P NATURAL JOIN User U WHERE P.user_id = ?;";
 
         try {
             return jdbcTemplate.queryForObject(sql, new PromoterMapper(), promoterId);
@@ -52,7 +52,7 @@ public class PromotionController {
     public ResponseEntity<String> deletePromoterById(
             @PathVariable("promoterId") int promoterId
     ) {
-        String sql = "DELETE FROM Promoter P WHERE P.promoter_id = (?);";
+        String sql = "DELETE FROM Promoter P WHERE P.user_id = ?;";
         jdbcTemplate.update(sql, promoterId);
 
         return new ResponseEntity<>("Promoter with id: " + promoterId +
@@ -60,13 +60,24 @@ public class PromotionController {
     }
 
     @PostMapping("/addPromoter")
-    public ResponseEntity<String> addPromoter(
-            @RequestBody Promoter promoter
-    ) {
-        String sqlPromoter = "INSERT INTO Promoter(income) VALUES (?);";
-        jdbcTemplate.update(sqlPromoter, promoter.getIncome());
+    public ResponseEntity<String> addPromoter(@RequestBody Promoter promoter) {
+        String sql = "INSERT INTO User(username, hashed_password, password_salt, email, phone_number, age, gender) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
-        return new ResponseEntity<>("Promoter is successfully added!", HttpStatus.OK);
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, promoter.getUsername(), promoter.getHashed_password(), promoter.getPassword_salt(),
+                promoter.getEmail(), promoter.getPhone_number(), promoter.getAge(), promoter.getGender());
+
+        int insertedId = getIdByEmail(promoter.getEmail());
+
+        String sqlPromoter = "INSERT INTO Promoter(user_id) VALUES (?);";
+        jdbcTemplate.update(sqlPromoter, insertedId);
+
+        return new ResponseEntity<>("Promoter Has Been Successfully Added!", HttpStatus.OK);
+    }
+
+    public int getIdByEmail(String email) {
+        String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, email);
     }
 
 

@@ -167,10 +167,10 @@ public class InitializerController {
                         "    FOREIGN KEY (restaurant_owner_id) REFERENCES RestaurantOwner(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (restaurant_id, restaurant_owner_id));",
                 "CREATE TABLE Promoter(\n" +
-                        "    promoter_id int NOT NULL,\n" +
-                        "    income int,\n" +
-                        "    FOREIGN KEY (promoter_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (promoter_id));",
+                        "    user_id int NOT NULL,\n" +
+                        "    income int DEFAULT 0,\n" +
+                        "    FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    PRIMARY KEY (user_id));",
                 "CREATE TABLE Promote(\n" +
                         "    promotion_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    promoter_id int NOT NULL,\n" +
@@ -179,7 +179,7 @@ public class InitializerController {
                         "    profit_rate int,\n" +
                         "    expiration_date date,\n" +
                         "    user_quota int,\n" +
-                        "    FOREIGN KEY (promoter_id) REFERENCES Promoter(promoter_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
+                        "    FOREIGN KEY (promoter_id) REFERENCES Promoter(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (promotion_id));",
                 "CREATE TABLE DiscountCoupon(\n" +

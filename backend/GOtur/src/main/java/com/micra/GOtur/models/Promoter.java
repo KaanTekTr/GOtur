@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Promoter {
+public class Promoter extends User {
 
-    private int promoter_id;
+    private int user_id;
     private int income;
 
 }

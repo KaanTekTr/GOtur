@@ -21,6 +21,8 @@ import RestaurantOwnerProfile from "../pages/RestaurantOwnerProfile";
 import RestaurantInfoPage from "../pages/RestaurantInfoPage";
 import RestaurantMenu from "../pages/RestaurantMenu";
 import RestaurantPastOrders from "../pages/RestaurantPastOrders";
+import DiscountCoupons from "../pages/DiscountCoupons";
+
 
 
 
@@ -51,6 +53,8 @@ const Routers = () => {
       <Route path="/restaurant-info" element={<RestaurantInfoPage />} />
       <Route path="/restaurant-menu/:id" element={<RestaurantMenu />} />
       <Route path="/restaurantPastOrders" element={<RestaurantPastOrders />} />
+      <Route path="/coupons" element={<DiscountCoupons />} />
+
 
 
 

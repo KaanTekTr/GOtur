@@ -49,6 +49,7 @@ const customerLinks = [
   { display: 'My Profile', path: '/profile', icon: <AccountCircleIcon /> },
   { display: 'Cart', path: '/cart', icon: <HistoryIcon /> },
   { display: 'Past Orders', path: '/pastOrders', icon: <HistoryIcon /> },
+  { display: 'My Coupons', path: '/coupons', icon: <HistoryIcon /> },
   { display: 'Groups', path: '/groups', icon: <StorefrontIcon /> },
   { display: 'Friends', path: '/friends', icon: <LocalShippingIcon /> },
   { display: 'Logout', path: '/login', icon: <ExitToAppIcon /> },

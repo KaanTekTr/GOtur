@@ -73,6 +73,13 @@ public class RestaurantOwnerController {
     @PostMapping("/addRestaurant/{restaurantOwnerId}")
     public ResponseEntity<String> addRestaurantByRestaurantOwnerId(@PathVariable("restaurantOwnerId") int restaurantOwnerId,
                                                                    @RequestBody Restaurant restaurant) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM RestaurantOwner R WHERE R.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, restaurantOwnerId);
+
+        if (!exists) { // if restaurant owner does not exist
+            return new ResponseEntity<>("Restaurant Owner With ID: " + restaurantOwnerId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
         SimpleJdbcInsert insertIntoRestaurant = new SimpleJdbcInsert(jdbcTemplate).withTableName("Restaurant").usingColumns("restaurant_name", "district",
                 "open_hour", "close_hour", "min_delivery_price", "is_top_restaurant").usingGeneratedKeyColumns("restaurant_id");
         final Map<String, Object> parameters = new HashMap<>();
@@ -89,13 +96,9 @@ public class RestaurantOwnerController {
         String sql = "INSERT INTO ManagedBy(restaurant_id, restaurant_owner_id) VALUES (?, ?);";
 
         System.out.println(">>" + sql);
-        try {
-            jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error! Make sure restaurantId or RestaurantOwnerID is valid!", HttpStatus.BAD_REQUEST);
-        }
+        jdbcTemplate.update(sql, restaurantId, restaurantOwnerId); // insert to ManagedBy table
 
-        return new ResponseEntity<>("Restaurant Successfully Inserted!", HttpStatus.OK);
+        return new ResponseEntity<>("Restaurant Has Been Successfully Inserted!", HttpStatus.OK);
     }
 
     @PostMapping("/addRestaurantOwner/{restaurantId}/{restaurantOwnerId}")

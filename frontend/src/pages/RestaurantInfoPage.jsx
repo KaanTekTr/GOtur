@@ -5,25 +5,41 @@ import { Link } from 'react-router-dom';
 // import { updateRestaurant } from '../redux/actions/restaurantActions';
 
 const RestaurantInfoPage = () => {
-  const restaurant = useSelector(state => state.restaurant);
-  const [modal, setModal] = useState(false);
+  // const restaurant = useSelector(state => state.restaurant);
+  const restaurant = {
+    id: '1',
+    name: 'Anadolu Tat 1071',
+    address: '123 Main St, Anytown, USA',
+    minOrderLimit: 100,
+    openHours: '10.00-22.00',
+    cuisineType: 'Turkish Kebab'
+
+  };
+
+  const id = "01";
+  const [orderModal, setOrderModal] = useState(false);
+  const [hourModal, setHourModal] = useState(false);
+
   const [minOrderLimit, setMinOrderLimit] = useState(restaurant.minOrderLimit);
   const [openHours, setOpenHours] = useState(restaurant.openHours);
   
   const dispatch = useDispatch();
 
   const toggleOrderModal = () => {
-    setModal(!modal);
+    setOrderModal(!orderModal);
   };
   const toggleHourModal = () => {
-    setModal(!modal);
+    setHourModal(!hourModal);
   };
 
   const updateHourInfo = () => {
+    setOpenHours(openHours);
     // dispatch(updateRestaurant({ minOrderLimit, openHours }));
     toggleHourModal();
   };
   const updateOrderInfo = () => {
+    setMinOrderLimit(minOrderLimit);
+
     // dispatch(updateRestaurant({ minOrderLimit, openHours }));
     toggleOrderModal();
   };
@@ -34,7 +50,7 @@ const RestaurantInfoPage = () => {
         <CardTitle tag="h5">My Restaurant Information</CardTitle>
         <p>Restaurant Name: {restaurant.name}</p>
         <p>Restaurant Address: {restaurant.address}</p>
-        <p>Minimum Order Limit: {restaurant.minOrderLimit} 
+        <p>Minimum Order Limit: {restaurant.minOrderLimit} TL 
           <Button onClick={toggleOrderModal} size="sm" color="primary">Edit</Button>
         </p>
         <p>Open Hours: {restaurant.openHours} 
@@ -43,10 +59,10 @@ const RestaurantInfoPage = () => {
         <p>Cuisine Type: {restaurant.cuisineType}</p>
         <div>
         <Button color="primary">
-          <Link to="/edit-menu" style={{ color: '#fff' }}>Edit Menu</Link>
+          <Link to={`/restaurant-menu/${id}`} style={{ color: '#fff' }}>View Restaurant Menu</Link>
         </Button>
         </div>
-        <Modal isOpen={modal} toggle={toggleOrderModal}>
+        <Modal isOpen={orderModal} toggle={toggleOrderModal}>
           <ModalHeader toggle={toggleOrderModal}>Edit Information</ModalHeader>
           <ModalBody>
             <Form onSubmit={updateOrderInfo}>
@@ -60,7 +76,7 @@ const RestaurantInfoPage = () => {
             </Form>
           </ModalBody>
         </Modal>
-        <Modal isOpen={modal} toggle={toggleHourModal}>
+        <Modal isOpen={hourModal} toggle={toggleHourModal}>
           <ModalHeader toggle={toggleHourModal}>Edit Information</ModalHeader>
           <ModalBody>
             <Form onSubmit={updateHourInfo}>

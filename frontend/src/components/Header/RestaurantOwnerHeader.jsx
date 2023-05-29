@@ -14,7 +14,7 @@ const ownerLinks = [
   { display: 'My Profile', path: '/profile', icon: <AccountCircleIcon /> },
   { display: 'My Restaurant', path: '/restaurant-info', icon: <StorefrontIcon /> },
   { display: 'Incoming Orders', path: '/restaurantOwnerHome', icon: <LocalShippingIcon /> },
-  { display: 'Past Orders', path: '/pastOrders', icon: <HistoryIcon /> },
+  { display: 'Past Orders', path: '/restaurantPastOrders', icon: <HistoryIcon /> },
   { display: 'Logout', path: '/login', icon: <ExitToAppIcon /> },
 ];
 

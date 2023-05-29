@@ -19,6 +19,10 @@ import Friends from "../pages/Friends";
 import RestaurantOwnerBalance from "../pages/RestaurantOwnerBalance";
 import RestaurantOwnerProfile from "../pages/RestaurantOwnerProfile";
 import RestaurantInfoPage from "../pages/RestaurantInfoPage";
+import RestaurantMenu from "../pages/RestaurantMenu";
+import RestaurantPastOrders from "../pages/RestaurantPastOrders";
+
+
 
 
 
@@ -45,6 +49,10 @@ const Routers = () => {
       <Route path="/balance" element={<RestaurantOwnerBalance />} />
       <Route path="/profile" element={<RestaurantOwnerProfile />} />
       <Route path="/restaurant-info" element={<RestaurantInfoPage />} />
+      <Route path="/restaurant-menu/:id" element={<RestaurantMenu />} />
+      <Route path="/restaurantPastOrders" element={<RestaurantPastOrders />} />
+
+
 
 
       

@@ -96,7 +96,7 @@ public class InitializerController {
                         "    is_delivered boolean DEFAULT 0,\n" +
                         "    is_canceled boolean DEFAULT 0,\n" +
                         "    purchase_time datetime,\n" +
-                        "    total_price float,\n" +
+                        "    total_price float DEFAULT 0,\n" +
                         "    FOREIGN KEY (customer_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (address_id) REFERENCES Address(address_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +

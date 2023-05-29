@@ -1,18 +1,20 @@
 package com.micra.GOtur.controllers;
 
-import com.micra.GOtur.mappers.AdminMapper;
-import com.micra.GOtur.mappers.FoodCategoryMapper;
-import com.micra.GOtur.mappers.ReportMapper;
+import com.micra.GOtur.mappers.*;
 import com.micra.GOtur.models.Admin;
 import com.micra.GOtur.models.FoodCategory;
 import com.micra.GOtur.models.Report;
+import com.micra.GOtur.models.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/report")
@@ -36,7 +38,7 @@ public class ReportController {
     }
 
     @GetMapping("/{reportId}")
-    public Report getFoodCategory(@PathVariable("reportId") int reportId) {
+    public Report getReport(@PathVariable("reportId") int reportId) {
         String sql = "SELECT * FROM Report R WHERE R.report_id = ? ;";
 
         try {
@@ -46,58 +48,82 @@ public class ReportController {
         }
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<String> addReport(
-            @RequestBody Report report
+    @PostMapping("/mostFavoritedRestaurant/{adminId}")
+    public ResponseEntity<String> mostFavoritedRestaurant(
+            @PathVariable("adminId") int adminId
     ) {
+
         String checkAdmin = "SELECT EXISTS (SELECT * FROM Admin A WHERE A.user_id = ?);";
-        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, report.getAdmin_id());
+        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, adminId);
         if (!existsAdmin) {
-            return new ResponseEntity<>("Admin with id: " + report.getAdmin_id() + " does not exist! Add review failed!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
+        String restaurantSQL = "WITH temp(restaurant_id, totalCount) AS" +
+                " (SELECT restaurant_id, count(*)" +
+                " FROM Favorites" +
+                " GROUP BY restaurant_id  )" +
+                " SELECT *" +
+                " FROM temp NATURAL JOIN Restaurant" +
+                " WHERE totalCount = ( SELECT max(totalCount)" +
+                " FROM temp);";
+        List<Restaurant> restaurants = jdbcTemplate.query(restaurantSQL, new RestaurantMapper());
+
+        StringBuilder detail = new StringBuilder();
+        detail.append("Most favorited restaurants are: ");
+        for (Restaurant r : restaurants) {
+            detail.append(r.getRestaurant_name() + ", ");
+        }
+        int length = detail.length();
+        detail.delete(length - 2, length);
+        String detailStr = detail.toString();
+
         String sql = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sql, report.getAdmin_id(), report.getDetails(), report.getReport_type(), report.getReport_date());
+        jdbcTemplate.update(sql, adminId, detailStr, "Most Favorited Restaurant", LocalDate.now());
 
-        // increment admin's report count
-        String sqlUpdate = "UPDATE Admin SET report_count = ? WHERE user_id = ?;";
-        String findAdmin = "SELECT * FROM Admin A, User U WHERE (U.user_id = ? AND U.user_id = A.user_id);";
-        Admin admin = jdbcTemplate.queryForObject(findAdmin, new AdminMapper(), report.getAdmin_id());
-        jdbcTemplate.update(sqlUpdate, admin.getReport_count()+1, report.getAdmin_id());
-
-        return new ResponseEntity<>("Report is successfully inserted!", HttpStatus.OK);
+        return new ResponseEntity<>(detailStr, HttpStatus.OK);
     }
 
-    @PostMapping("/analyze/{reportId}/{restaurantId}")
-    public ResponseEntity<String> analyzeRestaurant(
-            @PathVariable("reportId") int reportId,
+    @PostMapping("/restaurantActiveCoupons/{adminId}/{restaurantId}")
+    public ResponseEntity<String> restaurantActiveCoupons(
+            @PathVariable("adminId") int adminId,
             @PathVariable("restaurantId") int restaurantId
     ) {
 
-        String checkReport = "SELECT EXISTS (SELECT * FROM Report R WHERE R.report_id = ?);";
-        boolean existsReport = jdbcTemplate.queryForObject(checkReport, Boolean.class, reportId);
-        if (!existsReport) {
-            return new ResponseEntity<>("Report with id: " + reportId + " does not exist!", HttpStatus.BAD_REQUEST);
+        String checkAdmin = "SELECT EXISTS (SELECT * FROM Admin A WHERE A.user_id = ?);";
+        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, adminId);
+        if (!existsAdmin) {
+            return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
         String checkRestaurant = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
         boolean existsRestaurant = jdbcTemplate.queryForObject(checkRestaurant, Boolean.class, restaurantId);
         if (!existsRestaurant) {
-            return new ResponseEntity<>("Restaurant with id: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Restaurant with id: " + restaurantId + " does not exist! Failed!", HttpStatus.BAD_REQUEST);
         }
 
-        String sql = "INSERT INTO Analyzes(report_id, restaurant_id) VALUES (?,?);";
-        jdbcTemplate.update(sql, reportId, restaurantId);
+        String p1 = "restaurant_name";
+        String p2 = "count";
+        String sql = "SELECT R.restaurant_name, count(*) AS count" +
+                " FROM DiscountCoupon D NATURAL JOIN Restaurant R" +
+                " WHERE (D.expiration_date >= ? AND R.restaurant_id = ?)" +
+                " GROUP BY restaurant_id;";
+        Map<String, Integer> map = jdbcTemplate.queryForObject(sql, new StringIntegerMapper(p1, p2), LocalDate.now(), restaurantId);
 
-        return new ResponseEntity<>("Analysis is successfully inserted!", HttpStatus.OK);
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        for (String key : map.keySet()) {
+            detail.append("The restaurant with name '" + key + "' has total of "
+                    + map.get(key) + " active coupons");
+        }
+
+        String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant Active Coupons", LocalDate.now());
+
+        return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
+
     }
 
-    @GetMapping("/all/{restaurantId}")
-    public List<Report> getReportsOfRestaurant(@PathVariable("restaurantId") int restaurantId) {
-        String sql = "SELECT * FROM Report R WHERE R.report_id IN (SELECT A.report_id FROM Analyzes A WHERE A.restaurant_id = ?);";
-        List<Report> reports = jdbcTemplate.query(sql, new ReportMapper(), restaurantId);
-        return reports;
-    }
 
     @DeleteMapping("/delete/{reportId}")
     public ResponseEntity<String> deleteReport(
@@ -108,6 +134,13 @@ public class ReportController {
 
         return new ResponseEntity<>("Report with id: " + reportId +
                 " is successfully deleted!", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<String> deleteAllReports() {
+        String sql = "DELETE FROM Report";
+        jdbcTemplate.update(sql);
+        return new ResponseEntity<>("All reports are successfully deleted!", HttpStatus.OK);
     }
 
 

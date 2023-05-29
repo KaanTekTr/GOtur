@@ -97,4 +97,96 @@ public class PurchaseController {
 
         return new ResponseEntity<>("Purchase Has Successfully Formed!", HttpStatus.OK);
     }
+
+    @PostMapping("/markBeingPrepared/{purchaseId}")
+    public ResponseEntity<String> markPurchaseAsBeingPreparedByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+
+        if (!exists) { // if purchase does not exist
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!IsPaidByPurchaseId(purchaseId)) {
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Not Paid!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkStatusSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.being_prepared = 1);";
+        boolean existsStatus = jdbcTemplate.queryForObject(checkStatusSql, Boolean.class, purchaseId);
+
+        if (existsStatus) { // if status is already as being prepared
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Already Marked As Being Prepared!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the status
+        String sql = "UPDATE Purchase P SET P.being_prepared = 1 WHERE P.purchase_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, purchaseId);
+
+        return new ResponseEntity<>("The Status Of The Purchase With ID: " + purchaseId + " Has Been Successfully Updated To Being Prepared!", HttpStatus.OK);
+    }
+
+    @PostMapping("/markDeparted/{purchaseId}")
+    public ResponseEntity<String> markPurchaseAsDepartedByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+
+        if (!exists) { // if purchase does not exist
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!IsPaidByPurchaseId(purchaseId)) {
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Not Paid!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkStatusSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_departed = 1);";
+        boolean existsStatus = jdbcTemplate.queryForObject(checkStatusSql, Boolean.class, purchaseId);
+
+        if (existsStatus) { // if status is already as departed
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Already Marked As Departed!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the status
+        String sql = "UPDATE Purchase P SET P.is_departed = 1 WHERE P.purchase_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, purchaseId);
+
+        return new ResponseEntity<>("The Status Of The Purchase With ID: " + purchaseId + " Has Been Successfully Updated To Departed!", HttpStatus.OK);
+    }
+
+    @PostMapping("/markDelivered/{purchaseId}")
+    public ResponseEntity<String> markPurchaseAsDeliveredByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+
+        if (!exists) { // if purchase does not exist
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!IsPaidByPurchaseId(purchaseId)) {
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Not Paid!", HttpStatus.BAD_REQUEST);
+        }
+
+        String checkStatusSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_delivered = 1);";
+        boolean existsStatus = jdbcTemplate.queryForObject(checkStatusSql, Boolean.class, purchaseId);
+
+        if (existsStatus) { // if status is already delivered
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Already Marked As Delivered!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the status
+        String sql = "UPDATE Purchase P SET P.is_delivered = 1 WHERE P.purchase_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, purchaseId);
+
+        return new ResponseEntity<>("The Status Of The Purchase With ID: " + purchaseId + " Has Been Successfully Updated To Delivered!", HttpStatus.OK);
+    }
+
+    public Boolean IsPaidByPurchaseId(int purchaseId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_paid = 1);";
+        return jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+    }
 }

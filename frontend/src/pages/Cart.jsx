@@ -6,11 +6,21 @@ import "../styles/cart-page.css";
 import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
 import { cartActions } from "../store/shopping-cart/cartSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { orderActions } from "../store/user/orderSlice";
 
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const totalAmount = useSelector((state) => state.cart.totalAmount);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const seeRestaurants = () => {
+    dispatch(orderActions.updateCurrentCart({id: 0}));
+    navigate("/restaurants");
+  }
+
   return (
     <Helmet title="Cart">
       <CommonSection title="Your Cart" />
@@ -46,8 +56,8 @@ const Cart = () => {
                 </h6>
                 <p>Taxes and shipping will calculate at checkout</p>
                 <div className="cart__page-btn">
-                  <button className="addTOCart__btn me-4">
-                    <Link to="/foods">Continue Shopping</Link>
+                  <button className="addTOCart__btn me-4" onClick={seeRestaurants}>
+                    Continue Shopping
                   </button>
                   <button className="addTOCart__btn">
                     <Link to="/checkout">Proceed to checkout</Link>

@@ -48,7 +48,7 @@ const PastOrders = () => {
                         className="mb-2 text-muted"
                         tag="h6"
                     >
-                        22 May 2023
+                        {item.date}
                     </CardSubtitle>
                 <Table>
                     <thead>
@@ -76,7 +76,7 @@ const PastOrders = () => {
 
                     <h6>
                         Subtotal: $
-                        <span className="cart__subtotal">{100}</span>
+                        <span className="cart__subtotal">{item.totalAmount}</span>
                     </h6>
 
                     <Card className="p-2 mt-4">
@@ -112,7 +112,7 @@ const PastOrders = () => {
 
 
 const Tr = (props) => {
-    const { id, image01, title, price, quantity } = props.item;
+    const { image01, title, price, quantity } = props.item;
 
     return (
       <tr>

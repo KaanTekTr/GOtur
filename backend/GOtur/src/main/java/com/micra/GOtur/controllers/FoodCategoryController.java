@@ -81,6 +81,12 @@ public class FoodCategoryController {
             return new ResponseEntity<>("Restaurant with id: " + restaurantId + " does not exist! Add failed!", HttpStatus.BAD_REQUEST);
         }
 
+        String checkPair = "SELECT EXISTS (SELECT * FROM Serves S WHERE S.restaurant_id = ? AND S.food_category_id = ?);";
+        boolean existsPair = jdbcTemplate.queryForObject(checkPair, Boolean.class, restaurantId, foodCategoryId);
+        if (existsPair) {
+            return new ResponseEntity<>("Food Category with ID: " + foodCategoryId + " already exists in Restaurant with ID: " + restaurantId + "! Add failed!", HttpStatus.BAD_REQUEST);
+        }
+
         String sql = "INSERT INTO Serves(food_category_id, restaurant_id) VALUES (?,?);";
         jdbcTemplate.update(sql, foodCategoryId, restaurantId);
 

@@ -134,10 +134,39 @@ public class RestaurantController {
         return new ResponseEntity<>("Ingredient Has Been Successfully Added To The Food With ID: " + ingredient.getFood_id() + "!", HttpStatus.OK);
     }
 
+    @PatchMapping("/updateFood/{foodId}")
+    public ResponseEntity<String> updateFoodByFoodId(@PathVariable("foodId") int foodId,
+                                                      @RequestParam int newFoodCategoryId,
+                                                      @RequestParam int newMenuCategoryId,
+                                                     @RequestParam String newFoodName,
+                                                     @RequestParam String newFixedIngredients,
+                                                     @RequestParam int newPrice) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Food F WHERE F.food_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, foodId);
+
+        if (!exists) { // if food does not exist
+            return new ResponseEntity<>("Food With ID: " + foodId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String sql = "UPDATE Food F SET F.food_category_id = ?, F.menu_category_id = ?, F.food_name = ?, F.fixed_ingredients = ?, F.price = ? WHERE F.food_id = ?;";
+
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, newFoodCategoryId, newMenuCategoryId, newFoodName, newFixedIngredients, newPrice, foodId);
+
+        return new ResponseEntity<>("Food With ID: " + foodId + " Has Been Successfully Updated!", HttpStatus.OK);
+    }
+
     @PatchMapping("/updateIngredient/{ingredientId}")
-    public ResponseEntity<String> addIngredientToFood(@PathVariable("ingredientId") int ingredientId,
+    public ResponseEntity<String> updateIngredientByIngredientId(@PathVariable("ingredientId") int ingredientId,
                                                       @RequestParam String newIngredientName,
                                                       @RequestParam int newPrice) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Ingredient I WHERE I.ingredient_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, ingredientId);
+
+        if (!exists) { // if ingredient does not exist
+            return new ResponseEntity<>("Ingredient With ID: " + ingredientId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
         String sql = "UPDATE Ingredient I SET I.ingredient_name = ?, I.price = ? WHERE I.ingredient_id = ?;";
 
         System.out.println(">>" + sql);

@@ -184,7 +184,7 @@ const Header = () => {
               <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>
-                  {addresses.length > 0 ? addresses.map(address => (
+                  {addresses?.length > 0 ? addresses.map(address => (
                     <ListGroupItem style={{cursor: "pointer"}} active={address.address_id === selectedAddress.id} onClick={() => changeSelAddress(address.address_id)}>
                       <ListGroupItemHeading>
                         {address.address_name}

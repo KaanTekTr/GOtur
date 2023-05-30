@@ -4,7 +4,8 @@ import { userLogin, userLogout } from "../lib/api/unsplashService";
 export const loginThunk = createAsyncThunk('auth/login', 
   async (data, thunkAPI) => {
     try {
-      const  response = await userLogin("customer", data.email, data.password);
+      console.log(data);
+      const  response = await userLogin(data.authType, data.email, data.password);
       return response.data;
     } catch (error) {
       
@@ -15,7 +16,7 @@ export const loginThunk = createAsyncThunk('auth/login',
 export const logoutThunk = createAsyncThunk('auth/logout', 
   async (data, thunkAPI) => {
     try {
-      const  response = await userLogout("customer", data.userId);
+      const  response = await userLogout(data.authType, data.userId);
       return response.data;
     } catch (error) {
       

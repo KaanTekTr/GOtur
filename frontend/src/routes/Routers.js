@@ -23,6 +23,9 @@ import RestaurantMenu from "../pages/RestaurantMenu";
 import RestaurantPastOrders from "../pages/RestaurantPastOrders";
 import DiscountCoupons from "../pages/DiscountCoupons";
 import { useSelector } from "react-redux";
+import CustomerBalance from "../pages/CustomerBalance";
+import Payment from "../pages/Payment";
+
 
 
 
@@ -57,6 +60,9 @@ const Routers = () => {
       <Route path="/restaurant-menu/:id" element={<RestaurantMenu />} />
       <Route path="/restaurantPastOrders" element={<RestaurantPastOrders />} />
       <Route path="/coupons" element={<DiscountCoupons />} />
+      <Route path="/customer-balance" element={<CustomerBalance />} />
+      <Route path="/payment" element={<Payment />} />
+
 
 
 

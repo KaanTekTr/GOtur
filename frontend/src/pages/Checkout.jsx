@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Container, Row, Col, Card, CardTitle, Input, CardSubtitle, Table } from "reactstrap";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
+import { Link, useNavigate } from "react-router-dom";
 
 import "../styles/checkout.css";
 
@@ -14,7 +15,11 @@ const Checkout = () => {
   const shippingCost = 30;
 
   const totalAmount = cartTotalAmount + Number(shippingCost);
+  const navigate = useNavigate();
 
+  const handlePayment = () => {
+    navigate(`/payment`)
+  }
 
   return (
     <Helmet title="Checkout">
@@ -59,7 +64,7 @@ const Checkout = () => {
                     <Input placeholder="Add note..." className="mb-2"/>
                   </div>
                   <div>
-                    <button type="submit" className="addTOCart__btn">
+                    <button type="submit" className="addTOCart__btn" onClick={handlePayment}>
                       Payment
                     </button>
                   </div>

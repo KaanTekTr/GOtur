@@ -88,14 +88,47 @@ public class CustomerController {
             return new ResponseEntity<>("Customer With ID: " + customerId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
+        // the address is not primary
+        Boolean is_primary = Boolean.FALSE;
+
+        // Check if the customer already has an address
+        String checkAddressSql = "SELECT EXISTS (SELECT * FROM Address A WHERE A.customer_id = ?);";
+        boolean existsAddress = jdbcTemplate.queryForObject(checkAddressSql, Boolean.class, customerId);
+
+        if ( !existsAddress ) { // if the customer has no address, set the new address to primary
+            is_primary = Boolean.TRUE;
+        }
+
         String sql = "INSERT INTO Address(customer_id, address_name, is_primary, city, district, street_num, street_name, building_num, detailed_desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         System.out.println(">>" + sql);
         System.out.println(address.getIs_primary());
-        jdbcTemplate.update(sql, customerId, address.getAddress_name(), address.getIs_primary(), address.getCity(), address.getDistrict(), address.getStreet_num(),
+        jdbcTemplate.update(sql, customerId, address.getAddress_name(), is_primary, address.getCity(), address.getDistrict(), address.getStreet_num(),
                 address.getStreet_name(), address.getBuilding_num(), address.getDetailed_desc());
 
         return new ResponseEntity<>("Address Is Successfully Added To The Customer!", HttpStatus.OK);
+    }
+
+    @PostMapping("/setAddressPrimary/{addressId}")
+    public ResponseEntity<String> setAddressAsPrimaryByAddressId(@PathVariable("addressId") int addressId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Address A WHERE A.address_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, addressId);
+
+        if (!exists) {
+            return new ResponseEntity<>("The Address With ID: " + addressId + " Does Not Exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // set the previous primary to non-primary
+        String oldAddressSql = "UPDATE Address A SET A.is_primary = 0 WHERE A.is_primary = 1;";
+        System.out.println(">>" + oldAddressSql);
+        jdbcTemplate.update(oldAddressSql);
+
+        // set the new address as primary
+        String sql = "UPDATE Address A SET A.is_primary = ? WHERE A.address_id = ?;";
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, Boolean.TRUE, addressId);
+
+        return new ResponseEntity<>("Address With ID: " + addressId + " Has Been Set As Primary!", HttpStatus.OK);
     }
 
     @PostMapping("/addFriends/{customerId1}/{customerId2}")

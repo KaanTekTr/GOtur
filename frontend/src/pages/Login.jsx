@@ -4,7 +4,7 @@ import CommonSection from "../components/UI/common-section/CommonSection";
 import { Container, Row, Col } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authActions, loginThunk } from "../store/authSlice";
 
 const Login = () => {
@@ -18,24 +18,27 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const authType = useSelector(state => state.auth.authType);
+
   const submitHandler = (e) => {
 
     e.preventDefault();
+    dispatch(authActions.changeAuthType("customer"));
     dispatch(loginThunk({
+      authType,
       email,
       password
     }));
-    dispatch(authActions.changeAuthType("customer"));
     navigate("/home");
   };
 
   const submitHandlerRestaurant = (e) => {
     e.preventDefault();
+    dispatch(authActions.changeAuthType("restaurantOwner"));
     dispatch(authActions.login({
       email,
       password
     }));
-    dispatch(authActions.changeAuthType("restaurantOwner"));
     navigate("/RestaurantOwnerHome");
   };
 

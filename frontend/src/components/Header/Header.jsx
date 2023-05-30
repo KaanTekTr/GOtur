@@ -84,7 +84,7 @@ const Header = () => {
   };
 
   const logOut = () => {
-    dispatch(logoutThunk({userId}));
+    dispatch(logoutThunk({userId, authType}));
   }
 
   const eventHandler = () => {

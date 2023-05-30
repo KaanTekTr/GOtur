@@ -135,6 +135,9 @@ public class ReportController {
             return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
+        String p1 = "restaurant_name";
+        String p2 = "district";
+        String p3 = "purchaseCount";
         String sql = "WITH temp(restaurant_id, district, purchaseCount) AS" +
                 " (" +
                 " SELECT R.restaurant_id, R.district, count(purchase_id) AS purchaseCount" +
@@ -145,7 +148,19 @@ public class ReportController {
                 " SELECT R.restaurant_name, T.district, T.purchaseCount" +
                 " FROM temp T NATURAL JOIN Restaurant R" +
                 " WHERE T.purchaseCount = (SELECT max(purchaseCount)" +
-                " FROM temp);";
+                " FROM temp WHERE temp.district = R.district);";
+        List<Map<List<String>, Integer>> ls = jdbcTemplate.query(sql, new StringStringIntegerMapper(p1, p2, p3));
+        System.out.println("ls length: " + ls.size());
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        for (Map<List<String>, Integer> map : ls) {
+            for (List<String> key : map.keySet()) {
+                detail.append("The restaurant with name '" + key.get(0) + "' has most number of purchases in region '"
+                        + key.get(1)  + "' " + "with a total of " + map.get(key) + " purchases\n");
+            }
+        }
+
+        /*
         List<Map<String, Object>> ls = jdbcTemplate.queryForList(sql);
         StringBuilder detail = new StringBuilder();
         detail.append("");
@@ -164,6 +179,7 @@ public class ReportController {
         System.out.println("ls length: " + ls.size());
         detail.append("The restaurant with name '" + str1 + "' has most number of purchases in region '"
                 + str2  + "' " + "with a total of " + str3 + " purchases\n");
+        */
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
         jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Most Number of Purchases in Region", LocalDate.now());

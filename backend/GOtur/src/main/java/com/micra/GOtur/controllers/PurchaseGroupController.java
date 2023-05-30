@@ -1,11 +1,7 @@
 package com.micra.GOtur.controllers;
 
-import com.micra.GOtur.mappers.AddressMapper;
-import com.micra.GOtur.mappers.CustomerMapper;
-import com.micra.GOtur.mappers.PurchaseGroupMapper;
-import com.micra.GOtur.models.Address;
-import com.micra.GOtur.models.Customer;
-import com.micra.GOtur.models.PurchaseGroup;
+import com.micra.GOtur.mappers.*;
+import com.micra.GOtur.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +68,14 @@ public class PurchaseGroupController {
 
         return list;
     }
+
+    /*
+    @GetMapping("/getAllFoodAndIngredientsForCustomer/{purchaseId}/{customerId}")
+    public List<PurchaseItem> getAllFoodAndIngredientsByPurchaseIdAndCustomerId(@PathVariable("purchaseId") int purchaseId,
+                                                                                @PathVariable("customerId") int customerId) {
+
+    }
+    */
 
     @PostMapping("/add")
     public ResponseEntity<String> addPurchaseGroup(@RequestBody PurchaseGroup purchaseGroup) {
@@ -144,6 +149,47 @@ public class PurchaseGroupController {
                 address.getStreet_name(), address.getBuilding_num(), address.getDetailed_desc());
 
         return new ResponseEntity<>("Address Is Successfully Added To The Purchase Group!", HttpStatus.OK);
+    }
+
+    @PostMapping("/transferToGroupBalance/{groupId}/{customerId}")
+    public ResponseEntity<String> transferBalanceFromGroupMemberToGroupBalance(@PathVariable("groupId") int groupId,
+                                                                               @PathVariable("customerId") int customerId,
+                                                                               @RequestParam int transferAmount) {
+        // Check if the group exists
+        String checkSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if (!exists) { // if group does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Check if the group exists
+        String memberCheckSql = "SELECT EXISTS (SELECT * FROM Forms F WHERE F.group_id = ? AND F.group_member_id = ?);";
+        boolean existsMember = jdbcTemplate.queryForObject(memberCheckSql, Boolean.class, groupId, customerId);
+
+        if (!existsMember) { // if group member does not belong
+            return new ResponseEntity<>("Customer With ID: " + customerId + " Is Not Member Of The Purchase Group With ID: " + groupId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the customer has enough balance
+        String checkBalanceSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ? AND C.balance >= ?);";
+        boolean isEnoughBalance = jdbcTemplate.queryForObject(checkBalanceSql, Boolean.class, customerId, transferAmount);
+
+        if ( !isEnoughBalance ) {
+            return new ResponseEntity<>("The Balance Of The Customer Is Not Enough To Complete This Transaction!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the customer balance
+        String customerSql = "UPDATE Customer C SET C.balance = C.balance - ? WHERE C.user_id = ?;";
+        System.out.println(">>" + customerSql);
+        jdbcTemplate.update(customerSql, transferAmount, customerId);
+
+        // Update the group balance
+        String groupSql = "UPDATE PurchaseGroup P SET P.group_balance = P.group_balance + ? WHERE P.group_id = ?;";
+        System.out.println(">>" + groupSql);
+        jdbcTemplate.update(groupSql, transferAmount, groupId);
+
+        return new ResponseEntity<>("The Transaction Has Been Completed Successfully!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{groupId}")

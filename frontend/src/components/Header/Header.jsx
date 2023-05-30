@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 
 import "../../styles/header.css";
-import { authActions } from "../../store/authSlice";
+import { authActions, logoutThunk } from "../../store/authSlice";
 import { addressActions } from "../../store/user/adressSlice";
 import { orderActions } from "../../store/user/orderSlice";
 import { Drawer, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
@@ -71,6 +71,7 @@ const Header = () => {
   const addresses = useSelector(state => state.address.address);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
   const authType = useSelector(state => state.auth.authType);
+  const userId = useSelector(state => state.auth.userId);
 
   useEffect(() => {
     dispatch(addressActions.getAddresses());
@@ -83,7 +84,7 @@ const Header = () => {
   };
 
   const logOut = () => {
-    dispatch(authActions.logout());
+    dispatch(logoutThunk({userId}));
   }
 
   const eventHandler = () => {

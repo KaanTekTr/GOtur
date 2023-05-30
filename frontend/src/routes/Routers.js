@@ -22,6 +22,7 @@ import RestaurantInfoPage from "../pages/RestaurantInfoPage";
 import RestaurantMenu from "../pages/RestaurantMenu";
 import RestaurantPastOrders from "../pages/RestaurantPastOrders";
 import DiscountCoupons from "../pages/DiscountCoupons";
+import { useSelector } from "react-redux";
 import CustomerBalance from "../pages/CustomerBalance";
 import Payment from "../pages/Payment";
 
@@ -33,9 +34,11 @@ import Payment from "../pages/Payment";
 
 
 const Routers = () => {
+
+  const status = useSelector(state => state.auth.status)
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/Login" />} />
+      <Route path="/" element={status=== "authenticated" ? <Navigate to="/home" />: <Navigate to="/Login" />} />
       <Route path="/home" element={<Home />} />
       <Route path="/foods" element={<AllFoods />} />
       <Route path="/foods/:id" element={<FoodDetails />} />

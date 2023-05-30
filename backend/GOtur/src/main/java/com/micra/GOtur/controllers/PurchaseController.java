@@ -323,4 +323,43 @@ public class PurchaseController {
         String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_paid = 1);";
         return jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
     }
+
+    @DeleteMapping("/deleteFoodWithIngredientFromSingleUnpaidPurchase/{customerId}/{foodId}/{foodOrder}")
+    public ResponseEntity<String> deleteFoodAndIngredientsFromSingleUnpaidPurchaseByFoodIdAndFoodOrder(@PathVariable("customerId") int customerId,
+                                                                                                       @PathVariable("foodId") int foodId,
+                                                                                                       @PathVariable("foodOrder") int foodOrder) {
+        // check if the customer has an unpaid single purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if ( !exists ) { // if the customer does not have an unpaid single purchase
+            return new ResponseEntity<>("The Customer With ID: " + customerId + " Does Not Currently Have An Unpaid Single Purchase!", HttpStatus.BAD_REQUEST);
+        }
+
+        // find the purchase id of an unpaid single purchase
+        String findSql = "SELECT P.purchase_id FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0;";
+        int purchaseId = jdbcTemplate.queryForObject(findSql, Integer.class, customerId);
+
+        // delete the ingredients
+        String sql = "DELETE FROM IngredientInPurchase IP WHERE IP.purchase_id = ? AND IP.food_order = ? AND IP.ingredient_id IN (SELECT I.ingredient_id FROM Ingredient I WHERE I.food_id = ?);";
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, purchaseId, foodOrder, foodId);
+
+        // delete the food
+        String foodSql = "DELETE FROM FoodInPurchase FP WHERE FP.purchase_id = ? AND FP.food_order = ? AND FP.food_id = ?;";
+        System.out.println(">>" + foodSql);
+        jdbcTemplate.update(foodSql, purchaseId, foodOrder, foodId);
+
+        // if there's no other item left, delete the purchase
+        String countSql = "SELECT COUNT(*) FROM FoodInPurchase FP WHERE FP.purchase_id = ?;";
+        int foodCount = jdbcTemplate.queryForObject(countSql, Integer.class, purchaseId);
+
+        if ( foodCount == 0 ) {
+            String purchaseSql = "DELETE FROM Purchase P WHERE P.purchase_id = ?;";
+            System.out.println(">>" + purchaseSql);
+            jdbcTemplate.update(purchaseSql, purchaseId);
+        }
+
+        return new ResponseEntity<>("Selected Food And Ingredients Has Been Successfully Deleted From The Favorites Of The Customer With ID: " + customerId + "!", HttpStatus.OK);
+    }
 }

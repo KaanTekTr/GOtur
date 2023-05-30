@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-import { Container, Button, Modal, ModalHeader, ModalBody, ModalFooter, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, List } from 'reactstrap';
+import { Container, Button, Modal, ModalHeader, ModalBody, ModalFooter, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, List, Row, Col, InputGroup, InputGroupText } from 'reactstrap';
 import logo from "../../assets/images/res-logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,9 +9,9 @@ import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 
 import "../../styles/header.css";
 import { authActions, logoutThunk } from "../../store/authSlice";
-import { addressActions } from "../../store/user/adressSlice";
+import { addAddressesThunk, addressActions, getAddressesThunk } from "../../store/user/adressSlice";
 import { orderActions } from "../../store/user/orderSlice";
-import { Drawer, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Drawer, Input, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import StorefrontIcon from '@material-ui/icons/Storefront';
@@ -57,12 +57,23 @@ const customerLinks = [
 
 const Header = () => {
   const [modal, setModal] = useState(false);
+  const [addAddressModal, setAddAddressModal] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
+  const [streetName, setStreetName] = useState("");
+  const [streetNo, setStreetNo] = useState("");
+  const [buildingNo, setBuildingNo] = useState("");
+  const [desc, setDesc] = useState("");
   
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
   const toggle = () => setModal(!modal);
+  const addAddressToggle = () => setAddAddressModal(!addAddressModal);
+
   const menuRef = useRef(null);
   const headerRef = useRef(null);
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
@@ -74,8 +85,8 @@ const Header = () => {
   const userId = useSelector(state => state.auth.userId);
 
   useEffect(() => {
-    dispatch(addressActions.getAddresses());
-  })
+    dispatch(getAddressesThunk({userId}));
+  },[userId, dispatch])
 
   const toggleMenu = () => menuRef.current?.classList.toggle("show__menu");
 
@@ -118,6 +129,23 @@ const Header = () => {
     }
   }
 
+  const addNewAdress = () => {
+    console.log("New adress");
+    const address = {
+      address_name: title,
+      is_primary: false,
+      city,
+      district,
+      street_num: streetNo,
+      street_name: streetName,
+      building_num: buildingNo,
+      detailed_desc: desc, 
+    };
+    dispatch(addAddressesThunk({userId, address}));
+    dispatch(getAddressesThunk({userId}));
+    addAddressToggle();
+  }
+
   return (
     <header className="header" ref={headerRef}>
       <Container>
@@ -157,22 +185,94 @@ const Header = () => {
               <ModalBody>   
                 <ListGroup>
                   {addresses.length > 0 ? addresses.map(address => (
-                    <ListGroupItem style={{cursor: "pointer"}} active={address.id === selectedAddress.id} onClick={() => changeSelAddress(address.id)}>
+                    <ListGroupItem style={{cursor: "pointer"}} active={address.address_id === selectedAddress.id} onClick={() => changeSelAddress(address.address_id)}>
                       <ListGroupItemHeading>
-                        {address.title}
+                        {address.address_name}
                       </ListGroupItemHeading>
                       <ListGroupItemText>
-                        {address.desc}
+                        {address.street_name + " street, street no: "+address.street_num + ", " + address.district + "/" + address.city}
                       </ListGroupItemText>
                     </ListGroupItem>
                   )) : <span>No Address To Select</span>}
                 </ListGroup>
+                <Button className="mt-2" color="primary" onClick={addAddressToggle}>
+                  Add New Address
+                </Button>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={toggle}>
-                  Do Something
-                </Button>{' '}
                 <Button color="secondary" onClick={toggle}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </Modal>
+            <Modal className="modal-x" isOpen={addAddressModal} toggle={addAddressToggle} >
+              <ModalHeader toggle={addAddressToggle}>Add New Address</ModalHeader>
+              <ModalBody>   
+              <Container>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>Address Title</InputGroupText>
+                      <Input value={title} onChange={e => setTitle(e.target.value)} placeholder=" Home" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>Street Name</InputGroupText>
+                      <Input value={streetName} onChange={e => setStreetName(e.target.value)} placeholder=" X Street" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>Street No</InputGroupText>
+                      <Input value={streetNo} onChange={e => setStreetNo(e.target.value)} placeholder=" 5" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>Building No</InputGroupText>
+                      <Input value={buildingNo} onChange={e => setBuildingNo(e.target.value)} placeholder=" 21" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>District</InputGroupText>
+                      <Input value={district} onChange={e => setDistrict(e.target.value)} placeholder=" Çankaya" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>City</InputGroupText>
+                      <Input value={city} onChange={e => setCity(e.target.value)} placeholder=" Ankara" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                <Row className="mb-2">
+                  <Col>
+                    <InputGroup>
+                      <InputGroupText>Detailed Description</InputGroupText>
+                      <Input value={desc} onChange={e => setDesc(e.target.value)} placeholder=" Behind the X Mall" />
+                    </InputGroup>
+                  </Col>
+                </Row>
+                
+            </Container>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="secondary" onClick={addNewAdress}>
+                  Add
+                </Button>{"  "}
+                <Button color="secondary" onClick={addAddressToggle}>
                   Cancel
                 </Button>
               </ModalFooter>

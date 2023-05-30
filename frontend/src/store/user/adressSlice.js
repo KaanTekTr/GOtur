@@ -1,4 +1,27 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { addNewAddress, getCustomerAdresses } from "../../lib/api/unsplashService";
+
+export const getAddressesThunk = createAsyncThunk('user/getAddresses', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getCustomerAdresses(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addAddressesThunk = createAsyncThunk('user/addAddresses', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewAddress(data.userId, data.address);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 const initialState = {
     address: [
@@ -45,9 +68,6 @@ const addressSlice = createSlice({
 
   reducers: {
     // ACTIONS
-    getAddresses(state, action) {
-        console.log("get addresses");
-    },
     changeSelectedAddress(state, action) {
         const { id } = action.payload;
         state.selectedAddress.id = id;
@@ -59,6 +79,16 @@ const addressSlice = createSlice({
         const { id } = action.payload;
         state.selectedGroupAddress.id = id;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getAddressesThunk.fulfilled, (state, action) => {
+        state.address = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(addAddressesThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
   },
 });
 

@@ -10,3 +10,17 @@ export const userLogin = (authType, email, password) => (
 export const userLogout = (authType, id) => (
     axios.post(`${baseURL}/profile/logout/${authType}/${id}`)
   );
+
+export const getCustomerAdresses = (id) => (
+    axios.get(`${baseURL}/customer/allAddress/${id}`)
+  );
+
+export const addNewAddress = (id, address) => (
+  fetch(`${baseURL}/customer/addAddress/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-type' : 'application/json'
+    }, 
+    body: JSON.stringify(address)
+  })
+);

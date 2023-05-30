@@ -229,15 +229,17 @@ public class InitializerController {
                 "CREATE TABLE FoodInPurchase(\n" +
                         "    food_id int NOT NULL,\n" +
                         "    purchase_id int NOT NULL,\n" +
+                        "    food_order int NOT NULL,\n" +
                         "    FOREIGN KEY (food_id) REFERENCES Food(food_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (food_id, purchase_id));",
+                        "    PRIMARY KEY (food_id, purchase_id, food_order));",
                 "CREATE TABLE IngredientInPurchase(\n" +
                         "    ingredient_id int NOT NULL,\n" +
                         "    purchase_id int NOT NULL,\n" +
+                        "    food_order int NOT NULL,\n" +
                         "    FOREIGN KEY (ingredient_id) REFERENCES Ingredient(ingredient_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (purchase_id) REFERENCES Purchase(purchase_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
-                        "    PRIMARY KEY (ingredient_id, purchase_id));",
+                        "    PRIMARY KEY (ingredient_id, purchase_id, food_order));",
                 "CREATE TABLE Token(\n" +
                         "    token_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    user_id int NOT NULL,\n"+

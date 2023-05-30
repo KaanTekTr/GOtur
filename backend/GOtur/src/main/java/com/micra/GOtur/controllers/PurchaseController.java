@@ -1,9 +1,10 @@
 package com.micra.GOtur.controllers;
 
-import com.micra.GOtur.models.Food;
-import com.micra.GOtur.models.Ingredient;
-import com.micra.GOtur.models.Purchase;
-import com.micra.GOtur.models.PurchaseItem;
+import com.micra.GOtur.mappers.CustomerMapper;
+import com.micra.GOtur.mappers.FoodMapper;
+import com.micra.GOtur.mappers.IngredientMapper;
+import com.micra.GOtur.mappers.PurchaseMapper;
+import com.micra.GOtur.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,75 @@ public class PurchaseController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @GetMapping("/getAllPurchases/{customerId}")
+    public List<Purchase> getAllPurchasesByCustomerId(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.customer_id = ?;";
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), customerId);
+
+        return list;
+    }
+
+    @GetMapping("/getSinglePurchases/{customerId}")
+    public List<Purchase> getAllSinglePurchasesByCustomerId(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0;";
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), customerId);
+
+        return list;
+    }
+
+    @GetMapping("/getPurchase/{purchaseId}")
+    public Purchase getPurchasesByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?";
+        Purchase purchase = jdbcTemplate.queryForObject(sql, new PurchaseMapper(), purchaseId);
+
+        return purchase;
+    }
+
+    @GetMapping("/getAllFoodAndIngredients/{purchaseId}")
+    public List<PurchaseItem> getAllFoodAndIngredientsByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String sql = "SELECT * FROM Food F WHERE F.food_id IN (SELECT FP.food_id FROM FoodInPurchase FP WHERE FP.purchase_id = ?);";
+        List<Food> foodList = jdbcTemplate.query(sql, new FoodMapper(), purchaseId);
+        List<PurchaseItem> purchaseItemList = new ArrayList<>();
+
+        for (Food food : foodList) {
+            int food_id = food.getFood_id();
+            String ingredientSql = "SELECT * FROM Ingredient I WHERE I.food_id = ? AND I.ingredient_id IN (SELECT IP.ingredient_id FROM IngredientInPurchase IP WHERE IP.purchase_id = ?);";
+            List<Ingredient> ingredientList = jdbcTemplate.query(ingredientSql, new IngredientMapper(), food_id, purchaseId);
+
+            PurchaseItem purchaseItem = new PurchaseItem();
+            purchaseItem.setFood(food);
+            purchaseItem.setIngredientList(ingredientList);
+            purchaseItemList.add(purchaseItem);
+        }
+
+        return purchaseItemList;
+    }
+
+    /*
+    @GetMapping("/getAllFoodAndIngredientsUnpaidSinglePurchase/{customerId}")
+    public List<PurchaseItem> getAllFoodAndIngredientsByPurchaseId(@PathVariable("customerId") int customerId) {
+        // check if the customer already has an unpaid single purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        String sql = "SELECT * FROM Food F WHERE F.food_id IN (SELECT FP.food_id FROM FoodInPurchase FP WHERE FP.purchase_id = ?);";
+        List<Food> foodList = jdbcTemplate.query(sql, new FoodMapper(), purchaseId);
+        List<PurchaseItem> purchaseItemList = new ArrayList<>();
+
+        for (Food food : foodList) {
+            int food_id = food.getFood_id();
+            String ingredientSql = "SELECT * FROM Ingredient I WHERE I.food_id = ? AND I.ingredient_id IN (SELECT IP.ingredient_id FROM IngredientInPurchase IP WHERE IP.purchase_id = ?);";
+            List<Ingredient> ingredientList = jdbcTemplate.query(ingredientSql, new IngredientMapper(), food_id, purchaseId);
+
+            PurchaseItem purchaseItem = new PurchaseItem();
+            purchaseItem.setFood(food);
+            purchaseItem.setIngredientList(ingredientList);
+            purchaseItemList.add(purchaseItem);
+        }
+
+        return purchaseItemList;
+    }
+     */
 
     @PostMapping("/addSinglePurchaseTest")
     public ResponseEntity<String> addSinglePurchase(@RequestBody Purchase purchase) {
@@ -73,29 +144,25 @@ public class PurchaseController {
             purchase_id = insertIntoRestaurant.executeAndReturnKey(parameters).intValue();
         }
 
-        // check if the food is already contained in the purchase
+        // get the number of foods with that specific food_id
         int food_id = food.getFood_id();
-        String checkFoodSql = "SELECT EXISTS (SELECT * FROM FoodInPurchase F WHERE F.purchase_id = ? AND F.food_id = ?);";
-        boolean existsFood = jdbcTemplate.queryForObject(checkFoodSql, Boolean.class, purchase_id, food_id);
-
-        if (existsFood) { // if the food is already contained in the purchase
-            return new ResponseEntity<>("The Food Is Already Contained In The Purchase!", HttpStatus.BAD_REQUEST);
-        }
+        String checkFoodSql = "SELECT COUNT(*) FROM FoodInPurchase F WHERE F.purchase_id = ? AND F.food_id = ?;";
+        int foodCount = jdbcTemplate.queryForObject(checkFoodSql, Integer.class, purchase_id, food_id);
 
         // insert the food to FoodInPurchase
-        String insertFood = "INSERT INTO FoodInPurchase(food_id, purchase_id) VALUES (?, ?);";
+        String insertFood = "INSERT INTO FoodInPurchase(food_id, purchase_id, food_order) VALUES (?, ?, ?);";
         System.out.println(">>" + insertFood);
-        jdbcTemplate.update(insertFood, food_id, purchase_id);
+        jdbcTemplate.update(insertFood, food_id, purchase_id, foodCount + 1);
 
         for (Ingredient ingredient : ingredientList) {
             // insert the ingredient to IngredientInPurchase
             int ingredient_id = ingredient.getIngredient_id();
-            String insertIngredient = "INSERT INTO IngredientInPurchase(ingredient_id, purchase_id) VALUES (?, ?);";
+            String insertIngredient = "INSERT INTO IngredientInPurchase(ingredient_id, purchase_id, food_order) VALUES (?, ?, ?);";
             System.out.println(">>" + insertIngredient);
-            jdbcTemplate.update(insertIngredient, ingredient_id, purchase_id);
+            jdbcTemplate.update(insertIngredient, ingredient_id, purchase_id, foodCount + 1);
         }
 
-        return new ResponseEntity<>("Purchase Has Successfully Formed!", HttpStatus.OK);
+        return new ResponseEntity<>("Purchase Has Been Successfully Formed!", HttpStatus.OK);
     }
 
     @PostMapping("/markBeingPrepared/{purchaseId}")

@@ -45,7 +45,7 @@ const ownerLinks = [
 ];
 
 const customerLinks = [
-  { display: 'My Balance', path: '/balance', icon: <AccountCircleIcon /> },
+  { display: 'My Balance', path: '/customer-balance', icon: <AccountCircleIcon /> },
   { display: 'My Profile', path: '/profile', icon: <AccountCircleIcon /> },
   { display: 'Cart', path: '/cart', icon: <HistoryIcon /> },
   { display: 'Past Orders', path: '/pastOrders', icon: <HistoryIcon /> },

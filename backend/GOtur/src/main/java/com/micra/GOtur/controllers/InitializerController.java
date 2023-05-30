@@ -257,7 +257,7 @@ public class InitializerController {
 
     public void initializeTriggers() throws DataAccessException {
         String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2", "update_purchase_total_after_food",
-                "update_purchase_total_after_ingredient"};
+                "update_purchase_total_after_ingredient", "update_purchase_total_before_delete_food", "update_purchase_total_before_delete_ingredient"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -346,6 +346,22 @@ public class InitializerController {
                         "    UPDATE Purchase P\n" +
                         "    SET P.total_price = P.total_price + (SELECT I.price FROM Ingredient I WHERE I.ingredient_id = NEW.ingredient_id)\n" +
                         "    WHERE P.purchase_id = NEW.purchase_id;\n" +
+                        "END;",
+                "CREATE TRIGGER update_purchase_total_before_delete_food\n" +
+                        "BEFORE DELETE ON FoodInPurchase\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE Purchase P\n" +
+                        "    SET P.total_price = P.total_price - (SELECT F.price FROM Food F WHERE F.food_id = OLD.food_id)\n" +
+                        "    WHERE P.purchase_id = OLD.purchase_id;\n" +
+                        "END;",
+                "CREATE TRIGGER update_purchase_total_before_delete_ingredient\n" +
+                        "BEFORE DELETE ON IngredientInPurchase\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE Purchase P\n" +
+                        "    SET P.total_price = P.total_price - (SELECT I.price FROM Ingredient I WHERE I.ingredient_id = OLD.ingredient_id)\n" +
+                        "    WHERE P.purchase_id = OLD.purchase_id;\n" +
                         "END;"};
 
         for (String curTrigger : triggerNames) {

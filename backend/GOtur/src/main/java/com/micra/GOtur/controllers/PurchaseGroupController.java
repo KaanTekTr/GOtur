@@ -192,6 +192,78 @@ public class PurchaseGroupController {
         return new ResponseEntity<>("The Transaction Has Been Completed Successfully!", HttpStatus.OK);
     }
 
+    @PostMapping("/addFoodWithIngredient/{groupId}")
+    public ResponseEntity<String> addPurchaseItemToPurchase(@PathVariable("groupId") int groupId,
+                                                            @RequestBody PurchaseItem purchaseItem) {
+        // Check if the group exists
+        String groupSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean existsGroup = jdbcTemplate.queryForObject(groupSql, Boolean.class, groupId);
+
+        if (!existsGroup) { // if group does not exist
+            return new ResponseEntity<>("Purchase Group With ID: " + groupId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        Food food = purchaseItem.getFood();
+        List<Ingredient> ingredientList = purchaseItem.getIngredientList();
+        int restaurant_id = food.getRestaurant_id();
+
+        // check if the group already has an unpaid group purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P NATURAL JOIN PurchaseInGroup PG  WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        int purchase_id = -1; // will be changed separately in the blocks
+        if (exists) { // the group already has an unpaid purchase, check if the restaurant names match
+            String restaurantSql = "SELECT P.restaurant_id FROM Purchase P NATURAL JOIN PurchaseInGroup PG WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0;";
+            int existing_restaurant_id = jdbcTemplate.queryForObject(restaurantSql, Integer.class, groupId);
+
+            if ( restaurant_id != existing_restaurant_id ) {
+                return new ResponseEntity<>("Purchase Group With ID: " + groupId + " Already Has An Unpaid Purchase From Another Restaurant!", HttpStatus.BAD_REQUEST);
+            }
+
+            String purchaseSql = "SELECT P.purchase_id FROM Purchase P NATURAL  JOIN PurchaseInGroup PG WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0;";
+            purchase_id = jdbcTemplate.queryForObject(purchaseSql, Integer.class, groupId);
+        }
+        else { // insert a new purchase
+            // Get the id of the group owner
+            String ownerSql = "SELECT P.group_owner_id FROM PurchaseGroup P WHERE P.group_id = ?;";
+            int group_owner_id = jdbcTemplate.queryForObject(ownerSql, Integer.class, groupId);
+
+            SimpleJdbcInsert insertIntoRestaurant = new SimpleJdbcInsert(jdbcTemplate).withTableName("Purchase").usingColumns("customer_id", "restaurant_id", "is_group_purchase").usingGeneratedKeyColumns("purchase_id");
+            final Map<String, Object> parameters = new HashMap<>();
+            parameters.put("customer_id", group_owner_id);
+            parameters.put("restaurant_id", restaurant_id);
+            parameters.put("is_group_purchase", Boolean.TRUE);
+
+            // Get the inserted id back
+            purchase_id = insertIntoRestaurant.executeAndReturnKey(parameters).intValue();
+
+            // insert the purchase to PurchaseInGroup table
+            String insertGroupPurchase = "INSERT INTO PurchaseInGroup(purchase_id, group_id) VALUES (?, ?);";
+            System.out.println(">>" + insertGroupPurchase);
+            jdbcTemplate.update(insertGroupPurchase, purchase_id, groupId);
+        }
+
+        // get the number of foods with that specific food_id
+        int food_id = food.getFood_id();
+        String checkFoodSql = "SELECT COUNT(*) FROM FoodInPurchase F WHERE F.purchase_id = ? AND F.food_id = ?;";
+        int foodCount = jdbcTemplate.queryForObject(checkFoodSql, Integer.class, purchase_id, food_id);
+
+        // insert the food to FoodInPurchase
+        String insertFood = "INSERT INTO FoodInPurchase(food_id, purchase_id, food_order) VALUES (?, ?, ?);";
+        System.out.println(">>" + insertFood);
+        jdbcTemplate.update(insertFood, food_id, purchase_id, foodCount + 1);
+
+        for (Ingredient ingredient : ingredientList) {
+            // insert the ingredient to IngredientInPurchase
+            int ingredient_id = ingredient.getIngredient_id();
+            String insertIngredient = "INSERT INTO IngredientInPurchase(ingredient_id, purchase_id, food_order) VALUES (?, ?, ?);";
+            System.out.println(">>" + insertIngredient);
+            jdbcTemplate.update(insertIngredient, ingredient_id, purchase_id, foodCount + 1);
+        }
+
+        return new ResponseEntity<>("Purchase Has Been Successfully Formed!", HttpStatus.OK);
+    }
+
     @DeleteMapping("/delete/{groupId}")
     public ResponseEntity<String> deletePurchaseGroup(@PathVariable("groupId") int groupId) {
 

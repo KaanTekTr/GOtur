@@ -69,13 +69,65 @@ public class PurchaseGroupController {
         return list;
     }
 
-    /*
-    @GetMapping("/getAllFoodAndIngredientsForCustomer/{purchaseId}/{customerId}")
-    public List<PurchaseItem> getAllFoodAndIngredientsByPurchaseIdAndCustomerId(@PathVariable("purchaseId") int purchaseId,
-                                                                                @PathVariable("customerId") int customerId) {
+    @GetMapping("/getUnpaidGroupPurchase/{groupId}")
+    public Purchase getUnpaidGroupPurchaseByPurchaseGroupId(@PathVariable("groupId") int groupId) {
+        // check if the group has an unpaid purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P NATURAL JOIN PurchaseInGroup PG  WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
 
+        if ( !exists ) { // if the group does not have an unpaid single purchase
+            return null;
+        }
+
+        // find the unpaid group purchase
+        String findSql = "SELECT * FROM Purchase P WHERE P.is_group_purchase = 1 AND P.is_paid = 0 AND P.purchase_id IN (SELECT PG.purchase_id FROM PurchaseInGroup PG WHERE PG.group_id = ?);";
+        return jdbcTemplate.queryForObject(findSql, new PurchaseMapper(), groupId);
     }
-    */
+
+    @GetMapping("/getAllFoodAndIngredientsUnpaidGroupPurchase/{groupId}")
+    public List<PurchaseItem> getAllFoodAndIngredientsForUnpaidGroupPurchaseByPurchaseGroupId(@PathVariable("groupId") int groupId) {
+        // Check if the group exists
+        String groupSql = "SELECT EXISTS (SELECT * FROM PurchaseGroup P WHERE P.group_id = ?);";
+        boolean existsGroup = jdbcTemplate.queryForObject(groupSql, Boolean.class, groupId);
+
+        if (!existsGroup) { // if group does not exist
+            return new ArrayList<>();
+        }
+
+        // check if the group already has an unpaid group purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P NATURAL JOIN PurchaseInGroup PG  WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if ( !exists ) { // if the group does not have an unpaid purchase
+            return new ArrayList<>();
+        }
+
+        // find the purchase id of an unpaid group purchase
+        String purchaseSql = "SELECT P.purchase_id FROM Purchase P NATURAL  JOIN PurchaseInGroup PG WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0;";
+        int purchaseId = jdbcTemplate.queryForObject(purchaseSql, Integer.class, groupId);
+
+        String sql = "SELECT * FROM FoodInPurchase FP WHERE FP.purchase_id = ?;";
+        List<FoodInPurchase> foodList = jdbcTemplate.query(sql, new FoodInPurchaseMapper(), purchaseId);
+        List<PurchaseItem> purchaseItemList = new ArrayList<>();
+
+        for (FoodInPurchase foodInPurchase: foodList) {
+            int food_id = foodInPurchase.getFood_id();
+            int food_order = foodInPurchase.getFood_order();
+
+            String foodSql = "SELECT * FROM Food F WHERE F.food_id = ?;";
+            Food food = jdbcTemplate.queryForObject(foodSql, new FoodMapper(), food_id);
+
+            String ingredientSql = "SELECT * FROM Ingredient I WHERE I.food_id = ? AND I.ingredient_id IN (SELECT IP.ingredient_id FROM IngredientInPurchase IP WHERE IP.purchase_id = ? AND IP.food_order = ?);";
+            List<Ingredient> ingredientList = jdbcTemplate.query(ingredientSql, new IngredientMapper(), food_id, purchaseId, food_order);
+
+            PurchaseItem purchaseItem = new PurchaseItem();
+            purchaseItem.setFood(food);
+            purchaseItem.setIngredientList(ingredientList);
+            purchaseItemList.add(purchaseItem);
+        }
+
+        return purchaseItemList;
+    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addPurchaseGroup(@RequestBody PurchaseGroup purchaseGroup) {

@@ -2,8 +2,10 @@ package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.PromoteMapper;
 import com.micra.GOtur.mappers.PromoterMapper;
+import com.micra.GOtur.mappers.PromoterViewMapper;
 import com.micra.GOtur.models.Promote;
 import com.micra.GOtur.models.Promoter;
+import com.micra.GOtur.models.PromoterView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,14 @@ public class PromotionController {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @GetMapping("/promotersForCustomer")
+    public List<PromoterView> getPromotersForCustomer() {
+
+        String sql = "SELECT * FROM promoters_for_customers ;";
+        List<PromoterView> allPromoters = jdbcTemplate.query(sql, new PromoterViewMapper());
+        return allPromoters;
     }
 
     @DeleteMapping("/deletePromoter/{promoterId}")

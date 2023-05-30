@@ -30,6 +30,8 @@ public class InitializerController {
 
         initializeTables();
         initializeTriggers();
+        initializeViews();
+        //initializeConstraints();
 
         return new ResponseEntity<>("Successfully Initialized The Database", HttpStatus.OK);
     }
@@ -373,4 +375,62 @@ public class InitializerController {
             jdbcTemplate.execute(curTrigger);
         }
     }
+    public void initializeViews() throws DataAccessException {
+        String[] viewNames = new String[]{"restaurantsForCustomer", "promotersForCustomer"};
+        String[] views = new String[]{
+                "CREATE VIEW Restaurants_For_Customer AS " +
+                        "SELECT R.restaurant_id, R.restaurant_name, R.district, R.open_hour, " +
+                        "R.close_hour, " +
+                        "R.min_delivery_price, R.is_top_restaurant, " +
+                        "R.rating " +
+                        "FROM Address A,  Customer C, Restaurant R " +
+                        "WHERE C.user_id = A.customer_id AND " +
+                        "      A.district = R.district;",
+
+                "CREATE VIEW Promoters_For_Customers AS " +
+                        "SELECT U.username, U.age, U.gender, U.email " +
+                        "FROM Promoter P natural join User U " +
+                        "WHERE P.user_id = U.user_id;"
+        };
+
+        for (String curView : viewNames) {
+            jdbcTemplate.execute("DROP VIEW IF EXISTS " + curView);
+        }
+
+        for (String curView : views) {
+            System.out.println(">>" + curView);
+            jdbcTemplate.execute(curView);
+        }
+    }
+
+    /*public void initializeConstraints() throws DataAccessException {
+        String[] constraintNames = new String[]{"duplicate_review", "check_single_purchase", "purchase_total_price_check"};
+        String[] constraints = new String[]{
+                "CREATE ASSERTION duplicate_review " +
+                        "CHECK( NOT EXISTS (SELECT R1.review_id, R2.review_id FROM Review R1, Review R2, Purchase O " +
+                        "WHERE R1.review_id != R2.review_id AND R1.purchase_id = O.purchase_id AND R2.purchase_id = O.purchase_id));",
+
+                "CREATE ASSERTION check_single_purchase " +
+                        "CHECK(NOT EXISTS (SELECT O1.purchase_id, O2.purchase_id FROM Purchase O1, Purchase O2, Customer C " +
+                        "WHERE O1.purchase_id != O2.purchase_id AND O1.customer_id = C.user_id AND O2.customer_id = C.user_id " +
+                        "AND O1.is_paid = 0 AND O2.is_paid = 0 AND O1.is_group_purchase = 0 AND NOT O2.is_group_purchase = 0));",
+
+                "CREATE ASSERTION purchase_total_price_check " +
+                        "CHECK NOT EXISTS ( " +
+                        "SELECT * " +
+                        "FROM Purchase o " +
+                        "JOIN Restaurant r ON o.restaurant_id = r.restaurant_id " +
+                        "WHERE o.total_price < r.min_delivery_price " +
+                        " );"
+        };
+
+        for (String curConstraint : constraintNames) {
+            jdbcTemplate.execute("DROP ASSERTION IF EXISTS " + curConstraint);
+        }
+
+        for (String curConstraint : constraints) {
+            System.out.println(">>" + curConstraint);
+            jdbcTemplate.execute(curConstraint);
+        }
+    }*/
 }

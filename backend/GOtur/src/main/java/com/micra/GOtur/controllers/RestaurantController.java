@@ -1,20 +1,16 @@
 package com.micra.GOtur.controllers;
 
-import com.micra.GOtur.mappers.FoodMapper;
-import com.micra.GOtur.mappers.IngredientMapper;
-import com.micra.GOtur.mappers.MenuCategoryMapper;
-import com.micra.GOtur.mappers.RestaurantMapper;
-import com.micra.GOtur.models.Food;
-import com.micra.GOtur.models.Ingredient;
-import com.micra.GOtur.models.MenuCategory;
-import com.micra.GOtur.models.Restaurant;
+import com.micra.GOtur.mappers.*;
+import com.micra.GOtur.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/restaurant")
@@ -42,6 +38,26 @@ public class RestaurantController {
         String sql = "SELECT * FROM Restaurant R WHERE R.restaurant_id = ?;";
 
         return jdbcTemplate.queryForObject(sql, new RestaurantMapper(), restaurantId);
+    }
+
+    @GetMapping("/restaurantsForCustomer/{customerId}")
+    public List<RestaurantView> getRestaurantsForCustomer(
+            @PathVariable("customerId") int customerId
+    ) {
+        String sql = "SELECT * FROM restaurants_for_customer;";
+        List<RestaurantView> list = jdbcTemplate.query(sql, new RestaurantViewMapper());
+
+        String currDistrict = "SELECT district FROM User U NATURAL JOIN Address A WHERE (U.user_id = ? AND A.customer_id = U.user_id)";
+        String district = jdbcTemplate.queryForObject(currDistrict, String.class, customerId);
+        // System.out.println(district);
+        List<RestaurantView> newList = new ArrayList<>();
+        for (RestaurantView rs : list) {
+            if (Objects.equals(rs.getDistrict(), district)) {
+                newList.add(rs);
+            }
+        }
+
+        return newList;
     }
 
     @GetMapping("/foodId/{foodId}")

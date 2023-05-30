@@ -1,4 +1,27 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { userLogin, userLogout } from "../lib/api/unsplashService";
+
+export const loginThunk = createAsyncThunk('auth/login', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await userLogin("customer", data.email, data.password);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const logoutThunk = createAsyncThunk('auth/logout', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await userLogout("customer", data.userId);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
 
 const authSlice = createSlice({
   name: "cartUi",
@@ -17,16 +40,6 @@ const authSlice = createSlice({
 
 
   reducers: {
-    login(state, action) {
-      const { email, password } = action.payload;
-      console.log(email, "::", password);
-      state.status = "authenticated";
-      localStorage.setItem('userId', 1);
-    },
-    logout(state, action){
-      state.status = "not-authenticated";
-      localStorage.removeItem('userId');
-    },
     register(state, action) {
       const { fullName, email, password, birthdate, gender, authType, phoneNumber } = action.payload;
       console.log(fullName, "::", email, "::", password, "::", birthdate, "::", gender, "::", authType, "::", phoneNumber);
@@ -35,6 +48,19 @@ const authSlice = createSlice({
       state.authType = action.payload;
     }
     
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.status = "authenticated";
+        localStorage.setItem('userId', action.payload);
+        state.userId = action.payload;
+      })
+      .addCase(logoutThunk.fulfilled, (state, action) => {
+        state.status = "not-authenticated";
+        localStorage.removeItem('userId');
+        state.userId = 0;
+      })
   },
 });
 

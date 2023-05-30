@@ -5,7 +5,7 @@ import { Container, Row, Col } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useDispatch } from "react-redux";
-import { authActions } from "../store/authSlice";
+import { authActions, loginThunk } from "../store/authSlice";
 
 const Login = () => {
   const loginNameRef = useRef();
@@ -21,7 +21,7 @@ const Login = () => {
   const submitHandler = (e) => {
 
     e.preventDefault();
-    dispatch(authActions.login({
+    dispatch(loginThunk({
       email,
       password
     }));

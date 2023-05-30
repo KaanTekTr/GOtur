@@ -188,6 +188,45 @@ public class ReportController {
 
     }
 
+    @PostMapping("/maxRatingInRegion/{adminId}")
+    public ResponseEntity<String> restaurantMaxRating(
+            @PathVariable("adminId") int adminId
+    ) {
+
+        String checkAdmin = "SELECT EXISTS (SELECT * FROM Admin A WHERE A.user_id = ?);";
+        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, adminId);
+        if (!existsAdmin) {
+            return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String p1 = "restaurant_name";
+        String p2 = "district";
+        String p3 = "rating";
+        String sql = "SELECT r1.restaurant_name, r1.district, r1.rating" +
+                " FROM Restaurant r1" +
+                " WHERE r1.rating = (" +
+                " SELECT MAX(r2.rating)" +
+                " FROM Restaurant r2" +
+                " WHERE r1.district = r2.district" +
+                " )" +
+                " ORDER BY r1.district;";
+        List<Map<List<String>, Integer>> ls = jdbcTemplate.query(sql, new StringStringIntegerMapper(p1, p2, p3));
+
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        for (Map<List<String>, Integer> map : ls) {
+            for (List<String> key : map.keySet()) {
+                detail.append("The restaurant with name '" + key.get(0) + "' has the highest rating in region '"
+                        + key.get(1)  + "' " + "with a rating of " + map.get(key) + "\n");
+            }
+        }
+
+        String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Highest Rating in Region", LocalDate.now());
+
+        return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
+    }
+
     @PostMapping("/maxDiscountCoupon/{adminId}")
     public ResponseEntity<String> restaurantMaxDiscountCoupon(
             @PathVariable("adminId") int adminId

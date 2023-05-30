@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,21 @@ public class PurchaseController {
         Purchase purchase = jdbcTemplate.queryForObject(sql, new PurchaseMapper(), purchaseId);
 
         return purchase;
+    }
+
+    @GetMapping("/getUnpaidSinglePurchase/{customerId}")
+    public Purchase getUnpaidSinglePurchaseByCustomerId(@PathVariable("customerId") int customerId) {
+        // check if the customer has an unpaid single purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if ( !exists ) { // if the customer does not have an unpaid single purchase
+            return null;
+        }
+
+        // find the purchase id of an unpaid single purchase
+        String findSql = "SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0;";
+        return jdbcTemplate.queryForObject(findSql, new PurchaseMapper(), customerId);
     }
 
     @GetMapping("/getAllFoodAndIngredients/{purchaseId}")
@@ -177,6 +193,44 @@ public class PurchaseController {
 
         return new ResponseEntity<>("Purchase Has Been Successfully Formed!", HttpStatus.OK);
     }
+
+    @PostMapping("/completePurchase/{purchaseId}")
+    public ResponseEntity<String> completePurchaseByPurchaseId(@PathVariable("purchaseId") int purchaseId,
+                                                               @RequestParam int addressId,
+                                                               @RequestParam String customerNote) {
+        // check if the customer already has an unpaid single purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+
+        if ( !exists ) {
+            return new ResponseEntity<>("There Is No Unpaid Single Purchase With ID: " + purchaseId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the customer has enough balance
+        String checkBalanceSql = "SELECT EXISTS (SELECT * FROM Purchase P, Customer C WHERE P.purchase_id = ? AND P.customer_id = C.user_id AND C.balance >= P.total_price);";
+        boolean isEnoughBalance = jdbcTemplate.queryForObject(checkBalanceSql, Boolean.class, purchaseId);
+
+        if ( !isEnoughBalance ) {
+            return new ResponseEntity<>("The Balance Of The Customer Is Not Enough To Complete This Transaction!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the purchase
+        String sql = "UPDATE Purchase P SET P.address_id = ?, P.customer_note = ?, P.is_paid = 1, P.being_prepared = 1, P.purchase_time = ? WHERE P.purchase_id = ?;";
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, addressId, customerNote, LocalDate.now(), purchaseId);
+
+        // get the updated purchase
+        String getPurchaseSql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?;";
+        Purchase purchase = jdbcTemplate.queryForObject(getPurchaseSql, new PurchaseMapper(), purchaseId);
+
+        // Update the customer balance
+        String customerSql = "UPDATE Customer C SET C.balance = C.balance - ? WHERE C.user_id = ?;";
+        System.out.println(">>" + customerSql);
+        jdbcTemplate.update(customerSql, purchase.getTotal_price(), purchase.getCustomer_id());
+
+        return new ResponseEntity<>("The Purchase Has Been Completed Successfully!", HttpStatus.OK);
+    }
+
 
     @PostMapping("/markBeingPrepared/{purchaseId}")
     public ResponseEntity<String> markPurchaseAsBeingPreparedByPurchaseId(@PathVariable("purchaseId") int purchaseId) {

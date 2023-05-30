@@ -3,6 +3,7 @@ package com.micra.GOtur.controllers;
 import com.micra.GOtur.helpers.HashPasswordHelper;
 import com.micra.GOtur.mappers.CustomerMapper;
 import com.micra.GOtur.mappers.RestaurantOwnerMapper;
+import com.micra.GOtur.mappers.TokenMapper;
 import com.micra.GOtur.models.Customer;
 import com.micra.GOtur.models.RestaurantOwner;
 import com.micra.GOtur.models.Token;
@@ -47,7 +48,7 @@ public class ProfileController {
         return new ResponseEntity<>("Incorrect login credentials.", HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/login/restaurant_owner")
+    @PostMapping("/login/restaurantOwner")
     public ResponseEntity<String> loginRestaurantOwner(@RequestParam String email, @RequestParam String password ) {
         String checkUser = "SELECT EXISTS (SELECT *  FROM RestaurantOwner R, User U WHERE U.user_id = R.user_id AND U.email = ?);";
         boolean existsUser = jdbcTemplate.queryForObject(checkUser, Boolean.class, email);
@@ -70,5 +71,34 @@ public class ProfileController {
         return new ResponseEntity<>("Incorrect login credentials.", HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping("/logout/customer/{customerId}")
+    public ResponseEntity<String> logOutCustomer(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Customer C, User U, Token T WHERE U.user_id = C.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
+        Token token = jdbcTemplate.queryForObject(sql, new TokenMapper(), customerId );
+
+        if ( token.is_actively_used() ) {
+            String logoutsql = "UPDATE Token T SET T.last_active = ?, T.is_actively_used = ? WHERE T.token_id = ?;";
+            jdbcTemplate.update(logoutsql, LocalDateTime.now(), false, token.getToken_id());
+            return new ResponseEntity<>("Log out successful", HttpStatus.OK);
+        }
+        else {
+            return  new ResponseEntity<>("The customer with id  "+ customerId + " is not logged in.", HttpStatus.BAD_REQUEST);
+        }
+
+
+    }
+    @PostMapping("/logout/restaurantOwner/{restaurantOwnerId}")
+    public ResponseEntity<String> logOutRestaurantOwner(@PathVariable("restaurantOwnerId") int restaurantOwnerID) {
+        String sql = "SELECT * FROM RestaurantOwner R, User U, Token T WHERE U.user_id = R.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
+        Token token = jdbcTemplate.queryForObject(sql, new TokenMapper(), restaurantOwnerID);
+
+        if (token.is_actively_used()) {
+            String logoutsql = "UPDATE Token T SET T.last_active = ?, T.is_actively_used = ? WHERE T.token_id = ?;";
+            jdbcTemplate.update(logoutsql, LocalDateTime.now(), false, token.getToken_id());
+            return new ResponseEntity<>("Log out successful", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("The Restaurant Owner with id  " + restaurantOwnerID + " is not logged in.", HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

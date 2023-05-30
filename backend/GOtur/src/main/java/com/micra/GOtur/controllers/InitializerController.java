@@ -256,7 +256,8 @@ public class InitializerController {
     }
 
     public void initializeTriggers() throws DataAccessException {
-        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2"};
+        String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2", "update_purchase_total_after_food",
+                "update_purchase_total_after_ingredient"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -329,6 +330,22 @@ public class InitializerController {
                         "        ELSE total / size\n" +
                         "    END \n" +
                         "    WHERE R.restaurant_id = updated_restaurant_id;\n" +
+                        "END;",
+                "CREATE TRIGGER update_purchase_total_after_food\n" +
+                        "AFTER INSERT ON FoodInPurchase\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE Purchase P\n" +
+                        "    SET P.total_price = P.total_price + (SELECT F.price FROM Food F WHERE F.food_id = NEW.food_id)\n" +
+                        "    WHERE P.purchase_id = NEW.purchase_id;\n" +
+                        "END;",
+                "CREATE TRIGGER update_purchase_total_after_ingredient\n" +
+                        "AFTER INSERT ON IngredientInPurchase\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE Purchase P\n" +
+                        "    SET P.total_price = P.total_price + (SELECT I.price FROM Ingredient I WHERE I.ingredient_id = NEW.ingredient_id)\n" +
+                        "    WHERE P.purchase_id = NEW.purchase_id;\n" +
                         "END;"};
 
         for (String curTrigger : triggerNames) {

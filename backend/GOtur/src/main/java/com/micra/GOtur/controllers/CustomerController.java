@@ -150,6 +150,24 @@ public class CustomerController {
         return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " is Successfully Favorited By The Customer With ID: " + customerId + "!", HttpStatus.OK);
     }
 
+    @PostMapping("/addBalance/{customerId}")
+    public ResponseEntity<String> addBalanceByCustomerId(@PathVariable("customerId") int customerId,
+                                                         @RequestParam int transferAmount) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Customer C WHERE C.user_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId);
+
+        if (!exists) {
+            return new ResponseEntity<>("The Customer With ID: " + customerId + " Does Not Exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the balance of the customer
+        String sql = "UPDATE Customer C SET C.balance = ? WHERE C.user_id = ?;";
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, transferAmount, customerId);
+
+        return new ResponseEntity<>("The Balance Of The Customer With ID: " + customerId + " Has Been Successfully Updated!", HttpStatus.OK);
+    }
+
     public int getIdByEmail(String email) {
         String sql = "SELECT user_id FROM USER U WHERE U.email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email);

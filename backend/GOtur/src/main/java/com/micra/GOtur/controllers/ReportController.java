@@ -135,6 +135,9 @@ public class ReportController {
             return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
+        String p1 = "restaurant_name";
+        String p2 = "district";
+        String p3 = "purchaseCount";
         String sql = "WITH temp(restaurant_id, district, purchaseCount) AS" +
                 " (" +
                 " SELECT R.restaurant_id, R.district, count(purchase_id) AS purchaseCount" +
@@ -145,7 +148,19 @@ public class ReportController {
                 " SELECT R.restaurant_name, T.district, T.purchaseCount" +
                 " FROM temp T NATURAL JOIN Restaurant R" +
                 " WHERE T.purchaseCount = (SELECT max(purchaseCount)" +
-                " FROM temp);";
+                " FROM temp WHERE temp.district = R.district);";
+        List<Map<List<String>, Integer>> ls = jdbcTemplate.query(sql, new StringStringIntegerMapper(p1, p2, p3));
+        System.out.println("ls length: " + ls.size());
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        for (Map<List<String>, Integer> map : ls) {
+            for (List<String> key : map.keySet()) {
+                detail.append("The restaurant with name '" + key.get(0) + "' has most number of purchases in region '"
+                        + key.get(1)  + "' " + "with a total of " + map.get(key) + " purchases\n");
+            }
+        }
+
+        /*
         List<Map<String, Object>> ls = jdbcTemplate.queryForList(sql);
         StringBuilder detail = new StringBuilder();
         detail.append("");
@@ -164,9 +179,50 @@ public class ReportController {
         System.out.println("ls length: " + ls.size());
         detail.append("The restaurant with name '" + str1 + "' has most number of purchases in region '"
                 + str2  + "' " + "with a total of " + str3 + " purchases\n");
+        */
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
         jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Most Number of Purchases in Region", LocalDate.now());
+
+        return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
+
+    }
+
+    @PostMapping("/maxDiscountCoupon/{adminId}")
+    public ResponseEntity<String> restaurantMaxDiscountCoupon(
+            @PathVariable("adminId") int adminId
+    ) {
+
+        String checkAdmin = "SELECT EXISTS (SELECT * FROM Admin A WHERE A.user_id = ?);";
+        boolean existsAdmin = jdbcTemplate.queryForObject(checkAdmin, Boolean.class, adminId);
+        if (!existsAdmin) {
+            return new ResponseEntity<>("Admin with id: " + adminId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        String p1 = "restaurant_name";
+        String p2 = "couponCount";
+        String sql = "WITH temp( restaurant_id, couponCount ) AS (" +
+                " SELECT restaurant_id, count(*) AS count" +
+                " FROM DiscountCoupon" +
+                " WHERE expiration_date >= ?" +
+                " GROUP BY restaurant_id" +
+                " )" +
+                " SELECT R.restaurant_name, T.couponCount" +
+                " FROM temp T NATURAL JOIN Restaurant R" +
+                " WHERE couponCount = (SELECT MAX(couponCount)" +
+                " FROM temp);";
+        List<Map<String, Integer>> ls = jdbcTemplate.query(sql, new StringIntegerMapper(p1, p2), LocalDate.now());
+        StringBuilder detail = new StringBuilder();
+        detail.append("");
+        for (Map<String, Integer> map : ls) {
+            for (String key : map.keySet()) {
+                detail.append("The restaurant with name '" + key + "' has the most number of active coupons with a total of "
+                        + map.get(key) + " active coupons\n");
+            }
+        }
+
+        String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant With Most Active Coupons", LocalDate.now());
 
         return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
 

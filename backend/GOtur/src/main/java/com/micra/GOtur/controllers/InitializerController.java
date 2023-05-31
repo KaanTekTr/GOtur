@@ -190,7 +190,7 @@ public class InitializerController {
                         "    coupon_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    coupon_owner_id int NOT NULL,\n" +
                         "    restaurant_id int NOT NULL,\n" +
-                        "    is_used boolean,\n" +
+                        "    is_used boolean DEFAULT 0,\n" +
                         "    FOREIGN KEY (coupon_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (coupon_id));",
@@ -261,7 +261,7 @@ public class InitializerController {
     public void initializeTriggers() throws DataAccessException {
         String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2", "update_purchase_total_after_food",
                 "update_purchase_total_after_ingredient", "update_purchase_total_before_delete_food", "update_purchase_total_before_delete_ingredient",
-                "admin_report_count"};
+                "admin_report_count", "create_discount_coupon"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -384,8 +384,23 @@ public class InitializerController {
                         "                        FROM Report\n" +
                         "                        WHERE admin_id = NEW.admin_id)\n" +
                         "    WHERE user_id = NEW.admin_id;\n" +
-                        "END;"
-        };
+                        "END;",
+                "CREATE TRIGGER create_discount_coupon\n" +
+                        "AFTER UPDATE ON Purchase\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "   DECLARE coupon_limit float;\n" +
+                        "\n" +
+                        "    SELECT R.coupon_limit\n" +
+                        "    INTO coupon_limit\n" +
+                        "    FROM Restaurant R NATURAL JOIN Purchase P;\n" +
+                        "\n" +
+                        "   IF NEW.is_paid = 1 AND OLD.is_paid = 0 AND NEW.total_price >= coupon_limit\n" +
+                        "   THEN\n" +
+                        "       INSERT INTO DiscountCoupon(coupon_owner_id, restaurant_id)\n" +
+                        "       VALUES (NEW.customer_id, NEW.restaurant_id);\n" +
+                        " END IF;\n" +
+                        "END;"};
 
         for (String curTrigger : triggerNames) {
             jdbcTemplate.execute("DROP TRIGGER IF EXISTS " + curTrigger);

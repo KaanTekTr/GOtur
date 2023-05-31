@@ -43,6 +43,14 @@ public class PurchaseController {
         return list;
     }
 
+    @GetMapping("/getPaidSinglePurchases/{customerId}")
+    public List<Purchase> getAllPaidSinglePurchasesByCustomerId(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.customer_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 1;";
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), customerId);
+
+        return list;
+    }
+
     @GetMapping("/getPurchase/{purchaseId}")
     public Purchase getPurchasesByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
         String sql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?";

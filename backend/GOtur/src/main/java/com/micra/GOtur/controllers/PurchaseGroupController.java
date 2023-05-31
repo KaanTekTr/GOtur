@@ -70,6 +70,14 @@ public class PurchaseGroupController {
         return list;
     }
 
+    @GetMapping("/getPaidGroupPurchases/{groupId}")
+    public List<Purchase> getAllPaidGroupPurchasesByGroupId(@PathVariable("groupId") int groupId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.is_group_purchase = 1 AND P.is_paid = 1 AND P.purchase_id IN (SELECT PG.purchase_id FROM PurchaseInGroup PG WHERE PG.group_id = ?);";
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), groupId);
+
+        return list;
+    }
+
     @GetMapping("/getUnpaidGroupPurchase/{groupId}")
     public Purchase getUnpaidGroupPurchaseByPurchaseGroupId(@PathVariable("groupId") int groupId) {
         // check if the group has an unpaid purchase

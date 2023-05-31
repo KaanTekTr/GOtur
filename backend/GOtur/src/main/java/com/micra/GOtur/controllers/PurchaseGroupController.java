@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -373,7 +373,7 @@ public class PurchaseGroupController {
         // Update the purchase
         String sql = "UPDATE Purchase P SET P.address_id = ?, P.customer_note = ?, P.is_paid = 1, P.being_prepared = 1, P.purchase_time = ? WHERE P.purchase_id = ?;";
         System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, addressId, customerNote, LocalDate.now(), purchaseId);
+        jdbcTemplate.update(sql, addressId, customerNote, LocalDateTime.now(), purchaseId);
 
         // get the updated purchase
         String getPurchaseSql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?;";

@@ -12,4 +12,5 @@ import java.util.List;
 public class PurchaseItem {
     private Food food;
     private List<Ingredient> ingredientList;
+    private int food_order;
 }

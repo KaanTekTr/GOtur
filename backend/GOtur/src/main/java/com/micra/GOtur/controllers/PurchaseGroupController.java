@@ -124,6 +124,7 @@ public class PurchaseGroupController {
             PurchaseItem purchaseItem = new PurchaseItem();
             purchaseItem.setFood(food);
             purchaseItem.setIngredientList(ingredientList);
+            purchaseItem.setFood_order(food_order);
             purchaseItemList.add(purchaseItem);
         }
 

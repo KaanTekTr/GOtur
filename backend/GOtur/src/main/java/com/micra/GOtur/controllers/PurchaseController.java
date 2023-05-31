@@ -85,6 +85,7 @@ public class PurchaseController {
             PurchaseItem purchaseItem = new PurchaseItem();
             purchaseItem.setFood(food);
             purchaseItem.setIngredientList(ingredientList);
+            purchaseItem.setFood_order(food_order);
             purchaseItemList.add(purchaseItem);
         }
 
@@ -122,6 +123,7 @@ public class PurchaseController {
             PurchaseItem purchaseItem = new PurchaseItem();
             purchaseItem.setFood(food);
             purchaseItem.setIngredientList(ingredientList);
+            purchaseItem.setFood_order(food_order);
             purchaseItemList.add(purchaseItem);
         }
 

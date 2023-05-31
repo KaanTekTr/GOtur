@@ -194,7 +194,7 @@ public class CustomerController {
         }
 
         // Update the balance of the customer
-        String sql = "UPDATE Customer C SET C.balance = ? WHERE C.user_id = ?;";
+        String sql = "UPDATE Customer C SET C.balance = C.balance + ? WHERE C.user_id = ?;";
         System.out.println(">>" + sql);
         jdbcTemplate.update(sql, transferAmount, customerId);
 

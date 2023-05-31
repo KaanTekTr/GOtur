@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -314,6 +315,72 @@ public class PurchaseGroupController {
         }
 
         return new ResponseEntity<>("Purchase Has Been Successfully Formed!", HttpStatus.OK);
+    }
+
+    @PostMapping("/completeGroupPurchase/{purchaseId}")
+    public ResponseEntity<String> completeGroupPurchaseByPurchaseId(@PathVariable("purchaseId") int purchaseId,
+                                                               @RequestParam int addressId,
+                                                               @RequestParam String customerNote) {
+        // check if the group already has an unpaid group purchase
+        String checkGroupSql = "SELECT EXISTS (SELECT * FROM PurchaseInGroup PG  WHERE PG.purchase_id = ?);";
+        boolean existsGroupPurchase = jdbcTemplate.queryForObject(checkGroupSql, Boolean.class, purchaseId);
+
+        if ( !existsGroupPurchase ) { // the purchase is not a group purchase
+            return new ResponseEntity<>("The Purchase With ID: " + purchaseId + " Is Not A Group Purchase!", HttpStatus.BAD_REQUEST);
+        }
+
+        // get the group id
+        String groupIdSql = "SELECT PG.group_id FROM PurchaseInGroup PG  WHERE PG.purchase_id = ?;";
+        int groupId = jdbcTemplate.queryForObject(groupIdSql, Integer.class, purchaseId);
+
+        // check if the group has an unpaid group purchase
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P NATURAL JOIN PurchaseInGroup PG  WHERE PG.group_id = ? AND P.is_group_purchase = 1 AND P.is_paid = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, groupId);
+
+        if ( !exists ) {
+            return new ResponseEntity<>("There Is No Unpaid Single Purchase With ID: " + purchaseId + "!", HttpStatus.BAD_REQUEST);
+        }
+
+        // get the balance of the group
+        String getBalanceSql = "SELECT PG.group_balance FROM PurchaseGroup PG WHERE PG.group_id = ?;";
+        int group_balance = jdbcTemplate.queryForObject(getBalanceSql, Integer.class, groupId);
+
+        // get the total price of the purchase
+        String getTotalPriceSql = "SELECT P.total_price FROM Purchase P WHERE P.purchase_id = ?;";
+        int total_price = jdbcTemplate.queryForObject(getTotalPriceSql, Integer.class, purchaseId);
+
+        if ( group_balance < total_price ) { // if the group balance is not enough
+            return new ResponseEntity<>("The Balance Of The Group Is Not Enough To Complete This Transaction!", HttpStatus.BAD_REQUEST);
+        }
+
+        // get the min delivery price of the restaurant
+        String getMinDeliveryPriceSql = "SELECT R.min_delivery_price FROM Purchase P NATURAL JOIN Restaurant R WHERE P.purchase_id = ?;";
+        int min_delivery_price = jdbcTemplate.queryForObject(getMinDeliveryPriceSql, Integer.class, purchaseId);
+
+        if ( total_price < min_delivery_price ) { // if the total price is less than the min delivery
+            return new ResponseEntity<>("The Total Price Of The Purchase: " + total_price + " Is Less Than The Minimum Delivery Price Of The Restaurant!", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the purchase
+        String sql = "UPDATE Purchase P SET P.address_id = ?, P.customer_note = ?, P.is_paid = 1, P.being_prepared = 1, P.purchase_time = ? WHERE P.purchase_id = ?;";
+        System.out.println(">>" + sql);
+        jdbcTemplate.update(sql, addressId, customerNote, LocalDate.now(), purchaseId);
+
+        // get the updated purchase
+        String getPurchaseSql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?;";
+        Purchase purchase = jdbcTemplate.queryForObject(getPurchaseSql, new PurchaseMapper(), purchaseId);
+
+        // Update the group balance
+        String groupSql = "UPDATE PurchaseGroup PG SET PG.group_balance = PG.group_balance - ? WHERE PG.group_id = ?;";
+        System.out.println(">>" + groupSql);
+        jdbcTemplate.update(groupSql, total_price, groupId);
+
+        // Update the restaurant balance
+        String restaurantSql = "UPDATE Restaurant R SET R.total_earnings = R.total_earnings + ? WHERE R.restaurant_id = ?;";
+        System.out.println(">>" + restaurantSql);
+        jdbcTemplate.update(restaurantSql, total_price, purchase.getRestaurant_id());
+
+        return new ResponseEntity<>("The Purchase Has Been Completed Successfully!", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{groupId}")

@@ -198,7 +198,7 @@ public class PurchaseController {
     public ResponseEntity<String> completePurchaseByPurchaseId(@PathVariable("purchaseId") int purchaseId,
                                                                @RequestParam int addressId,
                                                                @RequestParam String customerNote) {
-        // check if the customer already has an unpaid single purchase
+        // check if the customer has an unpaid single purchase
         String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
         boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
 
@@ -206,12 +206,28 @@ public class PurchaseController {
             return new ResponseEntity<>("There Is No Unpaid Single Purchase With ID: " + purchaseId + "!", HttpStatus.BAD_REQUEST);
         }
 
-        // check if the customer has enough balance
-        String checkBalanceSql = "SELECT EXISTS (SELECT * FROM Purchase P, Customer C WHERE P.purchase_id = ? AND P.customer_id = C.user_id AND C.balance >= P.total_price);";
-        boolean isEnoughBalance = jdbcTemplate.queryForObject(checkBalanceSql, Boolean.class, purchaseId);
+        // get the customer id
+        String groupIdSql = "SELECT P.customer_id FROM Purchase P  WHERE P.purchase_id = ?;";
+        int customerId = jdbcTemplate.queryForObject(groupIdSql, Integer.class, purchaseId);
 
-        if ( !isEnoughBalance ) {
+        // get the balance of the customer
+        String getBalanceSql = "SELECT C.balance FROM Customer C WHERE C.user_id = ?;";
+        int balance = jdbcTemplate.queryForObject(getBalanceSql, Integer.class, customerId);
+
+        // get the total price of the purchase
+        String getTotalPriceSql = "SELECT P.total_price FROM Purchase P WHERE P.purchase_id = ?;";
+        int total_price = jdbcTemplate.queryForObject(getTotalPriceSql, Integer.class, purchaseId);
+
+        if ( balance < total_price ) { // if the customer balance is not enough
             return new ResponseEntity<>("The Balance Of The Customer Is Not Enough To Complete This Transaction!", HttpStatus.BAD_REQUEST);
+        }
+
+        // get the min delivery price of the restaurant
+        String getMinDeliveryPriceSql = "SELECT R.min_delivery_price FROM Purchase P NATURAL JOIN Restaurant R WHERE P.purchase_id = ?;";
+        int min_delivery_price = jdbcTemplate.queryForObject(getMinDeliveryPriceSql, Integer.class, purchaseId);
+
+        if ( total_price < min_delivery_price ) { // if the total price is less than the min delivery
+            return new ResponseEntity<>("The Total Price Of The Purchase: " + total_price + " Is Less Than The Minimum Delivery Price Of The Restaurant!", HttpStatus.BAD_REQUEST);
         }
 
         // Update the purchase
@@ -227,6 +243,11 @@ public class PurchaseController {
         String customerSql = "UPDATE Customer C SET C.balance = C.balance - ? WHERE C.user_id = ?;";
         System.out.println(">>" + customerSql);
         jdbcTemplate.update(customerSql, purchase.getTotal_price(), purchase.getCustomer_id());
+
+        // Update the restaurant balance
+        String restaurantSql = "UPDATE Restaurant R SET R.total_earnings = R.total_earnings + ? WHERE R.restaurant_id = ?;";
+        System.out.println(">>" + restaurantSql);
+        jdbcTemplate.update(restaurantSql, total_price, purchase.getRestaurant_id());
 
         return new ResponseEntity<>("The Purchase Has Been Completed Successfully!", HttpStatus.OK);
     }

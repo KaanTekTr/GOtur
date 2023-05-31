@@ -18,6 +18,8 @@ public class RestaurantMapper implements RowMapper<Restaurant> {
         int min_delivery_price = rs.getInt("min_delivery_price");
         boolean is_top_restaurant = rs.getBoolean("is_top_restaurant");
         float rating = rs.getFloat("rating");
+        float coupon_limit = rs.getFloat("coupon_limit");
+        float discount_percentage = rs.getFloat("discount_percentage");
 
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurant_id(restaurant_id);
@@ -29,6 +31,8 @@ public class RestaurantMapper implements RowMapper<Restaurant> {
         restaurant.setMin_delivery_price(min_delivery_price);
         restaurant.setIs_top_restaurant(is_top_restaurant);
         restaurant.setRating(rating);
+        restaurant.setCoupon_limit(coupon_limit);
+        restaurant.setDiscount_percentage(discount_percentage);
 
         return restaurant;
     }

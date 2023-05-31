@@ -84,6 +84,8 @@ public class InitializerController {
                         "    min_delivery_price int,\n" +
                         "    is_top_restaurant boolean,\n" +
                         "    rating float DEFAULT 0,\n" +
+                        "    coupon_limit float DEFAULT 0,\n" +
+                        "    discount_percentage float DEFAULT 5,\n" +
                         "    PRIMARY KEY (restaurant_id));",
                 "CREATE TABLE Purchase(\n" +
                         "    purchase_id int NOT NULL AUTO_INCREMENT,\n" +

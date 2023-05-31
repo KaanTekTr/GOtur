@@ -160,10 +160,10 @@ public class RestaurantController {
             return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " does not exist!", HttpStatus.BAD_REQUEST);
         }
 
-        String sql = "UPDATE Restaurant R SET R.restaurant_name = ?, R.district = ?, R.open_hour = ?, R.close_hour = ?, R.min_delivery_price = ? WHERE R.restaurant_id = ?;";
+        String sql = "UPDATE Restaurant R SET R.restaurant_name = ?, R.district = ?, R.open_hour = ?, R.close_hour = ?, R.min_delivery_price = ?, R.coupon_limit = ?, R.discount_percentage = ? WHERE R.restaurant_id = ?;";
 
         System.out.println(">>" + sql);
-        jdbcTemplate.update(sql, restaurant.getRestaurant_name(), restaurant.getDistrict(), restaurant.getOpen_hour(), restaurant.getClose_hour(), restaurant.getMin_delivery_price(), restaurantId);
+        jdbcTemplate.update(sql, restaurant.getRestaurant_name(), restaurant.getDistrict(), restaurant.getOpen_hour(), restaurant.getClose_hour(), restaurant.getMin_delivery_price(), restaurant.getCoupon_limit(), restaurant.getDiscount_percentage(),restaurantId);
 
         return new ResponseEntity<>("Restaurant With ID: " + restaurantId + " Has Been Successfully Updated!", HttpStatus.OK);
     }

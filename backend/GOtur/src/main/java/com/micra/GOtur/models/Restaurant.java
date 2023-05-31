@@ -18,5 +18,6 @@ public class Restaurant {
     private int min_delivery_price;
     private Boolean is_top_restaurant;
     private float rating;
-
+    private float coupon_limit;
+    private float discount_percentage;
 }

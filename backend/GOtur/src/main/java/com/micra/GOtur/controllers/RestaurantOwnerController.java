@@ -85,7 +85,7 @@ public class RestaurantOwnerController {
         }
 
         SimpleJdbcInsert insertIntoRestaurant = new SimpleJdbcInsert(jdbcTemplate).withTableName("Restaurant").usingColumns("restaurant_name", "district",
-                "open_hour", "close_hour", "min_delivery_price", "is_top_restaurant").usingGeneratedKeyColumns("restaurant_id");
+                "open_hour", "close_hour", "min_delivery_price", "is_top_restaurant", "coupon_limit", "discount_percentage").usingGeneratedKeyColumns("restaurant_id");
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("restaurant_name", restaurant.getRestaurant_name());
         parameters.put("district", restaurant.getDistrict());
@@ -93,6 +93,8 @@ public class RestaurantOwnerController {
         parameters.put("close_hour", restaurant.getClose_hour());
         parameters.put("min_delivery_price", restaurant.getMin_delivery_price());
         parameters.put("is_top_restaurant", Boolean.FALSE);
+        parameters.put("coupon_limit", restaurant.getCoupon_limit());
+        parameters.put("discount_percentage", restaurant.getDiscount_percentage());
 
         // Get the inserted id back
         int restaurantId = insertIntoRestaurant.executeAndReturnKey(parameters).intValue();

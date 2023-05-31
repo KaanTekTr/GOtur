@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -41,6 +42,20 @@ public class DiscountCouponController {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @GetMapping("/getAll/{customerId}")
+    public List<DiscountCoupon> getAllDiscountCoupons(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ?;";
+
+        return jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId);
+    }
+
+    @GetMapping("/getAllActive/{customerId}")
+    public List<DiscountCoupon> getAllActiveDiscountCoupons(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ? AND D.expiration_date >= ?;";
+
+        return jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId, LocalDate.now());
     }
 
     @PostMapping("/add")

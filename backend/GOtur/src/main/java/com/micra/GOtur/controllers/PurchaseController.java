@@ -381,6 +381,6 @@ public class PurchaseController {
             jdbcTemplate.update(purchaseSql, purchaseId);
         }
 
-        return new ResponseEntity<>("Selected Food And Ingredients Has Been Successfully Deleted From The Favorites Of The Customer With ID: " + customerId + "!", HttpStatus.OK);
+        return new ResponseEntity<>("Selected Food And Ingredients Has Been Successfully Deleted From The Purchase List Of The Customer With ID: " + customerId + "!", HttpStatus.OK);
     }
 }

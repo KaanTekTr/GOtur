@@ -259,7 +259,8 @@ public class InitializerController {
 
     public void initializeTriggers() throws DataAccessException {
         String[] triggerNames = new String[]{"increase_restaurant_count", "decrease_restaurant_count", "update_restaurant_rating", "update_restaurant_rating2", "update_purchase_total_after_food",
-                "update_purchase_total_after_ingredient", "update_purchase_total_before_delete_food", "update_purchase_total_before_delete_ingredient"};
+                "update_purchase_total_after_ingredient", "update_purchase_total_before_delete_food", "update_purchase_total_before_delete_ingredient",
+                "admin_report_count"};
         String[] triggers = new String[]{"CREATE TRIGGER increase_restaurant_count\n" +
                 "AFTER INSERT ON ManagedBy\n" +
                 "FOR EACH ROW\n" +
@@ -364,7 +365,18 @@ public class InitializerController {
                         "    UPDATE Purchase P\n" +
                         "    SET P.total_price = P.total_price - (SELECT I.price FROM Ingredient I WHERE I.ingredient_id = OLD.ingredient_id)\n" +
                         "    WHERE P.purchase_id = OLD.purchase_id;\n" +
-                        "END;"};
+                        "END;",
+                "CREATE TRIGGER admin_report_count\n" +
+                        "AFTER INSERT ON Report\n" +
+                        "FOR EACH ROW\n" +
+                        "BEGIN\n" +
+                        "    UPDATE Admin\n" +
+                        "    SET report_count = (SELECT count(*)\n" +
+                        "                        FROM Report\n" +
+                        "                        WHERE admin_id = NEW.admin_id)\n" +
+                        "    WHERE user_id = NEW.admin_id;\n" +
+                        "END;"
+        };
 
         for (String curTrigger : triggerNames) {
             jdbcTemplate.execute("DROP TRIGGER IF EXISTS " + curTrigger);

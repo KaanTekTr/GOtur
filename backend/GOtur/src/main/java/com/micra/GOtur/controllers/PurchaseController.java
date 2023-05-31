@@ -244,7 +244,7 @@ public class PurchaseController {
         // Update the customer balance
         String customerSql = "UPDATE Customer C SET C.balance = C.balance - ? WHERE C.user_id = ?;";
         System.out.println(">>" + customerSql);
-        jdbcTemplate.update(customerSql, purchase.getTotal_price(), purchase.getCustomer_id());
+        jdbcTemplate.update(customerSql, total_price, customerId);
 
         // Update the restaurant balance
         String restaurantSql = "UPDATE Restaurant R SET R.total_earnings = R.total_earnings + ? WHERE R.restaurant_id = ?;";
@@ -340,6 +340,56 @@ public class PurchaseController {
         jdbcTemplate.update(sql, purchaseId);
 
         return new ResponseEntity<>("The Status Of The Purchase With ID: " + purchaseId + " Has Been Successfully Updated To Delivered!", HttpStatus.OK);
+    }
+
+    @PostMapping("/cancelSinglePurchase/{purchaseId}")
+    public ResponseEntity<String> cancelSinglePurchaseByPurchaseId(@PathVariable("purchaseId") int purchaseId) {
+        String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_group_purchase = 0);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
+
+        if (!exists) { // if single purchase does not exist
+            return new ResponseEntity<>("Individual Purchase With ID: " + purchaseId + " does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!IsPaidByPurchaseId(purchaseId)) {
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Not Paid! Nothing To Cancel!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if already delivered
+        String checkStatusSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_delivered = 1);";
+        boolean existsStatus = jdbcTemplate.queryForObject(checkStatusSql, Boolean.class, purchaseId);
+
+        if (existsStatus) { // if status is already delivered
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Already Delivered And Cannot Be Canceled! ", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if already canceled
+        String checkCanceledStatusSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_canceled = 1);";
+        boolean canceledStatus = jdbcTemplate.queryForObject(checkCanceledStatusSql, Boolean.class, purchaseId);
+
+        if (canceledStatus) { // if status is already canceled
+            return new ResponseEntity<>("Purchase With ID: " + purchaseId + " Is Already Canceled! ", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update the status
+        String sql = "UPDATE Purchase P SET P.is_canceled = 1 WHERE P.purchase_id = ?;";
+        jdbcTemplate.update(sql, purchaseId);
+
+        // get the updated purchase
+        String getPurchaseSql = "SELECT * FROM Purchase P WHERE P.purchase_id = ?;";
+        Purchase purchase = jdbcTemplate.queryForObject(getPurchaseSql, new PurchaseMapper(), purchaseId);
+
+        // Update the customer balance
+        String customerSql = "UPDATE Customer C SET C.balance = C.balance + ? WHERE C.user_id = ?;";
+        System.out.println(">>" + customerSql);
+        jdbcTemplate.update(customerSql, purchase.getTotal_price(), purchase.getCustomer_id());
+
+        // Update the restaurant balance
+        String restaurantSql = "UPDATE Restaurant R SET R.total_earnings = R.total_earnings - ? WHERE R.restaurant_id = ?;";
+        System.out.println(">>" + restaurantSql);
+        jdbcTemplate.update(restaurantSql, purchase.getTotal_price(), purchase.getRestaurant_id());
+
+        return new ResponseEntity<>("The Status Of The Purchase With ID: " + purchaseId + " Has Been Successfully Updated To Canceled!", HttpStatus.OK);
     }
 
     public Boolean IsPaidByPurchaseId(int purchaseId) {

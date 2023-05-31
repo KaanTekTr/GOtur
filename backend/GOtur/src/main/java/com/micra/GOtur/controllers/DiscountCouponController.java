@@ -53,9 +53,9 @@ public class DiscountCouponController {
 
     @GetMapping("/getAllActive/{customerId}")
     public List<DiscountCoupon> getAllActiveDiscountCoupons(@PathVariable("customerId") int customerId) {
-        String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ? AND D.expiration_date >= ?;";
+        String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ? AND D.is_used = 0;";
 
-        return jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId, LocalDate.now());
+        return jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId);
     }
 
     @PostMapping("/add")
@@ -75,8 +75,8 @@ public class DiscountCouponController {
             return new ResponseEntity<>("Restaurant with id: " + discountCoupon.getRestaurant_id() + " does not exist! Failed!", HttpStatus.BAD_REQUEST);
         }
 
-        String sql = "INSERT INTO DiscountCoupon(coupon_owner_id, restaurant_id, discount_percentage, expiration_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sql, discountCoupon.getCoupon_owner_id(), discountCoupon.getRestaurant_id(), discountCoupon.getDiscount_percentage(), discountCoupon.getExpiration_date());
+        String sql = "INSERT INTO DiscountCoupon(coupon_owner_id, restaurant_id, is_used) VALUES (?,?,?);";
+        jdbcTemplate.update(sql, discountCoupon.getCoupon_owner_id(), discountCoupon.getRestaurant_id(), Boolean.FALSE);
 
         return new ResponseEntity<>("Discount coupon added for Customer with id: " +
                 discountCoupon.getCoupon_owner_id(), HttpStatus.OK);

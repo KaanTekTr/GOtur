@@ -190,8 +190,7 @@ public class InitializerController {
                         "    coupon_id int NOT NULL AUTO_INCREMENT,\n" +
                         "    coupon_owner_id int NOT NULL,\n" +
                         "    restaurant_id int NOT NULL,\n" +
-                        "    discount_percentage int,\n" +
-                        "    expiration_date date,\n" +
+                        "    is_used boolean,\n" +
                         "    FOREIGN KEY (coupon_owner_id) REFERENCES Customer(user_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,\n" +
                         "    PRIMARY KEY (coupon_id));",

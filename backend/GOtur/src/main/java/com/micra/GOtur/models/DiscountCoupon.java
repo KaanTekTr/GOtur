@@ -14,6 +14,5 @@ public class DiscountCoupon {
     private int coupon_id;
     private int coupon_owner_id;
     private int restaurant_id;
-    private int discount_percentage;
-    private LocalDate expiration_date;
+    private Boolean is_used;
 }

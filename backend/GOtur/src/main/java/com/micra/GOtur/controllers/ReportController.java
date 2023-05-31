@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class ReportController {
         String detailStr = detail.toString();
 
         String sql = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sql, adminId, detailStr, "Most Favorited Restaurant", LocalDate.now());
+        jdbcTemplate.update(sql, adminId, detailStr, "Most Favorited Restaurant", LocalDateTime.now());
 
         return new ResponseEntity<>(detailStr, HttpStatus.OK);
     }
@@ -118,7 +119,7 @@ public class ReportController {
         }
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant Active Coupons", LocalDate.now());
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant Active Coupons", LocalDateTime.now());
 
         return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
 
@@ -182,7 +183,7 @@ public class ReportController {
         */
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Most Number of Purchases in Region", LocalDate.now());
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Most Number of Purchases in Region", LocalDateTime.now());
 
         return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
 
@@ -222,7 +223,7 @@ public class ReportController {
         }
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Highest Rating in Region", LocalDate.now());
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurants With Highest Rating in Region", LocalDateTime.now());
 
         return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
     }
@@ -261,7 +262,7 @@ public class ReportController {
         }
 
         String sqlReport = "INSERT INTO Report(admin_id, details, report_type, report_date) VALUES (?,?,?,?);";
-        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant With Most Active Coupons", LocalDate.now());
+        jdbcTemplate.update(sqlReport, adminId, detail.toString(), "Restaurant With Most Active Coupons", LocalDateTime.now());
 
         return new ResponseEntity<>(detail.toString(), HttpStatus.OK);
 

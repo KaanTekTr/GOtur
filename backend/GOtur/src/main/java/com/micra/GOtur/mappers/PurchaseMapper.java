@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PurchaseMapper implements RowMapper<Purchase> {
     @Override
@@ -22,9 +23,9 @@ public class PurchaseMapper implements RowMapper<Purchase> {
         Boolean is_delivered = rs.getBoolean("is_delivered");
         Boolean is_canceled = rs.getBoolean("is_canceled");
         float total_price = rs.getFloat("total_price");
-        LocalDate purchase_time = null;
+        LocalDateTime purchase_time = null;
         if ( rs.getDate("purchase_time") != null ) {
-            purchase_time = rs.getDate("purchase_time").toLocalDate();
+            purchase_time = rs.getTimestamp("purchase_time").toLocalDateTime();
         }
 
         Purchase purchase = new Purchase();

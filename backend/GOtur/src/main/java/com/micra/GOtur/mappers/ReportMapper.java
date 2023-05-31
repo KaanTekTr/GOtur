@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReportMapper implements RowMapper<Report> {
 
@@ -16,7 +17,7 @@ public class ReportMapper implements RowMapper<Report> {
         int admin_id = rs.getInt("admin_id");
         String details = rs.getString("details");
         String report_type = rs.getString("report_type");
-        LocalDate report_date = rs.getDate("report_date").toLocalDate();
+        LocalDateTime report_date = rs.getTimestamp("report_date").toLocalDateTime();
 
         Report report = new Report();
         report.setReport_id(report_id);

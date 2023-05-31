@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,6 +18,6 @@ public class Review {
     private int reviewer_id;
     private String comment;
     private float rate;
-    private LocalDate review_date;
+    private LocalDateTime review_date;
 
 }

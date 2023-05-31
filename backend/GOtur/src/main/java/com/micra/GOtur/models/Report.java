@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,6 +16,6 @@ public class Report {
     private int admin_id;
     private String details;
     private String report_type;
-    private LocalDate report_date;
+    private LocalDateTime report_date;
 
 }

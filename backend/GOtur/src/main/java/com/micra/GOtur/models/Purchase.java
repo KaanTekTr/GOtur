@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,7 +23,7 @@ public class Purchase {
     private Boolean is_departed;
     private Boolean is_delivered;
     private Boolean is_canceled;
-    private LocalDate purchase_time;
+    private LocalDateTime purchase_time;
     private float total_price;
 
 }

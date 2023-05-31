@@ -5,7 +5,11 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 public class ReviewMapper implements RowMapper<Review> {
 
@@ -17,7 +21,7 @@ public class ReviewMapper implements RowMapper<Review> {
         int reviewer_id = rs.getInt("reviewer_id");
         String comment = rs.getString("comment");
         float rate = rs.getFloat("rate");
-        LocalDate review_date = rs.getDate("review_date").toLocalDate();
+        LocalDateTime review_date = rs.getTimestamp("review_date").toLocalDateTime();
 
         Review review = new Review();
         review.setReview_id(review_id);

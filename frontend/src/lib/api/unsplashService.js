@@ -25,6 +25,11 @@ export const addNewAddress = (id, address) => (
   })
 );
 
+// USER
+export const getUser = (authType, userId) => (
+  axios.get(`${baseURL}/${authType}/${userId}`)
+);
+
 // Restaurant Requests
 export const getAllRestaurants = () => (
   axios.get(`${baseURL}/restaurant/all`)
@@ -67,4 +72,19 @@ export const getAllFriends = (id) => (
 
 export const addNewFriend = (user_id, friend_id) => (
   axios.post(`${baseURL}/customer/addFriends/${user_id}/${friend_id}`)
+);
+
+// GROUP
+export const getAllGroups = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/getAllPurchaseGroups/${id}`)
+);
+
+export const addNewGroup= (group) => (
+  fetch(`${baseURL}/purchaseGroup/add`, {
+    method: 'POST',
+    headers: {
+      'Content-type' : 'application/json'
+    }, 
+    body: JSON.stringify(group)
+  })
 );

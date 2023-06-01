@@ -1,4 +1,5 @@
-import { createSlice, current } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
+import { addNewGroup, getAllGroups } from "../../lib/api/unsplashService";
 
 const items = groupId =>
   localStorage.getItem(`groupCartItems_${groupId}`) !== null
@@ -20,6 +21,29 @@ const setItemFunc = (item, totalAmount, totalQuantity, groupId) => {
   localStorage.setItem(`groupTotalAmount_${groupId}`, JSON.stringify(totalAmount));
   localStorage.setItem(`groupTotalQuantity_${groupId}`, JSON.stringify(totalQuantity));
 };
+
+
+export const getGroupsThunk = createAsyncThunk('user/getGroups', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getAllGroups(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addGroupsThunk = createAsyncThunk('user/addGroup', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewGroup(data.group);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 const initialState = {
     groups:[
@@ -152,6 +176,16 @@ const groupsSlice = createSlice({
           state.groups.find(group => group.id === groupId).groupTotalQuantity
         );
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getGroupsThunk.fulfilled, (state, action) => {
+        state.groups = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(addGroupsThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
   },
 });
 

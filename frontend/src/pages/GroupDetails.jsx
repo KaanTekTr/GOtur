@@ -10,7 +10,7 @@ import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
-import { groupsActions } from "../store/group/groupSlice";
+import { getGroupsThunk, groupsActions } from "../store/group/groupSlice";
 import { orderActions } from "../store/user/orderSlice";
 import { getFriendsThunk } from "../store/group/friendsSlice";
 

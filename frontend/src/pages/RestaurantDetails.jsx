@@ -17,13 +17,19 @@ import { useParams } from "react-router-dom";
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllFoodCategoryThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
+import { getAllFoodCategoryThunk, getRestaurantsThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const RestaurantDetails = () => {
   const [category, setCategory] = useState("ALL");
   
   const { id } = useParams();
-
+  const dispatch = useDispatch();
+  
+  useEffect(() => {
+    dispatch(getRestaurantsThunk());
+    dispatch(getAllFoodCategoryThunk({restaurant_id: id}));
+    dispatch(restaurantActions.getProducts())
+  }, [dispatch, id]);
   const restaurants = useSelector(state => state.restaurant.restaurants);
   console.log(restaurants);
   
@@ -34,11 +40,6 @@ const RestaurantDetails = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
 
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getAllFoodCategoryThunk({restaurant_id: id}));
-    dispatch(restaurantActions.getProducts())
-  })
   
   const products = useSelector(state => state.restaurant.products);
   const [allProducts, setAllProducts] = useState(products);
@@ -102,99 +103,104 @@ const RestaurantDetails = () => {
   const onDismiss = () => setVisible(false);
 
   return (
-    <Helmet title="All-Foods">
-      <CommonSection title={restaurant.restaurant_name} desc={restaurant.min_delivery_price} image={image01} />
-
-      <section>
-        <Container>
-          <Row>
-              <Col lg="12"  md="6" className="mb-4">
-                  <div className="food__category d-flex align-items-center justify-content-center gap-4">
-                  <button
-                      className={`all__btn  ${
-                      category === "ALL" ? "foodBtnActive" : ""
-                      } `}
-                      onClick={() => setCategory("ALL")}
-                  >
-                      All
-                  </button>
-                  <button
-                      className={`d-flex align-items-center gap-2 ${
-                      category === "BURGER" ? "foodBtnActive" : ""
-                      } `}
-                      onClick={() => setCategory("BURGER")}
-                  >
-                      <img src={foodCategoryImg01} alt="" />
-                      Burger
-                  </button>
-
-                  <button
-                      className={`d-flex align-items-center gap-2 ${
-                      category === "PIZZA" ? "foodBtnActive" : ""
-                      } `}
-                      onClick={() => setCategory("PIZZA")}
-                  >
-                      <img src={foodCategoryImg02} alt="" />
-                      Pizza
-                  </button>
-
-                  <button
-                      className={`d-flex align-items-center gap-2 ${
-                      category === "BREAD" ? "foodBtnActive" : ""
-                      } `}
-                      onClick={() => setCategory("BREAD")}
-                  >
-                      <img src={foodCategoryImg03} alt="" />
-                      Bread
-                  </button>
+    <>
+      {restaurant ?  
+        <Helmet title="All-Foods">
+        <CommonSection title={restaurant.restaurant_name} desc={restaurant.min_delivery_price} image={image01} />
+  
+        <section>
+          <Container>
+            <Row>
+                <Col lg="12"  md="6" className="mb-4">
+                    <div className="food__category d-flex align-items-center justify-content-center gap-4">
+                    <button
+                        className={`all__btn  ${
+                        category === "ALL" ? "foodBtnActive" : ""
+                        } `}
+                        onClick={() => setCategory("ALL")}
+                    >
+                        All
+                    </button>
+                    <button
+                        className={`d-flex align-items-center gap-2 ${
+                        category === "BURGER" ? "foodBtnActive" : ""
+                        } `}
+                        onClick={() => setCategory("BURGER")}
+                    >
+                        <img src={foodCategoryImg01} alt="" />
+                        Burger
+                    </button>
+  
+                    <button
+                        className={`d-flex align-items-center gap-2 ${
+                        category === "PIZZA" ? "foodBtnActive" : ""
+                        } `}
+                        onClick={() => setCategory("PIZZA")}
+                    >
+                        <img src={foodCategoryImg02} alt="" />
+                        Pizza
+                    </button>
+  
+                    <button
+                        className={`d-flex align-items-center gap-2 ${
+                        category === "BREAD" ? "foodBtnActive" : ""
+                        } `}
+                        onClick={() => setCategory("BREAD")}
+                    >
+                        <img src={foodCategoryImg03} alt="" />
+                        Bread
+                    </button>
+                    </div>
+                </Col>
+                <Col lg="6" md="3" sm="6" xs="12">
+                  <div className="search__widget d-flex align-items-center justify-content-between ">
+                    <input
+                      type="text"
+                      placeholder="I'm looking for...."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <span>
+                      <i class="ri-search-line"></i>
+                    </span>
                   </div>
-              </Col>
-              <Col lg="6" md="3" sm="6" xs="12">
-                <div className="search__widget d-flex align-items-center justify-content-between ">
-                  <input
-                    type="text"
-                    placeholder="I'm looking for...."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <span>
-                    <i class="ri-search-line"></i>
-                  </span>
-                </div>
-              </Col>
-              <Col lg="6" md="3" sm="6" xs="12" className="mb-2">
-                <div className="sorting__widget text-end">
-                  <select className="w-50">
-                    <option>Default</option>
-                    <option value="ascending">Alphabetically, A-Z</option>
-                    <option value="descending">Alphabetically, Z-A</option>
-                    <option value="high-price">High Price</option>
-                    <option value="low-price">Low Price</option>
-                  </select>
-                </div>
-              </Col>
-
-              {displayPage.map((item) => (
-                  <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
-                      <ProductCard item={item} setVisible={setVisible} visible={visible}/>
-                  </Col>
-              ))}  
-            <div>
-              <ReactPaginate
-                pageCount={pageCount}
-                onPageChange={changePage}
-                previousLabel={"Prev"}
-                nextLabel={"Next"}
-                containerClassName=" paginationBttns "
-              />
-            </div>
-          </Row>
-        </Container>
-      </section>
-      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="info" isOpen={visible} toggle={onDismiss}>
-        Product added to cart!
-      </Alert>
-    </Helmet>
+                </Col>
+                <Col lg="6" md="3" sm="6" xs="12" className="mb-2">
+                  <div className="sorting__widget text-end">
+                    <select className="w-50">
+                      <option>Default</option>
+                      <option value="ascending">Alphabetically, A-Z</option>
+                      <option value="descending">Alphabetically, Z-A</option>
+                      <option value="high-price">High Price</option>
+                      <option value="low-price">Low Price</option>
+                    </select>
+                  </div>
+                </Col>
+  
+                {displayPage.map((item) => (
+                    <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
+                        <ProductCard item={item} setVisible={setVisible} visible={visible}/>
+                    </Col>
+                ))}  
+              <div>
+                <ReactPaginate
+                  pageCount={pageCount}
+                  onPageChange={changePage}
+                  previousLabel={"Prev"}
+                  nextLabel={"Next"}
+                  containerClassName=" paginationBttns "
+                />
+              </div>
+            </Row>
+          </Container>
+        </section>
+        <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="info" isOpen={visible} toggle={onDismiss}>
+          Product added to cart!
+        </Alert>
+      </Helmet>
+      : <h5>Loading...</h5>}
+    </>
+    
   );
 };
 

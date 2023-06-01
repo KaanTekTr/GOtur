@@ -9,7 +9,7 @@ import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { groupsActions } from "../store/group/groupSlice";
+import { addGroupsThunk, getGroupsThunk, groupsActions } from "../store/group/groupSlice";
 
 const Groups = () => {
 
@@ -19,6 +19,7 @@ const Groups = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    const [groupName, setGroupName] = useState(""); 
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);
 
@@ -27,8 +28,17 @@ const Groups = () => {
     }
 
     useEffect(() => {
-      dispatch(groupsActions.getGroups({userId}));
-    })
+      dispatch(getGroupsThunk({userId}));
+    }, [dispatch,userId]);
+
+    const createGroup = () => {
+      const group = {
+        group_owner_id: userId,
+        group_name: groupName,
+      }
+      dispatch(addGroupsThunk({group}));
+      toggle();
+    }
     
   return (
     <Helmet title="My Groups">
@@ -39,13 +49,13 @@ const Groups = () => {
           <Row>
 
             {groups.map((group, index) => (
-              <Col lg="12" md="12" sm="6" xs="6" key={group.id} className="mb-4">
+              <Col lg="12" md="12" sm="6" xs="6" key={group.group_id} className="mb-4">
                 <Card className="p-4">
                     <Container>
                         <Row style={{display: "flex"}}>
                             <Col lg="10" md="10">
                                 <CardTitle tag="h3">
-                                    {group.title}
+                                    {group.group_name}
                                 </CardTitle>
                                 <CardSubtitle
                                     className="mb-2 text-muted"
@@ -55,9 +65,9 @@ const Groups = () => {
                                 </CardSubtitle>
                             </Col>
                             <Col lg="2" md="2">
-                                Balance: {group.balance}$
+                                Balance: {group.group_balance}$
                             
-                                <Button className="mt-4" onClick={()  => orderTog(group.id)}>Order Together</Button>
+                                <Button className="mt-4" onClick={()  => orderTog(group.group_id)}>Order Together</Button>
                             </Col>
                         </Row>
                     </Container>
@@ -80,13 +90,13 @@ const Groups = () => {
                       <h5>Group Name:</h5>  
                     </Col>
                     <Col lg="6" md="6">
-                      <Input />
+                      <Input value={groupName} onChange={e => setGroupName(e.target.value)}/>
                     </Col>
                   </Row>
                 </Container>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={toggle}>
+                <Button color="primary" onClick={createGroup}>
                   Create
                 </Button>{' '}
                 <Button color="secondary" onClick={toggle}>

@@ -9,9 +9,11 @@ import { cartActions } from "../store/shopping-cart/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { orderActions } from "../store/user/orderSlice";
 
+import image01 from "../assets/images/bread.png";
+
+
 const Cart = () => {
-  const cartItems = useSelector((state) => state.cart.cartItems);
-  const totalAmount = useSelector((state) => state.cart.totalAmount);
+  const cart = useSelector((state) => state.order.unpaidSinglePurchase);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ const Cart = () => {
         <Container>
           <Row>
             <Col lg="12">
-              {cartItems.length === 0 ? (
+              {cart?.products?.length === 0 ? (
                 <h5 className="text-center">Your cart is empty</h5>
               ) : (
                 <table className="table table-bordered">
@@ -37,12 +39,11 @@ const Cart = () => {
                       <th>Image</th>
                       <th>Product Title</th>
                       <th>Price</th>
-                      <th>Quantity</th>
                       <th>Delete</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {cartItems.map((item) => (
+                    {cart?.products?.map((item) => (
                       <Tr item={item} key={item.id} />
                     ))}
                   </tbody>
@@ -52,7 +53,7 @@ const Cart = () => {
               <div className="mt-4">
                 <h6>
                   Subtotal: $
-                  <span className="cart__subtotal">{totalAmount}</span>
+                  <span className="cart__subtotal">{cart.total_price}</span>
                 </h6>
                 <p>Taxes and shipping will calculate at checkout</p>
                 <div className="cart__page-btn">
@@ -73,20 +74,19 @@ const Cart = () => {
 };
 
 const Tr = (props) => {
-  const { id, image01, title, price, quantity } = props.item;
+  const { food_id, food_name, price } = props.item.food;
   const dispatch = useDispatch();
 
   const deleteItem = () => {
-    dispatch(cartActions.deleteItem(id));
+    dispatch(cartActions.deleteItem(food_id));
   };
   return (
     <tr>
       <td className="text-center cart__img-box">
         <img src={image01} alt="" />
       </td>
-      <td className="text-center">{title}</td>
+      <td className="text-center">{food_name}</td>
       <td className="text-center">${price}</td>
-      <td className="text-center">{quantity}px</td>
       <td className="text-center cart__item-del">
         <i class="ri-delete-bin-line" onClick={deleteItem}></i>
       </td>

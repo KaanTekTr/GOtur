@@ -1,4 +1,71 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { addFoodToGroupPurchase, addFoodToSinglePurchase, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
+
+export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidSingle', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getProductUnpaidSinglePurchase(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getUnpaidSingle', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getUnpaidSinglePurchase(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getProductsUnpaidGroupPurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidGroup', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getProductUnpaidGroupPurchase(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getUnpaidGroupPurchaseThunk = createAsyncThunk('purchase/getUnpaidGroup', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getUnpaidGroupPurchase(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addFoodToSinglePurchaseThunk = createAsyncThunk('purchase/addFoodSingle', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addFoodToSinglePurchase(data.food, data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addFoodToGroupPurchaseThunk = createAsyncThunk('purchase/addFoodGroup', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addFoodToGroupPurchase(data.food, data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 const initialState = {
     pastOrders: [
@@ -70,6 +137,9 @@ const initialState = {
       }
     ],
     currentCart: 0,
+    unpaidSinglePurchase: JSON.parse(localStorage.getItem("singleCart")),
+    unpaidGroupPurchase: {},
+    itemAdded: 0
 };
 
 const orderSlice = createSlice({
@@ -84,7 +154,39 @@ const orderSlice = createSlice({
     updateCurrentCart(state, action) {
       const {id} = action.payload;
       state.currentCart = id;
+    },
+    updateItemAdded(state, action) {
+      state.itemAdded = 0;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getUnpaidGroupPurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.unpaidGroupPurchase = action.payload;
+      })
+      .addCase(getProductsUnpaidGroupPurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.unpaidGroupPurchase = {...state.unpaidGroupPurchase, products: action.payload};
+      })
+      .addCase(getUnpaidSinglePurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.unpaidSinglePurchase = action.payload;
+        localStorage.setItem("singleCart", JSON.stringify(state.unpaidSinglePurchase));
+      })
+      .addCase(getProductsUnpaidSinglePurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.unpaidSinglePurchase = {...state.unpaidSinglePurchase, products: action.payload};
+        localStorage.setItem("singleCart", JSON.stringify(state.unpaidSinglePurchase));
+      })
+      .addCase(addFoodToGroupPurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.itemAdded = 1;
+      })
+      .addCase(addFoodToSinglePurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.itemAdded = 1;
+      })
   },
 });
 

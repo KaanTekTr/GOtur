@@ -3,31 +3,32 @@ import { ListGroupItem } from "reactstrap";
 
 import "../../../styles/cart-item.css";
 
+import image01 from "../../../assets/images/bread.png";
+
 import { useDispatch } from "react-redux";
 import { cartActions } from "../../../store/shopping-cart/cartSlice";
 
 const CartItem = ({ item }) => {
-  const { id, title, price, image01, quantity, totalPrice } = item;
+  const { food_id, food_name, price } = item.food;
 
   const dispatch = useDispatch();
 
   const incrementItem = () => {
     dispatch(
       cartActions.addItem({
-        id,
-        title,
+        id: food_id,
+        title: food_name,
         price,
-        image01,
       })
     );
   };
 
   const decreaseItem = () => {
-    dispatch(cartActions.removeItem(id));
+    dispatch(cartActions.removeItem(food_id));
   };
 
   const deleteItem = () => {
-    dispatch(cartActions.deleteItem(id));
+    dispatch(cartActions.deleteItem(food_id));
   };
 
   return (
@@ -37,19 +38,10 @@ const CartItem = ({ item }) => {
 
         <div className="cart__product-info w-100 d-flex align-items-center gap-4 justify-content-between">
           <div>
-            <h6 className="cart__product-title">{title}</h6>
+            <h6 className="cart__product-title">{food_name}</h6>
             <p className=" d-flex align-items-center gap-5 cart__product-price">
-              {quantity}x <span>${totalPrice}</span>
+              <span>${price}</span>
             </p>
-            <div className=" d-flex align-items-center justify-content-between increase__decrease-btn">
-              <span className="increase__btn" onClick={incrementItem}>
-                <i class="ri-add-line"></i>
-              </span>
-              <span className="quantity">{quantity}</span>
-              <span className="decrease__btn" onClick={decreaseItem}>
-                <i class="ri-subtract-line"></i>
-              </span>
-            </div>
           </div>
 
           <span className="delete__btn" onClick={deleteItem}>

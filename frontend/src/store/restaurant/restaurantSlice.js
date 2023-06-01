@@ -1,7 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import restaurants from "../../assets/fake-data/restaurants";
-import products from "../../assets/fake-data/products";
 import { addNewFood, addNewMenuCategory, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
 
 export const getRestaurantsThunk = createAsyncThunk('user/getRestaurants', 
@@ -83,6 +81,7 @@ export const addNewMenuCatThunk = createAsyncThunk('rest/addMenuCat',
 
 const initialState = {
     restaurants: [],
+    lastVisited: localStorage.getItem("lastVisited"),
     foodCategories: [],
     menuCategories: [],
     products: [],
@@ -102,6 +101,10 @@ const restaurantSlice = createSlice({
     },
     getProducts(state, action) {
         console.log("get products");
+    },
+    visitRest(state, action) {
+      state.lastVisited = action.payload;
+      localStorage.setItem("lastVisited", action.payload);
     }
   },
   extraReducers: (builder) => {

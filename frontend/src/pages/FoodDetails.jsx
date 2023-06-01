@@ -13,6 +13,8 @@ import image01 from "../assets/images/bread.png";
 
 import ProductCard from "../components/UI/product-card/ProductCard";
 import { groupsActions } from "../store/group/groupSlice";
+import { addFoodToSinglePurchaseThunk } from "../store/user/orderSlice";
+import { getAllFoodCategoryThunk, getAllFoodRestThunk, getAllMenuCategoryThunk } from "../store/restaurant/restaurantSlice";
 
 const FoodDetails = () => {
   const [tab, setTab] = useState("desc");
@@ -25,15 +27,22 @@ const FoodDetails = () => {
   const products = useSelector(state => state.restaurant.products);
   const food__categories = useSelector(state => state.restaurant.foodCategories);
   const menu__categories = useSelector(state => state.restaurant.menuCategories);
+  const userId = useSelector(state => state.auth.userId);
+  const restaurant_id = useSelector(state => state.restaurant.lastVisited);
+
+  useEffect(() => {
+    dispatch(getAllFoodCategoryThunk({restaurant_id}));
+    dispatch(getAllMenuCategoryThunk({restaurant_id}));
+    dispatch(getAllFoodRestThunk({restaurant_id}));
+  }, [restaurant_id, dispatch])
 
 
   const product = products.find((product) => `${product.food_id}` === id);
 
-  const foodCategory = food__categories.find(cat => cat.food_category_id === product.food_category_id);
-  const menuCategory = menu__categories.find(cat => cat.menu_category_id === product.menu_category_id);
+  const foodCategory = food__categories.find(cat => cat.food_category_id === product?.food_category_id);
+  const menuCategory = menu__categories.find(cat => cat.menu_category_id === product?.menu_category_id);
 
   const [previewImg, setPreviewImg] = useState(image01);
-  const { food_name, price, fixed_ingredients } = product;
 
   //const relatedProduct = products.filter((item) => category === item.category);
 
@@ -41,22 +50,24 @@ const FoodDetails = () => {
 
   const addToCart = () => {
     if (selectedCart === 0) {
-      dispatch(
-        cartActions.addItem({
-          id,
-          title: food_name,
-          image01,
-          price,
-        })
-      );
+      const food = {
+        food: {
+          food_id: product.food_id,
+          food_category_id: foodCategory.food_category_id,
+          menu_category_id: menuCategory.menu_category_id,
+          restaurant_id: product.restaurant_id, 
+        },
+        ingredientList: []
+      }
+      dispatch(addFoodToSinglePurchaseThunk({food, userId}))
     } else {
       dispatch(
         groupsActions.addItem({ 
           newItem: {
             id,
-            title: food_name,
+            title: product.food_name,
             image01,
-            price,
+            price: product.price,
           },
           groupId: selectedCart
         })
@@ -71,7 +82,7 @@ const FoodDetails = () => {
   };
 
   useEffect(() => {
-    setPreviewImg(product.image01);
+    setPreviewImg(image01);
   }, [product]);
 
   useEffect(() => {
@@ -79,8 +90,10 @@ const FoodDetails = () => {
   }, [product]);
 
   return (
-    <Helmet title="Product-details">
-      <CommonSection title={food_name} />
+    <>
+    {product ? (
+      <Helmet title="Product-details">
+      <CommonSection title={product.food_name} />
 
       <section>
         <Container>
@@ -104,16 +117,16 @@ const FoodDetails = () => {
 
             <Col lg="6" md="6">
               <div className="single__product-content">
-                <h2 className="product__title mb-3">{food_name}</h2>
+                <h2 className="product__title mb-3">{product.food_name}</h2>
                 <p className="product__price">
                   {" "}
-                  Price: <span>${price}</span>
+                  Price: <span>${product.price}</span>
                 </p>
                 <p className="category mb-1">
-                  Food Category: <span>{foodCategory.food_category_name}</span>
+                  Food Category: <span>{foodCategory?.food_category_name}</span>
                 </p>
                 <p className="category mb-5">
-                  Menu Category: <span>{menuCategory.menu_category_name}</span>
+                  Menu Category: <span>{menuCategory?.menu_category_name}</span>
                 </p>
 
                 <button onClick={addToCart} className="addTOCart__btn">
@@ -140,7 +153,7 @@ const FoodDetails = () => {
 
               {tab === "desc" ? (
                 <div className="tab__content">
-                  <h5>Fixed Ingrediens: {fixed_ingredients}</h5>
+                  <h5>Fixed Ingrediens: {product.fixed_ingredients}</h5>
                 </div>
               ) : (
                 <div className="tab__form mb-3">
@@ -179,6 +192,9 @@ const FoodDetails = () => {
         </Container>
       </section>
     </Helmet>
+    ): <span>Loading...</span>}
+    </>
+    
   );
 };
 

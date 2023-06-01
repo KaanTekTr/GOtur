@@ -31,7 +31,8 @@ const RestaurantDetails = () => {
     dispatch(getAllMenuCategoryThunk({restaurant_id: id}));
     dispatch(getAllFoodRestThunk({restaurant_id: id}));
 
-    dispatch(restaurantActions.getProducts())
+    dispatch(restaurantActions.getProducts());
+    dispatch(restaurantActions.visitRest(id));
   }, [dispatch, id]);
   const restaurants = useSelector(state => state.restaurant.restaurants);
   console.log(restaurants);
@@ -150,18 +151,20 @@ const RestaurantDetails = () => {
                     </select>
                   </div>
                 </Col>
-
+                
+                <Container>
                 {menu__categories.map(cat => (
-                  <div className="mt-4">
+                  <Row className="mt-4">
                     <h2>{cat.menu_category_name}</h2>
                     {(displayPage && displayPage.filter(it => it.menu_category_id === cat.menu_category_id).length > 0) ? displayPage.filter(it => it.menu_category_id === cat.menu_category_id).map((item) => (
                         <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-3">
                             <ProductCard item={item} setVisible={setVisible} visible={visible}/>
                         </Col>
                     )) : <h5>No product</h5>}
-                  </div>
+                  </Row>
 
                 ))}
+                </Container>
               <div>
                 <ReactPaginate
                   pageCount={pageCount}

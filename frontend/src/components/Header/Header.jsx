@@ -10,7 +10,7 @@ import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 import "../../styles/header.css";
 import { authActions, logoutThunk } from "../../store/authSlice";
 import { addAddressesThunk, addressActions, getAddressesThunk } from "../../store/user/adressSlice";
-import { orderActions } from "../../store/user/orderSlice";
+import { getProductsUnpaidSinglePurchaseThunk, getUnpaidSinglePurchaseThunk, orderActions } from "../../store/user/orderSlice";
 import { Drawer, Input, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
@@ -73,6 +73,7 @@ const Header = () => {
   const [streetNo, setStreetNo] = useState("");
   const [buildingNo, setBuildingNo] = useState("");
   const [desc, setDesc] = useState("");
+  const [reload, setReload] = useState(false);
   
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
@@ -82,17 +83,28 @@ const Header = () => {
 
   const menuRef = useRef(null);
   const headerRef = useRef(null);
-  const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const dispatch = useDispatch();
 
   const addresses = useSelector(state => state.address.address);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
   const authType = useSelector(state => state.auth.authType);
   const userId = useSelector(state => state.auth.userId);
+  const cart = useSelector((state) => state.order.unpaidSinglePurchase);
+  const added = useSelector(state => state.order.itemAdded);
 
   useEffect(() => {
     dispatch(getAddressesThunk({userId}));
-  },[userId, dispatch])
+    dispatch(getUnpaidSinglePurchaseThunk({userId}));
+    dispatch(getProductsUnpaidSinglePurchaseThunk({userId}));
+  },[userId, dispatch, reload])
+
+  useEffect(() => {
+    if (added) {
+      dispatch(getUnpaidSinglePurchaseThunk({userId}));
+      dispatch(getProductsUnpaidSinglePurchaseThunk({userId}));
+      dispatch(orderActions.updateItemAdded());
+    }
+  }, [added, setReload, dispatch, userId]);
 
   const toggleMenu = () => menuRef.current?.classList.toggle("show__menu");
 
@@ -148,6 +160,8 @@ const Header = () => {
       detailed_desc: desc, 
     };
     dispatch(addAddressesThunk({userId, address}));
+    setReload(!reload);
+    setReload(!reload);
     dispatch(getAddressesThunk({userId}));
     addAddressToggle();
   }
@@ -292,7 +306,7 @@ const Header = () => {
             {authType === "customer" ? (
                <span className="cart__icon" onClick={toggleCart}>
                <i class="ri-shopping-basket-line"></i>
-               <span className="cart__badge">{totalQuantity}</span>
+               <span className="cart__badge">{cart?.products?.length}</span>
              </span>
             ): null}
             

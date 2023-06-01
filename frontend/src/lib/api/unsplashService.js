@@ -134,3 +134,49 @@ export const addNewMenuCategory= (menu) => (
 export const getAllMenuCategories = (id) => (
   axios.get(`${baseURL}/restaurant/allMenuCategories/${id}`)
 );
+
+// PURCHASES
+export const getUnpaidSinglePurchase = (id) => (
+  axios.get(`${baseURL}/purchase/getUnpaidSinglePurchase/${id}`)
+);
+
+export const getUnpaidGroupPurchase = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/getUnpaidGroupPurchase/${id}`)
+);
+
+export const getAllSinglePurchases = (id) => (
+  axios.get(`${baseURL}/purchase/getPaidSinglePurchases/${id}`)
+);
+
+export const getAllGroupPurchases = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/getPaidGroupPurchases/${id}`)
+);
+
+export const getProductUnpaidSinglePurchase = (id) => (
+  axios.get(`${baseURL}/purchase/getAllFoodAndIngredientsUnpaidSinglePurchase/${id}`)
+);
+
+export const getProductUnpaidGroupPurchase = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/getAllFoodAndIngredientsUnpaidGroupPurchase/${id}`)
+);
+
+export const addFoodToSinglePurchase= (food, id) => (
+  fetch(`${baseURL}/purchase/addFoodWithIngredient/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-type' : 'application/json'
+    }, 
+    body: JSON.stringify(food)
+  })
+);
+
+export const addFoodToGroupPurchase= (food, id) => (
+  fetch(`${baseURL}/purchaseGroup/addFoodWithIngredient/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-type' : 'application/json'
+    }, 
+    body: JSON.stringify(food)
+  })
+);
+

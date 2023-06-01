@@ -1,18 +1,19 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getAllFriends } from "../../lib/api/unsplashService";
+
+export const getFriendsThunk = createAsyncThunk('user/getFriends', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getAllFriends(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 const initialState = {
-    friends:[
-        {
-            id: 1,
-            name: "Ali",
-            email: "ali@gmail.com"
-        },
-        {
-            id: 2,
-            name: "Korhan",
-            email: "korhan@gmail.com"
-        },
-    ]
+    friends:[]
 };
 
 const friendsSlice = createSlice({
@@ -27,6 +28,13 @@ const friendsSlice = createSlice({
 
     // GROUP CART ACTIONS
 
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getFriendsThunk.fulfilled, (state, action) => {
+        state.friends = action.payload;
+        console.log(action.payload);
+      });
   },
 });
 

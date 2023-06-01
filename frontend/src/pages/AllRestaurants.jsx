@@ -10,7 +10,7 @@ import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import RestaurantCard from "../components/UI/restaurant/RestaurantCard";
 import { useDispatch, useSelector } from "react-redux";
-import { restaurantActions } from "../store/restaurant/restaurantSlice";
+import { getRestaurantsThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const AllRestaurants = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,15 +22,15 @@ const AllRestaurants = () => {
 
   useEffect(() => {
     dispatch(
-      restaurantActions.getRestaurants()
+      getRestaurantsThunk()
     );
-  });
+  }, [dispatch]);
 
-  const searchedRestaurant = restaurants.filter((item) => {
+  const searchedRestaurant = restaurants?.filter((item) => {
     if (searchTerm.value === "") {
       return item;
     }
-    if (item.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (item.restaurant_name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return item;
     } else {
       return console.log("not found");
@@ -39,12 +39,12 @@ const AllRestaurants = () => {
 
   const productPerPage = 12;
   const visitedPage = pageNumber * productPerPage;
-  const displayPage = searchedRestaurant.slice(
+  const displayPage = searchedRestaurant?.slice(
     visitedPage,
     visitedPage + productPerPage
   );
 
-  const pageCount = Math.ceil(searchedRestaurant.length / productPerPage);
+  const pageCount = Math.ceil(searchedRestaurant?.length / productPerPage);
 
   const changePage = ({ selected }) => {
     setPageNumber(selected);
@@ -82,8 +82,8 @@ const AllRestaurants = () => {
               </div>
             </Col>
 
-            {displayPage.map((item) => (
-              <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mb-4">
+            {displayPage?.map((item, index) => (
+              <Col lg="3" md="4" sm="6" xs="6" key={index} className="mb-4">
                 <RestaurantCard item={item} />
               </Col>
             ))}

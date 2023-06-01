@@ -12,6 +12,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
 import { groupsActions } from "../store/group/groupSlice";
 import { orderActions } from "../store/user/orderSlice";
+import { getFriendsThunk } from "../store/group/friendsSlice";
 
 const GroupDetails = () => {
 
@@ -46,7 +47,8 @@ const GroupDetails = () => {
 
     useEffect(() => {
       dispatch(groupsActions.getGroups({userId}));
-      setGroup(groups.find(group => `${group.id}` === id))
+      dispatch(getFriendsThunk({userId}));
+      setGroup(groups.find(group => `${group.id}` === id));
     }, [groups, id, dispatch, userId])
     
     const seeRestaurants = id => {
@@ -313,7 +315,7 @@ const GroupDetails = () => {
                         <DropdownToggle caret>{selectedFriend}</DropdownToggle>
                         <DropdownMenu>
                           {friends?.map((friend, index) => (
-                            <DropdownItem onClick={() => setSelectedFriend(friend.name)} key={friend.id}>{friend.name}</DropdownItem>
+                            <DropdownItem onClick={() => setSelectedFriend(friend.username)} key={friend.id}>{friend.username}</DropdownItem>
                           ))}
                         </DropdownMenu>
                       </Dropdown>

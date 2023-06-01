@@ -7,7 +7,7 @@ import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, Modal
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
-import { friendsActions } from "../store/group/friendsSlice";
+import { friendsActions, getFriendsThunk } from "../store/group/friendsSlice";
 
 const Friends = () => {
 
@@ -23,8 +23,8 @@ const Friends = () => {
 
 
     useEffect(() => {
-      dispatch(friendsActions.getFriends({userId}));
-    })
+      dispatch(getFriendsThunk({userId}));
+    }, [dispatch, userId]);
 
     const addMember = () => {
 
@@ -47,7 +47,7 @@ const Friends = () => {
                                 <Row style={{display: "flex"}}>
                                     <Col lg="10" md="10">
                                         <CardTitle tag="h3">
-                                            {member.name}
+                                            {member.username}
                                         </CardTitle>
                                     </Col>
                                 </Row>

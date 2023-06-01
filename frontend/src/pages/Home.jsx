@@ -32,6 +32,9 @@ import networkImg from "../assets/images/network.png";
 
 import TestimonialSlider from "../components/UI/slider/TestimonialSlider.jsx";
 import Restaurants from "../components/UI/restaurant/restaurants.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../lib/api/unsplashService.js";
+import { getUserThunk } from "../store/authSlice.js";
 
 const featureData = [
   {
@@ -57,12 +60,19 @@ const Home = () => {
   const [allProducts, setAllProducts] = useState(products);
 
   const [hotPizza, setHotPizza] = useState([]);
+  const dispatch = useDispatch();
+
+  const authType = useSelector(state => state.auth.authType);
+  const userId = useSelector(state => state.auth.userId);
 
   useEffect(() => {
     const filteredPizza = products.filter((item) => item.category === "Pizza");
     const slicePizza = filteredPizza.slice(0, 4);
     setHotPizza(slicePizza);
-  }, []);
+    if (userId !== 0) {
+      dispatch(getUserThunk({authType, userId}));
+    }
+  }, [dispatch, authType, userId]);
 
   useEffect(() => {
     if (category === "ALL") {

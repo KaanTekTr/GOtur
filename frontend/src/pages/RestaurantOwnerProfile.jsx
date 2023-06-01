@@ -8,9 +8,6 @@ const RestaurantOwnerProfile = () => {
   const [modal, setModal] = useState(false);
   const [password, setPassword] = useState('password'); // For simplicity, initial password is set to 'password'. Real password should not be stored like this.
 
-  // Get user data from the auth state
-  const user = useSelector(state => state.auth);
-
   const toggleModal = () => setModal(!modal);
 
   const handlePasswordChange = (e) => {
@@ -20,17 +17,21 @@ const RestaurantOwnerProfile = () => {
     toggleModal();
   };
 
+  const user = useSelector(state => state.auth.user);
+  const authType = useSelector(state => state.auth.authType);
+
   return (
     <Helmet title="Profile">
     <Container>
       <Card body>
-        <CardTitle tag="h5">Restaurant Owner Profile</CardTitle>
-        <p>Name: {user.fullName}</p>
+        <CardTitle tag="h5">{authType ==="customer" ? "Customer" : "Restaurant Owner"} Profile</CardTitle>
+        <p>Name: {user.username}</p>
         <p>Email: {user.email}</p>
-        <p>Birthdate: {user.birthdate}</p>
+        <p>Age: {user.age}</p>
         <p>Gender: {user.gender}</p>
-        <p>User Type: {user.authType}</p>
-        <p>Phone Number: {user.phoneNumber}</p>
+        <p>User Type: {authType}</p>
+        <p>Phone Number: {user.phone_number}</p>
+        <p>Balance: {user.balance} $</p>
         <div>
         <Button color="primary" onClick={toggleModal}>Change Password</Button>
         </div>

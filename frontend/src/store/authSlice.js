@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { userLogin, userLogout } from "../lib/api/unsplashService";
+import { getUser, userLogin, userLogout, userRegister } from "../lib/api/unsplashService";
 
 export const loginThunk = createAsyncThunk('auth/login', 
   async (data, thunkAPI) => {
@@ -24,6 +24,29 @@ export const logoutThunk = createAsyncThunk('auth/logout',
   }
 )
 
+export const registerThunk = createAsyncThunk('auth/register', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await userRegister(data.authType, data.user);
+      return {response, nav: data.navigate};
+    } catch (error) {
+      console.log(error);
+    }
+  }
+)
+
+export const getUserThunk = createAsyncThunk('auth/getUser', 
+  async (data, thunkAPI) => {
+    try {
+      console.log(data.userId);
+      const  response = await getUser(data.authType, data.userId);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: "cartUi",
   initialState: {
@@ -31,12 +54,7 @@ const authSlice = createSlice({
     status: localStorage.getItem('userId') ? 'authenticated' : 'not-authenticated',
     key: localStorage.getItem('key'),
     userId: localStorage.getItem('userId'),
-    email: localStorage.getItem('email'),
-    fullName: localStorage.getItem('fullName'),
-    password: localStorage.getItem('password'),
-    birthdate: localStorage.getItem('birthdate'),
-    gender: localStorage.getItem('gender'),
-    phoneNumber: localStorage.getItem('phoneNumber'),
+    user: JSON.parse(localStorage.getItem('user'))
   },
 
 
@@ -47,6 +65,7 @@ const authSlice = createSlice({
     }, 
     changeAuthType(state, action) {
       state.authType = action.payload;
+      localStorage.setItem('authType', action.payload);
     }
     
   },
@@ -61,6 +80,16 @@ const authSlice = createSlice({
         state.status = "not-authenticated";
         localStorage.removeItem('userId');
         state.userId = 0;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        action.payload.nav("/login");
+        console.log(action.payload);
+      })
+      .addCase(getUserThunk.fulfilled, (state, action) => {
+        if (action.payload )
+          localStorage.setItem('user', JSON.stringify(action.payload));
+        state.user = action.payload;
+        console.log(action.payload);
       })
   },
 });

@@ -2,9 +2,9 @@ import React, { useRef, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import { Container, Row, Col } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { authActions } from "../store/authSlice";
+import { authActions, registerThunk } from "../store/authSlice";
 
 const Register = () => {
   const signupNameRef = useRef();
@@ -19,13 +19,14 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
-  const [birthdate, setBirthdate] = useState("");
+  const [age, setAge] = useState(0);
   const [gender, setGender] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [authType, setUserType] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -35,17 +36,31 @@ const Register = () => {
       return;
     }
 
-    dispatch(
-      authActions.register({
-        email,
-        fullName,
-        password,
-        birthdate,
-        gender,
-        authType,
-        phoneNumber
-      })
-    );
+    const customer = {
+      username: fullName,
+      hashed_password: password,
+      password_salt: password,
+      email,
+      phone_number: phoneNumber,
+      age,
+      gender,
+      payment_method: "Money"
+    }
+
+    const restaurantOwner = {
+      username: fullName,
+      hashed_password: password,
+      password_salt: password,
+      email,
+      phone_number: phoneNumber,
+      age,
+      gender,
+    }
+    if (authType === "customer") {
+      dispatch(registerThunk({authType, user:customer, navigate}));
+    } else {
+      dispatch(registerThunk({authType, user:restaurantOwner, navigate}));
+    }
   };
 
   return (
@@ -59,7 +74,7 @@ const Register = () => {
                 <div className="form__group">
                   <input
                     type="text"
-                    placeholder="Full name"
+                    placeholder="Username"
                     required
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
@@ -108,11 +123,11 @@ const Register = () => {
                 </div>
                 <div className="form__group">
                   <input
-                    type="date"
-                    placeholder="Birthdate"
+                    type="number"
+                    placeholder="21"
                     required
-                    value={birthdate}
-                    onChange={e => setBirthdate(e.target.value)}
+                    value={age}
+                    onChange={e => setAge(e.target.value)}
                     ref={signupBirthdateRef}
                   />
                 </div>

@@ -139,7 +139,7 @@ const RestaurantMenu = () => {
   
     return (
         <Helmet title="Restaurant Menu">
-          <CommonSection title={restaurant.title} desc={restaurant.minPrice} image={restaurant.image01} />
+          <CommonSection title={restaurant.info.restaurant_name} desc={restaurant.info.min_delivery_price} image={restaurant.image01} />
     
           <section>
             <Container>

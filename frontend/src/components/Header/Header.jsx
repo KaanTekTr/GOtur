@@ -27,13 +27,19 @@ const nav__links = [
   {
     display: "Restaurants",
     path: "/restaurants",
-  },
-  {
-    display: "Contact",
-    path: "/contact",
-  },
+  }
 ];
 
+const owner_nav__links = [
+  {
+    display: "Home",
+    path: "/restaurantOwnerHome",
+  },
+  {
+    display: "My Restaurant",
+    path: "/restaurant-info",
+  }
+];
 
 const ownerLinks = [
   { display: 'My Balance', path: '/balance', icon: <AccountCircleIcon /> },
@@ -161,7 +167,7 @@ const Header = () => {
           {/* ======= menu ======= */}
           <div className="navigation" ref={menuRef} onClick={toggleMenu}>
             <div className="menu d-flex align-items-center gap-5">
-              {nav__links.map((item, index) => (
+              {(authType === "customer" ? nav__links: owner_nav__links).map((item, index) => (
                 <NavLink
                   to={item.path}
                   key={index}
@@ -177,9 +183,11 @@ const Header = () => {
           </div>
 
           <div>
-            <Button color="danger" onClick={toggle}>
-              Address
-            </Button>
+            {authType === "customer" ? (
+               <Button color="danger" onClick={toggle}>
+               Address
+             </Button>
+            ): null}
             <Modal className="modal-x" isOpen={modal} toggle={toggle} >
               <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
               <ModalBody>   
@@ -281,10 +289,13 @@ const Header = () => {
 
           {/* ======== nav right icons ========= */}
           <div className="nav__right d-flex align-items-center gap-4">
-            <span className="cart__icon" onClick={toggleCart}>
-              <i class="ri-shopping-basket-line"></i>
-              <span className="cart__badge">{totalQuantity}</span>
-            </span>
+            {authType === "customer" ? (
+               <span className="cart__icon" onClick={toggleCart}>
+               <i class="ri-shopping-basket-line"></i>
+               <span className="cart__badge">{totalQuantity}</span>
+             </span>
+            ): null}
+            
 
             <span className="user" onClick={logOut}>
               <Link to="/login">

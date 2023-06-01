@@ -47,8 +47,8 @@ const RestaurantInfoPage = () => {
   return (
     <>
     { restaurant.info ? 
-    <Container>
-    <Card body>
+    <Container className='mt-4 mb-4' >
+    <Card className='p-4' style={{marginBottom:"200px", marginTop:"50px"}} body>
       <CardTitle tag="h5">My Restaurant Information</CardTitle>
       <p>Restaurant Name: {restaurant.info.restaurant_name}</p>
       <p>Restaurant Address: {restaurant.info.district}</p>

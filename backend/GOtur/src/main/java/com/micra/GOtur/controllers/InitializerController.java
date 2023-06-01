@@ -393,7 +393,8 @@ public class InitializerController {
                         "\n" +
                         "    SELECT R.coupon_limit\n" +
                         "    INTO coupon_limit\n" +
-                        "    FROM Restaurant R NATURAL JOIN Purchase P;\n" +
+                        "    FROM Restaurant R NATURAL JOIN Purchase P\n" +
+                        "    WHERE P.purchase_id = NEW.purchase_id;\n" +
                         "\n" +
                         "   IF NEW.is_paid = 1 AND OLD.is_paid = 0 AND NEW.total_price >= coupon_limit\n" +
                         "   THEN\n" +

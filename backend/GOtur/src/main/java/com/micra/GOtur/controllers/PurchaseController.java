@@ -208,7 +208,8 @@ public class PurchaseController {
     @PostMapping("/completePurchase/{purchaseId}")
     public ResponseEntity<String> completePurchaseByPurchaseId(@PathVariable("purchaseId") int purchaseId,
                                                                @RequestParam int addressId,
-                                                               @RequestParam String customerNote) {
+                                                               @RequestParam String customerNote,
+                                                               @RequestParam int couponId) {
         // check if the customer has an unpaid single purchase
         String checkSql = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_group_purchase = 0 AND P.is_paid = 0);";
         boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, purchaseId);
@@ -227,7 +228,7 @@ public class PurchaseController {
 
         // get the total price of the purchase
         String getTotalPriceSql = "SELECT P.total_price FROM Purchase P WHERE P.purchase_id = ?;";
-        int total_price = jdbcTemplate.queryForObject(getTotalPriceSql, Integer.class, purchaseId);
+        float total_price = jdbcTemplate.queryForObject(getTotalPriceSql, Float.class, purchaseId);
 
         if ( balance < total_price ) { // if the customer balance is not enough
             return new ResponseEntity<>("The Balance Of The Customer Is Not Enough To Complete This Transaction!", HttpStatus.BAD_REQUEST);
@@ -239,6 +240,17 @@ public class PurchaseController {
 
         if ( total_price < min_delivery_price ) { // if the total price is less than the min delivery
             return new ResponseEntity<>("The Total Price Of The Purchase: " + total_price + " Is Less Than The Minimum Delivery Price Of The Restaurant!", HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the discount coupon is active and exists
+        String checkCouponSql = "SELECT EXISTS (SELECT * FROM DiscountCoupon D WHERE D.coupon_id = ? AND D.is_used = 0);";
+        boolean existsCoupon = jdbcTemplate.queryForObject(checkCouponSql, Boolean.class, couponId);
+
+        if ( existsCoupon ) { // if coupon is valid, get the discount percentage of the restaurant and apply
+            String getDiscountSql = "SELECT R.discount_percentage FROM Purchase P NATURAL JOIN Restaurant R WHERE P.purchase_id = ?;";
+            float discount_percentage = jdbcTemplate.queryForObject(getDiscountSql, Integer.class, purchaseId);
+
+            total_price = (total_price * (100 - discount_percentage)) / 100; // get the discounted total price
         }
 
         // Update the purchase

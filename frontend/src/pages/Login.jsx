@@ -35,7 +35,8 @@ const Login = () => {
   const submitHandlerRestaurant = (e) => {
     e.preventDefault();
     dispatch(authActions.changeAuthType("restaurantOwner"));
-    dispatch(authActions.login({
+    dispatch(loginThunk({
+      authType,
       email,
       password
     }));

@@ -224,7 +224,7 @@ public class PurchaseController {
 
         // get the balance of the customer
         String getBalanceSql = "SELECT C.balance FROM Customer C WHERE C.user_id = ?;";
-        int balance = jdbcTemplate.queryForObject(getBalanceSql, Integer.class, customerId);
+        float balance = jdbcTemplate.queryForObject(getBalanceSql, Float.class, customerId);
 
         // get the total price of the purchase
         String getTotalPriceSql = "SELECT P.total_price FROM Purchase P WHERE P.purchase_id = ?;";
@@ -251,6 +251,10 @@ public class PurchaseController {
             float discount_percentage = jdbcTemplate.queryForObject(getDiscountSql, Integer.class, purchaseId);
 
             total_price = (total_price * (100 - discount_percentage)) / 100; // get the discounted total price
+
+            // Update the discount coupon to used
+            String sql = "UPDATE DiscountCoupon D SET D.is_used = 1 WHERE D.coupon_id = ?;";
+            jdbcTemplate.update(sql, couponId);
         }
 
         // Update the purchase

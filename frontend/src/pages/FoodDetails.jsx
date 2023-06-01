@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import products from "../assets/fake-data/products";
 import { useParams } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
@@ -10,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../store/shopping-cart/cartSlice";
 
 import "../styles/product-details.css";
+import image01 from "../assets/images/bread.png"; 
 
 import ProductCard from "../components/UI/product-card/ProductCard";
 import { groupsActions } from "../store/group/groupSlice";
@@ -22,11 +22,20 @@ const FoodDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const product = products.find((product) => product.id === id);
-  const [previewImg, setPreviewImg] = useState(product.image01);
-  const { title, price, category, desc, image01 } = product;
+  const products = useSelector(state => state.restaurant.products);
+  const food__categories = useSelector(state => state.restaurant.foodCategories);
+  const menu__categories = useSelector(state => state.restaurant.menuCategories);
 
-  const relatedProduct = products.filter((item) => category === item.category);
+
+  const product = products.find((product) => `${product.food_id}` === id);
+
+  const foodCategory = food__categories.find(cat => cat.food_category_id === product.food_category_id);
+  const menuCategory = menu__categories.find(cat => cat.menu_category_id === product.menu_category_id);
+
+  const [previewImg, setPreviewImg] = useState(image01);
+  const { food_name, price, fixed_ingredients } = product;
+
+  //const relatedProduct = products.filter((item) => category === item.category);
 
   const selectedCart = useSelector(state => state.order.currentCart);
 
@@ -35,7 +44,7 @@ const FoodDetails = () => {
       dispatch(
         cartActions.addItem({
           id,
-          title,
+          title: food_name,
           image01,
           price,
         })
@@ -45,7 +54,7 @@ const FoodDetails = () => {
         groupsActions.addItem({ 
           newItem: {
             id,
-            title,
+            title: food_name,
             image01,
             price,
           },
@@ -71,7 +80,7 @@ const FoodDetails = () => {
 
   return (
     <Helmet title="Product-details">
-      <CommonSection title={title} />
+      <CommonSection title={food_name} />
 
       <section>
         <Container>
@@ -80,22 +89,9 @@ const FoodDetails = () => {
               <div className="product__images ">
                 <div
                   className="img__item mb-3"
-                  onClick={() => setPreviewImg(product.image01)}
+                  onClick={() => setPreviewImg(image01)}
                 >
-                  <img src={product.image01} alt="" className="w-50" />
-                </div>
-                <div
-                  className="img__item mb-3"
-                  onClick={() => setPreviewImg(product.image02)}
-                >
-                  <img src={product.image02} alt="" className="w-50" />
-                </div>
-
-                <div
-                  className="img__item"
-                  onClick={() => setPreviewImg(product.image03)}
-                >
-                  <img src={product.image03} alt="" className="w-50" />
+                  <img src={image01} alt="" className="w-50" />
                 </div>
               </div>
             </Col>
@@ -108,13 +104,16 @@ const FoodDetails = () => {
 
             <Col lg="6" md="6">
               <div className="single__product-content">
-                <h2 className="product__title mb-3">{title}</h2>
+                <h2 className="product__title mb-3">{food_name}</h2>
                 <p className="product__price">
                   {" "}
                   Price: <span>${price}</span>
                 </p>
+                <p className="category mb-1">
+                  Food Category: <span>{foodCategory.food_category_name}</span>
+                </p>
                 <p className="category mb-5">
-                  Category: <span>{category}</span>
+                  Menu Category: <span>{menuCategory.menu_category_name}</span>
                 </p>
 
                 <button onClick={addToCart} className="addTOCart__btn">
@@ -141,7 +140,7 @@ const FoodDetails = () => {
 
               {tab === "desc" ? (
                 <div className="tab__content">
-                  <p>{desc}</p>
+                  <h5>Fixed Ingrediens: {fixed_ingredients}</h5>
                 </div>
               ) : (
                 <div className="tab__form mb-3">
@@ -162,39 +161,7 @@ const FoodDetails = () => {
                     <p className="user__email">jhon1@gmail.com</p>
                     <p className="feedback__text">great product</p>
                   </div>
-                  <form className="form" onSubmit={submitHandler}>
-                    <div className="form__group">
-                      <input
-                        type="text"
-                        placeholder="Enter your name"
-                        onChange={(e) => setEnteredName(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form__group">
-                      <input
-                        type="text"
-                        placeholder="Enter your email"
-                        onChange={(e) => setEnteredEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form__group">
-                      <textarea
-                        rows={5}
-                        type="text"
-                        placeholder="Write your review"
-                        onChange={(e) => setReviewMsg(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <button type="submit" className="addTOCart__btn">
-                      Submit
-                    </button>
-                  </form>
+                  
                 </div>
               )}
             </Col>
@@ -203,7 +170,7 @@ const FoodDetails = () => {
               <h2 className="related__Product-title">You might also like</h2>
             </Col>
 
-            {relatedProduct.map((item) => (
+            {products.map((item) => (
               <Col lg="3" md="4" sm="6" xs="6" className="mb-4" key={item.id}>
                 <ProductCard item={item} />
               </Col>

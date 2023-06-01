@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import restaurants from "../../assets/fake-data/restaurants";
 import products from "../../assets/fake-data/products";
-import { getAllFoodCategory, getAllRestaurants } from "../../lib/api/unsplashService";
+import { getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants } from "../../lib/api/unsplashService";
 
 export const getRestaurantsThunk = createAsyncThunk('user/getRestaurants', 
   async () => {
@@ -26,9 +26,33 @@ export const getAllFoodCategoryThunk = createAsyncThunk('user/getFoodCategories'
   }
 );
 
+export const getAllMenuCategoryThunk = createAsyncThunk('user/getMenuCategories', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getAllMenuCategories(data.restaurant_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getAllFoodRestThunk = createAsyncThunk('user/getFoodRest', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getAllFoodsOfRest(data.restaurant_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 const initialState = {
     restaurants: [],
-    products: products
+    foodCategories: [],
+    menuCategories: [],
+    products: []
 };
 
 const restaurantSlice = createSlice({
@@ -51,6 +75,15 @@ const restaurantSlice = createSlice({
         console.log(action.payload);
       })
       .addCase(getAllFoodCategoryThunk.fulfilled, (state, action) => {
+        state.foodCategories = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(getAllFoodRestThunk.fulfilled, (state, action) => {
+        state.products = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(getAllMenuCategoryThunk.fulfilled, (state, action) => {
+        state.menuCategories = action.payload;
         console.log(action.payload);
       })
   },

@@ -17,7 +17,7 @@ import { useParams } from "react-router-dom";
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllFoodCategoryThunk, getRestaurantsThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
+import { getAllFoodCategoryThunk, getAllFoodRestThunk, getAllMenuCategoryThunk, getRestaurantsThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const RestaurantDetails = () => {
   const [category, setCategory] = useState("ALL");
@@ -28,6 +28,9 @@ const RestaurantDetails = () => {
   useEffect(() => {
     dispatch(getRestaurantsThunk());
     dispatch(getAllFoodCategoryThunk({restaurant_id: id}));
+    dispatch(getAllMenuCategoryThunk({restaurant_id: id}));
+    dispatch(getAllFoodRestThunk({restaurant_id: id}));
+
     dispatch(restaurantActions.getProducts())
   }, [dispatch, id]);
   const restaurants = useSelector(state => state.restaurant.restaurants);
@@ -42,13 +45,16 @@ const RestaurantDetails = () => {
 
   
   const products = useSelector(state => state.restaurant.products);
+  const food__categories = useSelector(state => state.restaurant.foodCategories);
+  const menu__categories = useSelector(state => state.restaurant.menuCategories);
+
   const [allProducts, setAllProducts] = useState(products);
 
   const searchedProduct = allProducts.filter((item) => {
     if (searchTerm.value === "") {
       return item;
     }
-    if (item.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (item.food_name?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return item;
     } else {
       return console.log("not found");
@@ -72,31 +78,17 @@ const RestaurantDetails = () => {
     if (category === "ALL") {
       setAllProducts(products);
     }
-
-    if (category === "BURGER") {
-      const filteredProducts = products.filter(
-        (item) => item.category === "Burger"
-      );
-
-      setAllProducts(filteredProducts);
-    }
-
-    if (category === "PIZZA") {
-      const filteredProducts = products.filter(
-        (item) => item.category === "Pizza"
-      );
-
-      setAllProducts(filteredProducts);
-    }
-
-    if (category === "BREAD") {
-      const filteredProducts = products.filter(
-        (item) => item.category === "Bread"
-      );
-
-      setAllProducts(filteredProducts);
-    }
-  }, [category, products]);
+    food__categories.forEach(cat => {
+      if (category === cat.food_category_name) {
+        const filteredProducts = products.filter(
+          (item) => item.food_category_id === cat.food_category_id
+        );
+  
+        setAllProducts(filteredProducts);
+      }
+      
+    });
+  }, [category, products, food__categories]);
 
   const [visible, setVisible] = useState(false);
 
@@ -121,35 +113,17 @@ const RestaurantDetails = () => {
                     >
                         All
                     </button>
-                    <button
-                        className={`d-flex align-items-center gap-2 ${
-                        category === "BURGER" ? "foodBtnActive" : ""
-                        } `}
-                        onClick={() => setCategory("BURGER")}
-                    >
-                        <img src={foodCategoryImg01} alt="" />
-                        Burger
-                    </button>
-  
-                    <button
-                        className={`d-flex align-items-center gap-2 ${
-                        category === "PIZZA" ? "foodBtnActive" : ""
-                        } `}
-                        onClick={() => setCategory("PIZZA")}
-                    >
-                        <img src={foodCategoryImg02} alt="" />
-                        Pizza
-                    </button>
-  
-                    <button
-                        className={`d-flex align-items-center gap-2 ${
-                        category === "BREAD" ? "foodBtnActive" : ""
-                        } `}
-                        onClick={() => setCategory("BREAD")}
-                    >
-                        <img src={foodCategoryImg03} alt="" />
-                        Bread
-                    </button>
+                    {food__categories.map(cat => (
+                      <button
+                          className={`d-flex align-items-center gap-2 ${
+                          category === cat.food_category_name ? "foodBtnActive" : ""
+                          } `}
+                          onClick={() => setCategory(cat.food_category_name)}
+                      >
+                          <img src={foodCategoryImg01} alt="" />
+                          {cat.food_category_name}
+                      </button>
+                    ))}
                     </div>
                 </Col>
                 <Col lg="6" md="3" sm="6" xs="12">
@@ -176,12 +150,18 @@ const RestaurantDetails = () => {
                     </select>
                   </div>
                 </Col>
-  
-                {displayPage.map((item) => (
-                    <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
-                        <ProductCard item={item} setVisible={setVisible} visible={visible}/>
-                    </Col>
-                ))}  
+
+                {menu__categories.map(cat => (
+                  <div className="mt-4">
+                    <h2>{cat.menu_category_name}</h2>
+                    {(displayPage && displayPage.filter(it => it.menu_category_id === cat.menu_category_id).length > 0) ? displayPage.filter(it => it.menu_category_id === cat.menu_category_id).map((item) => (
+                        <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-3">
+                            <ProductCard item={item} setVisible={setVisible} visible={visible}/>
+                        </Col>
+                    )) : <h5>No product</h5>}
+                  </div>
+
+                ))}
               <div>
                 <ReactPaginate
                   pageCount={pageCount}

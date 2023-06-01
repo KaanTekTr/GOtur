@@ -4,12 +4,14 @@ import "../../../styles/product-card.css";
 
 import { Link, useNavigate } from "react-router-dom";
 
+import image01 from "../../../assets/images/bread.png"; 
+
 import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../../../store/shopping-cart/cartSlice";
 import { groupsActions } from "../../../store/group/groupSlice";
 
 const ProductCard = (props) => {
-  const { id, title, image01, price } = props.item;
+  const { food_id, food_name, price } = props.item;
   const dispatch = useDispatch();
 
   const selectedCart = useSelector(state => state.order.currentCart);
@@ -18,8 +20,8 @@ const ProductCard = (props) => {
     if (selectedCart === 0) {
       dispatch(
         cartActions.addItem({
-          id,
-          title,
+          id: food_id,
+          title: food_name,
           image01,
           price,
         })
@@ -28,8 +30,8 @@ const ProductCard = (props) => {
       dispatch(
         groupsActions.addItem({ 
           newItem: {
-            id,
-            title,
+            id: food_id,
+            title: food_name,
             image01,
             price,
           },
@@ -45,7 +47,7 @@ const ProductCard = (props) => {
 
   const navigate = useNavigate();
   const navToFood = () => {
-    navigate(`/foods/${id}`)
+    navigate(`/foods/${food_id}`)
   }
 
   return (
@@ -56,7 +58,7 @@ const ProductCard = (props) => {
 
       <div className="product__content">
         <h5>
-          <Link to={`/foods/${id}`}>{title}</Link>
+          <Link to={`/foods/${food_id}`}>{food_name}</Link>
         </h5>
         <div className=" d-flex align-items-center justify-content-between ">
           <span className="product__price">${price}</span>

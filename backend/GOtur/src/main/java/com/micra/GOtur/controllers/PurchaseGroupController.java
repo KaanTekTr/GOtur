@@ -139,6 +139,14 @@ public class PurchaseGroupController {
         return purchaseItemList;
     }
 
+    @GetMapping("/getAllPurchaseGroups/{customerId}")
+    public List<PurchaseGroup> getAllPurchaseGroupsOfCustomerByCustomerId(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM PurchaseGroup PG WHERE PG.group_id IN (SELECT F.group_id FROM Forms F WHERE F.group_member_id = ?);";
+        List<PurchaseGroup> list = jdbcTemplate.query(sql, new PurchaseGroupMapper(), customerId);
+
+        return list;
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addPurchaseGroup(@RequestBody PurchaseGroup purchaseGroup) {
 

@@ -73,32 +73,37 @@ public class ProfileController {
 
     @PostMapping("/logout/customer/{customerId}")
     public ResponseEntity<String> logOutCustomer(@PathVariable("customerId") int customerId) {
-        String sql = "SELECT * FROM Customer C, User U, Token T WHERE U.user_id = C.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
+        String sql = "SELECT T.token_id, T.user_id, T.token, T.is_actively_used, T.last_active FROM Customer C, User U, Token T WHERE U.user_id = C.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
         Token token = jdbcTemplate.queryForObject(sql, new TokenMapper(), customerId );
 
         if ( token.is_actively_used() ) {
             String logoutsql = "UPDATE Token T SET T.last_active = ?, T.is_actively_used = ? WHERE T.token_id = ?;";
             jdbcTemplate.update(logoutsql, LocalDateTime.now(), false, token.getToken_id());
+            String deleteSql = "DELETE FROM Token T WHERE T.token_id = ?;";
+            jdbcTemplate.update(deleteSql, token.getToken_id()); // delete the token
+
             return new ResponseEntity<>("Log out successful", HttpStatus.OK);
         }
         else {
             return  new ResponseEntity<>("The customer with id  "+ customerId + " is not logged in.", HttpStatus.BAD_REQUEST);
         }
-
-
     }
+
     @PostMapping("/logout/restaurantOwner/{restaurantOwnerId}")
     public ResponseEntity<String> logOutRestaurantOwner(@PathVariable("restaurantOwnerId") int restaurantOwnerID) {
-        String sql = "SELECT * FROM RestaurantOwner R, User U, Token T WHERE U.user_id = R.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
+        String sql = "SELECT T.token_id, T.user_id, T.token, T.is_actively_used, T.last_active FROM RestaurantOwner R, User U, Token T WHERE U.user_id = R.user_id AND U.user_id = T.user_id AND U.user_id = ?;";
         Token token = jdbcTemplate.queryForObject(sql, new TokenMapper(), restaurantOwnerID);
 
         if (token.is_actively_used()) {
             String logoutsql = "UPDATE Token T SET T.last_active = ?, T.is_actively_used = ? WHERE T.token_id = ?;";
             jdbcTemplate.update(logoutsql, LocalDateTime.now(), false, token.getToken_id());
+            String deleteSql = "DELETE FROM Token T WHERE T.token_id = ?;";
+            jdbcTemplate.update(deleteSql, token.getToken_id()); // delete the toke
             return new ResponseEntity<>("Log out successful", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("The Restaurant Owner with id  " + restaurantOwnerID + " is not logged in.", HttpStatus.BAD_REQUEST);
         }
     }
+
 
 }

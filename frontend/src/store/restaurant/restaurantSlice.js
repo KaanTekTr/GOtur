@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import restaurants from "../../assets/fake-data/restaurants";
 import products from "../../assets/fake-data/products";
-import { getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants } from "../../lib/api/unsplashService";
+import { addNewFood, addNewMenuCategory, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
 
 export const getRestaurantsThunk = createAsyncThunk('user/getRestaurants', 
   async () => {
@@ -48,11 +48,47 @@ export const getAllFoodRestThunk = createAsyncThunk('user/getFoodRest',
   }
 );
 
+export const getRestOfOwnerThunk = createAsyncThunk('user/getOwnRest', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getRestaurantsOfOwner(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addNewFoodThunk = createAsyncThunk('rest/addFood', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewFood(data.food);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addNewMenuCatThunk = createAsyncThunk('rest/addMenuCat', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewMenuCategory(data.category);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 const initialState = {
     restaurants: [],
     foodCategories: [],
     menuCategories: [],
-    products: []
+    products: [],
+    myRestaurant: {
+      info: JSON.parse(localStorage.getItem("info"))
+    }
 };
 
 const restaurantSlice = createSlice({
@@ -84,6 +120,17 @@ const restaurantSlice = createSlice({
       })
       .addCase(getAllMenuCategoryThunk.fulfilled, (state, action) => {
         state.menuCategories = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(getRestOfOwnerThunk.fulfilled, (state, action) => {
+        state.myRestaurant.info = action.payload[0];
+        localStorage.setItem("info", JSON.stringify(action.payload[0]));
+        console.log(action.payload);
+      })
+      .addCase(addNewFoodThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
+      .addCase(addNewMenuCatThunk.fulfilled, (state, action) => {
         console.log(action.payload);
       })
   },

@@ -5,11 +5,14 @@ import "../../../styles/product-card.css";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from 'reactstrap';
 
+import image01 from "../../../assets/images/bread.png";
+
+
 import { useDispatch, useSelector } from "react-redux";
 import { restaurantActions } from "../../../store/restaurant/restaurantSlice";
 
 const MenuItem = (props) => {
-  const { id, title, image01, price } = props.item;
+  const { food_id, food_name, price } = props.item;
   const dispatch = useDispatch();
 
   // New state for the new price form
@@ -31,7 +34,7 @@ const MenuItem = (props) => {
 
   const navigate = useNavigate();
   const navToFood = () => {
-    navigate(`/foods/${id}`)
+    navigate(`/foods/${food_id}`)
   }
 
   return (
@@ -42,7 +45,7 @@ const MenuItem = (props) => {
 
       <div className="product__content">
         <h5>
-          <Link to={`/foods/${id}`}>{title}</Link>
+          <Link to={`/foods/${food_id}`}>{food_name}</Link>
         </h5>
         <div className=" d-flex align-items-center justify-content-between ">
           <span className="product__price">${price}</span>

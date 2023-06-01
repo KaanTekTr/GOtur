@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Alert,Button, Input } from "reactstrap";
+import { Container, Row, Col, Alert,Button, Input, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 
 import MenuItem from "../components/UI/menu-item/MenuItem";
 import ReactPaginate from "react-paginate";
@@ -17,30 +17,35 @@ import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import restaurants from "../assets/fake-data/restaurants";
 import { useDispatch, useSelector } from "react-redux";
-import { restaurantActions } from "../store/restaurant/restaurantSlice";
+import { addNewFoodThunk, addNewMenuCatThunk, getAllFoodCategoryThunk, getAllFoodRestThunk, getAllMenuCategoryThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const RestaurantMenu = () => {
     const [category, setCategory] = useState("ALL");
   
     const { id } = useParams();
-    const restaurant = restaurants.find((restaurant) => restaurant.id === id);
+    const restaurant = useSelector(state => state.restaurant.myRestaurant);
     
     const [searchTerm, setSearchTerm] = useState("");
     const [pageNumber, setPageNumber] = useState(0);
+    const [reload, setReload] = useState(false);
   
     const dispatch = useDispatch();
     useEffect(() => {
-      dispatch(restaurantActions.getProducts())
-    })
+      dispatch(getAllFoodCategoryThunk({restaurant_id: restaurant.info.restaurant_id}));
+      dispatch(getAllMenuCategoryThunk({restaurant_id: restaurant.info.restaurant_id}));
+      dispatch(getAllFoodRestThunk({restaurant_id: restaurant.info.restaurant_id}));
+    }, [dispatch, restaurant, reload]);
     
     const products = useSelector(state => state.restaurant.products);
+    const food__categories = useSelector(state => state.restaurant.foodCategories);
+    const menu__categories = useSelector(state => state.restaurant.menuCategories);
     const [allProducts, setAllProducts] = useState(products);
   
     const searchedProduct = allProducts.filter((item) => {
       if (searchTerm.value === "") {
         return item;
       }
-      if (item.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (item.food_name?.toLowerCase().includes(searchTerm.toLowerCase())) {
         return item;
       } else {
         return console.log("not found");
@@ -64,41 +69,27 @@ const RestaurantMenu = () => {
       if (category === "ALL") {
         setAllProducts(products);
       }
-  
-      if (category === "BURGER") {
-        const filteredProducts = products.filter(
-          (item) => item.category === "Burger"
-        );
-  
-        setAllProducts(filteredProducts);
-      }
-  
-      if (category === "PIZZA") {
-        const filteredProducts = products.filter(
-          (item) => item.category === "Pizza"
-        );
-  
-        setAllProducts(filteredProducts);
-      }
-  
-      if (category === "BREAD") {
-        const filteredProducts = products.filter(
-          (item) => item.category === "Bread"
-        );
-  
-        setAllProducts(filteredProducts);
-      }
-    }, [category, products]);
+      food__categories.forEach(cat => {
+        if (category === cat.food_category_name) {
+          const filteredProducts = products.filter(
+            (item) => item.food_category_id === cat.food_category_id
+          );
+    
+          setAllProducts(filteredProducts);
+        }
+        
+      });
+    }, [category, products, food__categories]);
   
     const [visible, setVisible] = useState(false);
   
     const onDismiss = () => setVisible(false);
   
-    const [newProduct, setNewProduct] = useState({
-      title: '',
-      price: '',
-      category: '',
-    });
+    const [newProduct, setNewProduct] = useState("");
+    const [newProductPrice, setNewProductPrice] = useState(0);
+    const [menuCategory, setMenuCategory] = useState("");
+    const [foodCategory, setFoodCategory] = useState("");
+
   
     const [newCategory, setNewCategory] = useState('');
   
@@ -109,10 +100,24 @@ const RestaurantMenu = () => {
     };
   
     const addProduct = () => {
-      if (newProduct.title && newProduct.price && newProduct.category) {
-        // dispatch(restaurantActions.addProduct(newProduct));
-  
-        setNewProduct({ title: '', price: '', category: '' });
+      if (newProduct && newProductPrice && menuCategory !== "0" && foodCategory !== "0") {
+        const food = {
+          food_category_id: foodCategory,
+          restaurant_id: restaurant.info.restaurant_id,
+          menu_category_id: menuCategory,
+          food_name: newProduct,
+          fixed_ingredients: "...",
+          price: newProductPrice
+        }
+
+        dispatch(addNewFoodThunk({food}));
+        setReload(!reload);
+        setReload(!reload);
+
+        setNewProduct("");
+        setNewProductPrice(0);
+        setMenuCategory("0");
+        setFoodCategory("0");
       } else {
         console.error('All fields must be filled out to add a new product');
       }
@@ -120,7 +125,11 @@ const RestaurantMenu = () => {
   
     const addCategory = () => {
       if (newCategory) {
-        // dispatch(restaurantActions.addCategory(newCategory));
+        const cat = {
+          restaurant_id: restaurant.info.restaurant_id,
+          menu_category_name: newCategory,
+        };
+        dispatch(addNewMenuCatThunk({category: cat}));
   
         setNewCategory('');
       } else {
@@ -145,35 +154,17 @@ const RestaurantMenu = () => {
                       >
                           All
                       </button>
+                      {food__categories.map(cat => (
                       <button
                           className={`d-flex align-items-center gap-2 ${
-                          category === "BURGER" ? "foodBtnActive" : ""
+                          category === cat.food_category_name ? "foodBtnActive" : ""
                           } `}
-                          onClick={() => setCategory("BURGER")}
+                          onClick={() => setCategory(cat.food_category_name)}
                       >
                           <img src={foodCategoryImg01} alt="" />
-                          Burger
+                          {cat.food_category_name}
                       </button>
-    
-                      <button
-                          className={`d-flex align-items-center gap-2 ${
-                          category === "PIZZA" ? "foodBtnActive" : ""
-                          } `}
-                          onClick={() => setCategory("PIZZA")}
-                      >
-                          <img src={foodCategoryImg02} alt="" />
-                          Pizza
-                      </button>
-    
-                      <button
-                          className={`d-flex align-items-center gap-2 ${
-                          category === "BREAD" ? "foodBtnActive" : ""
-                          } `}
-                          onClick={() => setCategory("BREAD")}
-                      >
-                          <img src={foodCategoryImg03} alt="" />
-                          Bread
-                      </button>
+                    ))}
 
                       </div>
                   </Col>
@@ -201,44 +192,74 @@ const RestaurantMenu = () => {
                       </select>
                     </div>
                   </Col>
-    
-                  {displayPage.map((item) => (
-      <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
-        <MenuItem item={item} setVisible={setVisible} visible={visible}/>
-      </Col>
-    ))}  
+                  
+                  <Container>
+                  {menu__categories.map(cat => (
+                    <Row> 
+                      <h2 className="mt-4">{cat.menu_category_name}</h2>
+                      {(displayPage && displayPage.filter(it => it.menu_category_id === cat.menu_category_id).length > 0) ? displayPage.filter(it => it.menu_category_id === cat.menu_category_id).map((item) => (
+                        <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
+                          <MenuItem item={item} setVisible={setVisible} visible={visible}/>
+                        </Col>
+                      )) : <h5>No product</h5>}  
+                    </Row>
+                  ))}
+                  </Container>
     <Col lg="12" className="mt-5">
       <h5>Add New Product</h5>
       <Input 
+        className="mb-4"
         type="text" 
         placeholder="Product Title" 
-        value={newProduct.title} 
-        onChange={e => setNewProduct({ ...newProduct, title: e.target.value })} 
+        value={newProduct} 
+        onChange={e => setNewProduct(e.target.value)} 
       />
       <Input 
-        type="text" 
+        className="mb-4"
+        type="number" 
         placeholder="Product Price" 
-        value={newProduct.price} 
-        onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} 
+        value={newProductPrice} 
+        onChange={e => setNewProductPrice(e.target.value)} 
       />
-      <Input 
-        type="text" 
-        placeholder="Product Category" 
-        value={newProduct.category} 
-        onChange={e => setNewProduct({ ...newProduct, category: e.target.value })} 
-      />
+      <div className="mb-4">
+        Menu Category: 
+        <select
+          required
+          value={menuCategory}
+          onChange={e => setMenuCategory(e.target.value)}
+        >
+          <option value="0">Select Category</option>
+          {menu__categories.map(cat => (
+            <option key={cat.menu_category_id} value={cat.menu_category_id}>{cat.menu_category_name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-4">
+        Food Category: 
+        <select
+          required
+          value={foodCategory}
+          onChange={e => setFoodCategory(e.target.value)}
+        >
+          <option value="0">Select Category</option>
+          {food__categories.map(cat => (
+            <option key={cat.food_category_id} value={cat.food_category_id}>{cat.food_category_name}</option>
+          ))}
+        </select>
+      </div>
       <Button color="primary" onClick={addProduct}>Add Product</Button>
     </Col>
   
     <Col lg="12" className="mt-5">
-      <h5>Add New Category</h5>
+      <h5>Add New Menu Category</h5>
       <Input 
+      className="mt-4"
         type="text" 
         placeholder="Category Name" 
         value={newCategory} 
         onChange={e => setNewCategory(e.target.value)} 
       />
-      <Button color="primary" onClick={addCategory}>Add Category</Button>
+      <Button className="mt-4" color="primary" onClick={addCategory}>Add Category</Button>
     </Col>
                 <div>
                   <ReactPaginate

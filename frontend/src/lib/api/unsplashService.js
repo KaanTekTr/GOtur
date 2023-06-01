@@ -57,6 +57,10 @@ export const addNewRestaurant = (id, restaurant) => (
   })
 );
 
+export const getRestaurantsOfOwner = (id) => (
+  axios.get(`${baseURL}/restaurantOwner/restaurants/${id}`)
+);
+
 // FRIENDS
 
 export const getAllFriends = (id) => (

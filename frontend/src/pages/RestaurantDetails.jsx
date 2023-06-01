@@ -10,27 +10,33 @@ import ReactPaginate from "react-paginate";
 import foodCategoryImg01 from "../assets/images/hamburger.png";
 import foodCategoryImg02 from "../assets/images/pizza.png";
 import foodCategoryImg03 from "../assets/images/bread.png";
+import image01 from "../assets/images/dominos.png";
 
 import { useParams } from "react-router-dom";
 
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
-import restaurants from "../assets/fake-data/restaurants";
 import { useDispatch, useSelector } from "react-redux";
-import { restaurantActions } from "../store/restaurant/restaurantSlice";
+import { getAllFoodCategoryThunk, restaurantActions } from "../store/restaurant/restaurantSlice";
 
 const RestaurantDetails = () => {
   const [category, setCategory] = useState("ALL");
   
   const { id } = useParams();
+
+  const restaurants = useSelector(state => state.restaurant.restaurants);
+  console.log(restaurants);
   
-  const restaurant = restaurants.find((restaurant) => restaurant.id === id);
+  const restaurant = restaurants.find((restaurant) => `${restaurant.restaurant_id}` === id);
+
+  console.log(restaurant);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
 
   const dispatch = useDispatch();
   useEffect(() => {
+    dispatch(getAllFoodCategoryThunk({restaurant_id: id}));
     dispatch(restaurantActions.getProducts())
   })
   
@@ -97,7 +103,7 @@ const RestaurantDetails = () => {
 
   return (
     <Helmet title="All-Foods">
-      <CommonSection title={restaurant.title} desc={restaurant.minPrice} image={restaurant.image01} />
+      <CommonSection title={restaurant.restaurant_name} desc={restaurant.min_delivery_price} image={image01} />
 
       <section>
         <Container>

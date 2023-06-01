@@ -77,6 +77,12 @@ public class ReviewController {
             return new ResponseEntity<>("A Review by that Customer is already made", HttpStatus.BAD_REQUEST);
         }
 
+        String checkIsDelivered = "SELECT EXISTS (SELECT * FROM Purchase P WHERE P.purchase_id = ? AND P.is_delivered = false);";
+        boolean notDelivered = jdbcTemplate.queryForObject(checkIsDelivered, Boolean.class, review.getPurchase_id());
+        if (notDelivered) {
+            return new ResponseEntity<>("Purchase is not delivered yet. Cannot make a review yet", HttpStatus.BAD_REQUEST);
+        }
+
         String sql = "INSERT INTO Review(purchase_id, reviewer_id, comment, rate, review_date) VALUES (?,?,?,?,?);";
         jdbcTemplate.update(sql, review.getPurchase_id(), review.getReviewer_id(), review.getComment(), review.getRate(), LocalDateTime.now());
 

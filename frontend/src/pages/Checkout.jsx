@@ -1,24 +1,27 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Container, Row, Col, Card, CardTitle, Input, CardSubtitle, Table } from "reactstrap";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
 import { Link, useNavigate } from "react-router-dom";
 
+import image01 from "../assets/images/bread.png"; 
+
 import "../styles/checkout.css";
+import { completeSinglePurchaseThunk } from "../store/user/orderSlice";
 
 const Checkout = () => {
 
-  const cartItems = useSelector((state) => state.cart.cartItems);
+  const cart = useSelector((state) => state.order.unpaidSinglePurchase);
+  const addresses = useSelector(state => state.address.address);
+  const [note, setNote] = useState("");
 
-  const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
-  const shippingCost = 30;
-
-  const totalAmount = cartTotalAmount + Number(shippingCost);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handlePayment = () => {
-    navigate(`/payment`)
+    dispatch(completeSinglePurchaseThunk({purchase_id: cart.purchase_id, address_id: addresses.find(ad => ad.is_primary)?.address_id, note, coupon_id: -1}))
+    //navigate(`/payment`)
   }
 
   return (
@@ -33,6 +36,9 @@ const Checkout = () => {
                     Order 
                 </CardTitle>
               
+                {cart?.products?.length === 0 ? (
+                <h5 className="text-center">Your cart is empty</h5>
+              ) : (
                 <Table>
                     <thead>
                         <tr>
@@ -45,23 +51,20 @@ const Checkout = () => {
                         <th className="text-center">
                             Price
                         </th>
-                        <th className="text-center">
-                            Quantity
-                        </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {cartItems.map((item) => (
+                        {cart.products?.map((item) => (
                           <Tr item={item} key={item.id} />
                         ))}
                     </tbody>
-                    </Table>
+                    </Table>)}
               <Card className="p-4 mt-4">
                 <CardTitle tag="h5">
                     Customer Note
                 </CardTitle>
                   <div>
-                    <Input placeholder="Add note..." className="mb-2"/>
+                    <Input placeholder="Add note..." value={note} onChange={e=>setNote(e.target.value)} className="mb-2"/>
                   </div>
                   <div>
                     <button type="submit" className="addTOCart__btn" onClick={handlePayment}>
@@ -75,14 +78,14 @@ const Checkout = () => {
             <Col lg="4" md="6">
               <div className="checkout__bill">
                 <h6 className="d-flex align-items-center justify-content-between mb-3">
-                  Subtotal: <span>${cartTotalAmount}</span>
+                  Subtotal: <span>${cart.total_price || 0}</span>
                 </h6>
                 <h6 className="d-flex align-items-center justify-content-between mb-3">
-                  Shipping: <span>${shippingCost}</span>
+                  Shipping: <span>${0}</span>
                 </h6>
                 <div className="checkout__total">
                   <h5 className="d-flex align-items-center justify-content-between">
-                    Total: <span>${totalAmount}</span>
+                    Total: <span>${cart.total_price || 0}</span>
                   </h5>
                 </div>
               </div>
@@ -95,16 +98,15 @@ const Checkout = () => {
 };
 
 const Tr = (props) => {
-  const { image01, title, price, quantity } = props.item;
+  const { food_name, price } = props.item.food;
 
   return (
     <tr>
       <td className="text-center cart__img-box">
         <img src={image01} alt="" />
       </td>
-      <td className="text-center">{title}</td>
+      <td className="text-center">{food_name}</td>
       <td className="text-center">${price}</td>
-      <td className="text-center">{quantity}px</td>
     </tr>
   );
 };

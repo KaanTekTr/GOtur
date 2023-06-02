@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
@@ -6,14 +6,17 @@ import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button, Inpu
 
 import ReactPaginate from "react-paginate";
 
+import image01 from "../assets/images/bread.png"; 
+
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getOldPurchasesFoodsThunk, getOldPurchasesThunk } from "../store/user/orderSlice";
 
 const PastOrders = () => {
 
   const pastOrders = useSelector((state) => state.order.pastOrders);
-
+  const userId = useSelector((state) => state.auth.userId);
 
   const [pageNumber, setPageNumber] = useState(0);
 
@@ -30,6 +33,15 @@ const PastOrders = () => {
     setPageNumber(selected);
   };
 
+  const [reload, setReload] = useState(false);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getOldPurchasesThunk({userId, dispatch}));
+    setReload(r => !r);
+    setReload(r => !r);
+  }, [dispatch, userId]);
+
   return (
     <Helmet title="Past Orders">
       <CommonSection title="Past Orders" />
@@ -38,7 +50,7 @@ const PastOrders = () => {
         <Container>
           <Row>
 
-            {displayPage.map((item, index) => (
+            {displayPage?.map((item, index) => (
               <Col lg="12" md="12" sm="6" xs="6" key={item.id} className="mb-4">
                 <Card className="p-4">
                     <CardTitle tag="h3">
@@ -62,13 +74,10 @@ const PastOrders = () => {
                         <th className="text-center">
                             Price
                         </th>
-                        <th className="text-center">
-                            Quantity
-                        </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {item.items.map((item) => (
+                        {item?.products?.map((item) => (
                         <Tr item={item} key={item.id} />
                         ))}
                     </tbody>
@@ -76,12 +85,19 @@ const PastOrders = () => {
 
                     <h6>
                         Subtotal: $
-                        <span className="cart__subtotal">{item.totalAmount}</span>
+                        <span className="cart__subtotal">{item.total_price}</span>
                     </h6>
 
                     <Card className="p-2 mt-4">
                       <CardTitle tag="h5">
-                          Comment
+                          Customer Note
+                      </CardTitle>
+                        <span>{item.customer_note}</span>
+                    </Card>
+
+                    <Card className="p-2 mt-4">
+                      <CardTitle tag="h5">
+                          Review
                       </CardTitle>
                       {item.comment === "" ? (
                         <div>
@@ -112,16 +128,15 @@ const PastOrders = () => {
 
 
 const Tr = (props) => {
-    const { image01, title, price, quantity } = props.item;
+    const { food_name, price } = props.item.food;
 
     return (
       <tr>
         <td className="text-center cart__img-box">
           <img src={image01} alt="" />
         </td>
-        <td className="text-center">{title}</td>
+        <td className="text-center">{food_name}</td>
         <td className="text-center">${price}</td>
-        <td className="text-center">{quantity}px</td>
       </tr>
     );
   };

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addFoodToGroupPurchase, addFoodToSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
+import { addFoodToGroupPurchase, addFoodToSinglePurchase, completeGroupPurchase, completeSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getOldPurchases, getOldPurchasesFoods, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
 
 export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidSingle', 
   async (data, thunkAPI) => {
@@ -88,6 +88,52 @@ export const deleteFoodFromGroupPurchaseThunk = createAsyncThunk('purchase/delet
     }
   }
 );
+
+export const completeSinglePurchaseThunk = createAsyncThunk('purchase/completeSinglePurchase', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await completeSinglePurchase(data.purchase_id, data.address_id, data.note, data.coupon_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const completeGroupPurchaseThunk = createAsyncThunk('purchase/completeGroupPurchase', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await completeGroupPurchase(data.purchase_id, data.address_id, data.note, data.coupon_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getOldPurchasesThunk = createAsyncThunk('purchase/getOldPurchases', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getOldPurchases(data.userId);
+
+      return { pastOrders: response.data, dispatch: data.dispatch};
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getOldPurchasesFoodsThunk = createAsyncThunk('purchase/getOldPurchasesFoods', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getOldPurchasesFoods(data.purchase_id);
+      return {products: response.data, purchase_id: data.purchase_id};
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 const initialState = {
     pastOrders: [
       {
@@ -217,6 +263,21 @@ const orderSlice = createSlice({
       .addCase(deleteFoodFromSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
         state.itemAdded = 1;
+      })
+      .addCase(getOldPurchasesThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.pastOrders = action.payload.pastOrders;
+
+        setTimeout(() => {
+          action.payload.pastOrders?.forEach(order => {
+            action.payload.dispatch(getOldPurchasesFoodsThunk({purchase_id: order.purchase_id}));
+          });
+        }, 100);
+      })
+      .addCase(getOldPurchasesFoodsThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.pastOrders = [...state.pastOrders.filter(p => p.purchase_id !== action.payload.purchase_id), 
+          {...state.pastOrders.find(p => p.purchase_id === action.payload.purchase_id), products: action.payload.products}];
       })
   },
 });

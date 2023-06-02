@@ -207,3 +207,19 @@ export const  deleteFoodFromSinglePurchase = (customer_id, food_id, food_order) 
 export const  deleteFoodFromGroupPurchase = (customer_id, food_id, food_order) => (
   axios.delete(`${baseURL}/purchaseGroup/deleteFoodWithIngredientFromGroupUnpaidPurchase/${customer_id}/${food_id}/${food_order}`)
 );
+
+export const completeSinglePurchase = (purchase_id, address_id, note, couponId) => (
+  axios.post(`${baseURL}/purchase/completePurchase/${purchase_id}?addressId=${address_id}&customerNote=${note}&couponId=${couponId}`)
+);
+
+export const completeGroupPurchase = (purchase_id, address_id, note, couponId) => (
+  axios.post(`${baseURL}/purchaseGroup/completeGroupPurchase/${purchase_id}?addressId=${address_id}&customerNote=${note}&couponId=${couponId}`)
+);
+
+export const getOldPurchases = (id) => (
+  axios.get(`${baseURL}/purchase/getAllPurchases/${id}`)
+);
+
+export const getOldPurchasesFoods = (id) => (
+  axios.get(`${baseURL}/purchase/getAllFoodAndIngredients/${id}`)
+);

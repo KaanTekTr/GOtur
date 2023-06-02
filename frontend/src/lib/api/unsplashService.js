@@ -37,9 +37,17 @@ export const addNewAddress = (id, address) => (
   })
 );
 
+export const setAddressPrimary = (addressId) => (
+  axios.post(`${baseURL}/customer/setAddressPrimary/${addressId}`)
+);
+
 // USER
 export const getUser = (authType, userId) => (
   axios.get(`${baseURL}/${authType}/${userId}`)
+);
+
+export const addBalanceCustomer = (amount, userId) => (
+  axios.post(`${baseURL}/customer/addBalance/${userId}?transferAmount=${amount}`)
 );
 
 // Restaurant Requests

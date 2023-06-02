@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getUser, userLogin, userLogout, userRegister } from "../lib/api/unsplashService";
+import { addBalanceCustomer, getUser, userLogin, userLogout, userRegister } from "../lib/api/unsplashService";
 
 export const loginThunk = createAsyncThunk('auth/login', 
   async (data, thunkAPI) => {
@@ -40,6 +40,17 @@ export const getUserThunk = createAsyncThunk('auth/getUser',
     try {
       console.log(data.userId);
       const  response = await getUser(data.authType, data.userId);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const addBalanceThunk = createAsyncThunk('auth/addBalance', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addBalanceCustomer(data.amount, data.userId);
       return response.data;
     } catch (error) {
       

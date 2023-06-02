@@ -9,7 +9,7 @@ import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 
 import "../../styles/header.css";
 import { authActions, logoutThunk } from "../../store/authSlice";
-import { addAddressesThunk, addressActions, getAddressesThunk } from "../../store/user/adressSlice";
+import { addAddressesThunk, addressActions, getAddressesThunk, setAddressPriThunk } from "../../store/user/adressSlice";
 import { getProductsUnpaidSinglePurchaseThunk, getUnpaidSinglePurchaseThunk, orderActions } from "../../store/user/orderSlice";
 import { Drawer, Input, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 
@@ -123,7 +123,11 @@ const Header = () => {
   };
 
   const changeSelAddress = id => {
-    dispatch(addressActions.changeSelectedAddress({id}));
+    dispatch(setAddressPriThunk({address_id: id}));
+    setTimeout(function(){
+      dispatch(getAddressesThunk({userId}));
+        
+    }, 500);
   }
 
   useEffect(() => {
@@ -151,7 +155,7 @@ const Header = () => {
     console.log("New adress");
     const address = {
       address_name: title,
-      is_primary: false,
+      is_primary: true,
       city,
       district,
       street_num: streetNo,
@@ -162,7 +166,10 @@ const Header = () => {
     dispatch(addAddressesThunk({userId, address}));
     setReload(!reload);
     setReload(!reload);
-    dispatch(getAddressesThunk({userId}));
+    setTimeout(function(){
+      dispatch(getAddressesThunk({userId}));
+        
+    }, 500);
     addAddressToggle();
   }
 
@@ -207,7 +214,7 @@ const Header = () => {
               <ModalBody>   
                 <ListGroup>
                   {addresses?.length > 0 ? addresses.map(address => (
-                    <ListGroupItem style={{cursor: "pointer"}} active={address.address_id === selectedAddress.id} onClick={() => changeSelAddress(address.address_id)}>
+                    <ListGroupItem style={{cursor: "pointer"}} active={address.is_primary} onClick={() => changeSelAddress(address.address_id)}>
                       <ListGroupItemHeading>
                         {address.address_name}
                       </ListGroupItemHeading>

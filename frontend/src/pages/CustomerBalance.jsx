@@ -5,6 +5,8 @@ import "../styles/home.css";
 import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ModalFooter, InputGroup, Input, InputGroupText } from "reactstrap";
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
+import { useDispatch, useSelector } from "react-redux";
+import { addBalanceThunk, getUserThunk } from "../store/authSlice.js";
 
 const CustomerBalance = () => {
     const [balance, setBalance] = useState(1000);
@@ -14,6 +16,9 @@ const CustomerBalance = () => {
     const [expireDate, setExpireDate] = useState("");
     const [cvv, setCvv] = useState("");
     const [modalAddMoney, setModalAddMoney] = useState(false);
+
+    const user = useSelector(state => state.auth.user);
+    const dispatch = useDispatch();
 
     const toggleAddMoney = () => {
         setModalAddMoney(!modalAddMoney);
@@ -25,7 +30,12 @@ const CustomerBalance = () => {
             alert('Invalid input. Please enter a positive number.');
             return;
         }
-        setBalance(prevBalance => prevBalance + addAmount);
+
+        dispatch(addBalanceThunk({amount, userId: user.user_id}));
+        setTimeout(() => {
+            dispatch(getUserThunk({authType: "customer",userId: user.user_id}));
+          }, 100)
+        toggleAddMoney();
         alert('Money has been successfully added to your account.');
     }
 
@@ -35,7 +45,7 @@ const CustomerBalance = () => {
                 <div>
                     <Card body>
                         <CardTitle tag="h5">Customer Balance</CardTitle>
-                        <p>Your current balance is: ${balance.toFixed(2)}</p>
+                        <p>Your current balance is: ${user?.balance.toFixed(2)}</p>
                         <div>
                             <Button color="success" onClick={toggleAddMoney}>Add Money</Button>
                         </div>

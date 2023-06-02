@@ -86,6 +86,18 @@ export const addNewGroup= (group) => (
   })
 );
 
+export const getAllMembersOfGroup = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/allMembers/${id}`)
+);
+
+export const getOwnerOfGroup = (id) => (
+  axios.get(`${baseURL}/purchaseGroup/groupOwner/${id}`)
+);
+
+export const addMemberToGroup = (group_id, customer_id) => (
+  axios.post(`${baseURL}/purchaseGroup/add/${group_id}/${customer_id}`)
+);
+
 // FOOD CATEGORY
 export const addFoodCategory= (foodCategory) => (
   fetch(`${baseURL}/foodCategory/add`, {
@@ -180,3 +192,10 @@ export const addFoodToGroupPurchase= (food, id) => (
   })
 );
 
+export const  deleteFoodFromSinglePurchase = (customer_id, food_id, food_order) => (
+  axios.delete(`${baseURL}/purchase/deleteFoodWithIngredientFromSingleUnpaidPurchase/${customer_id}/${food_id}/${food_order}`)
+);
+
+export const  deleteFoodFromGroupPurchase = (customer_id, food_id, food_order) => (
+  axios.delete(`${baseURL}/purchaseGroup/deleteFoodWithIngredientFromGroupUnpaidPurchase/${customer_id}/${food_id}/${food_order}`)
+);

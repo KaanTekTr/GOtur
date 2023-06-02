@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
 import { cartActions } from "../store/shopping-cart/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { orderActions } from "../store/user/orderSlice";
+import { deleteFoodFromSinglePurchaseThunk, orderActions } from "../store/user/orderSlice";
 
 import image01 from "../assets/images/bread.png";
 
@@ -76,9 +76,10 @@ const Cart = () => {
 const Tr = (props) => {
   const { food_id, food_name, price } = props.item.food;
   const dispatch = useDispatch();
+  const userId = useSelector(state => state.auth.userId);
 
   const deleteItem = () => {
-    dispatch(cartActions.deleteItem(food_id));
+    dispatch(deleteFoodFromSinglePurchaseThunk({customer_id: userId, food_id, food_order: props.item.food_order}));
   };
   return (
     <tr>

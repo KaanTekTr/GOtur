@@ -13,7 +13,7 @@ import image01 from "../assets/images/bread.png";
 
 import ProductCard from "../components/UI/product-card/ProductCard";
 import { groupsActions } from "../store/group/groupSlice";
-import { addFoodToSinglePurchaseThunk } from "../store/user/orderSlice";
+import { addFoodToGroupPurchaseThunk, addFoodToSinglePurchaseThunk } from "../store/user/orderSlice";
 import { getAllFoodCategoryThunk, getAllFoodRestThunk, getAllMenuCategoryThunk } from "../store/restaurant/restaurantSlice";
 
 const FoodDetails = () => {
@@ -61,17 +61,16 @@ const FoodDetails = () => {
       }
       dispatch(addFoodToSinglePurchaseThunk({food, userId}))
     } else {
-      dispatch(
-        groupsActions.addItem({ 
-          newItem: {
-            id,
-            title: product.food_name,
-            image01,
-            price: product.price,
-          },
-          groupId: selectedCart
-        })
-      );
+      const food = {
+        food: {
+          food_id: product.food_id,
+          food_category_id: foodCategory.food_category_id,
+          menu_category_id: menuCategory.menu_category_id,
+          restaurant_id: product.restaurant_id, 
+        },
+        ingredientList: []
+      }
+      dispatch(addFoodToGroupPurchaseThunk({food, userId: selectedCart}))
     }
   };
 

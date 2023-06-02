@@ -10,18 +10,21 @@ import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
-import { getGroupsThunk, groupsActions } from "../store/group/groupSlice";
-import { orderActions } from "../store/user/orderSlice";
+import { addGroupMemberThunk, getGroupMembersThunk, getGroupsThunk, groupsActions } from "../store/group/groupSlice";
+import { deleteFoodFromGroupPurchaseThunk, getProductsUnpaidGroupPurchaseThunk, getUnpaidGroupPurchaseThunk, orderActions } from "../store/user/orderSlice";
 import { getFriendsThunk } from "../store/group/friendsSlice";
+
+import image01 from "../assets/images/bread.png"; 
 
 const GroupDetails = () => {
 
     const groups = useSelector(state => state.groups.groups);
+    const groupCart = useSelector(state => state.order.unpaidGroupPurchase);
     const friends = useSelector(state => state.friends.friends);
     const userId = useSelector(state => state.auth.userId);
 
     const { id } = useParams();
-    const [group, setGroup] = useState(groups.filter(group => `${group.id}` === id)[0]);
+    const [group, setGroup] = useState(groups.filter(group => `${group.group_id}` === id)[0]);
 
     const groupAddresses = useSelector(state => state.address.groupAddress);
     const selectedGroupAddress = useSelector(state => state.address.selectedGroupAddress);
@@ -31,6 +34,8 @@ const GroupDetails = () => {
     const [modalGroupCart, setModalGroupCart] = useState(false);
     const [modalAddMember, setModalAddMember] = useState(false);
     const [modalGroupCheckout, setModalGroupCheckout] = useState(false);
+    const [reload, setReload] = useState(false);
+    const [reload2, setReload2] = useState(false);
 
     const toggle = () => setModal(!modal);
     const toggleAddMoney = () => setModalAddMoney(!modalAddMoney);
@@ -46,10 +51,27 @@ const GroupDetails = () => {
     }
 
     useEffect(() => {
-      dispatch(groupsActions.getGroups({userId}));
+      dispatch(getGroupsThunk({userId}));
       dispatch(getFriendsThunk({userId}));
-      setGroup(groups.find(group => `${group.id}` === id));
-    }, [groups, id, dispatch, userId])
+     
+      setReload(r => !r);
+      setReload(r => !r);
+    }, [id, dispatch, userId]);
+
+    useEffect(() => {
+      if (group) {
+        dispatch(getUnpaidGroupPurchaseThunk({userId: group.group_id}));
+        dispatch(getProductsUnpaidGroupPurchaseThunk({userId: group.group_id}));
+      }
+    }, [group, dispatch, reload2]);
+
+    useEffect(() => {
+      dispatch(getGroupMembersThunk({group_id: id}));
+    }, [id, dispatch]);
+
+    useEffect(() => {
+      setGroup(groups.find(group => `${group.group_id}` === id));
+    }, [groups, id, reload]);
     
     const seeRestaurants = id => {
       dispatch(orderActions.updateCurrentCart({id}));
@@ -62,21 +84,29 @@ const GroupDetails = () => {
     }
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [selectedFriend, setSelectedFriend] = useState("Select Friend");
+    const [selectedFriend, setSelectedFriend] = useState(0);
 
     const toggleDropDown = () => setDropdownOpen((prevState) => !prevState);
     const addMember = () => {
-
+      if (selectedFriend) {
+        dispatch(addGroupMemberThunk({group_id: group.group_id, customer_id: selectedFriend}));
+        dispatch(getGroupMembersThunk({group_id: id}));
+        toggleAddMember();
+      } else {
+        console.error("Choose a friend!");
+      }
     }
   return (
-    <Helmet title={group.title}>
-      <CommonSection title={group.title} />
+    <>
+      {group ? (
+    <Helmet title={group.group_name}>
+      <CommonSection title={group.group_name} />
 
       <section>
         <Container>
             <Row className="mb-4">
                 <Col lg="3" md="3">
-                    <h4>Balance: {group.balance}$</h4>
+                    <h4>Balance: {group.group_balance}$</h4>
                 </Col>
                 <Col lg="2" md="2">
                     <Button color="primary" onClick={toggleAddMoney}>Add Money</Button>
@@ -91,7 +121,7 @@ const GroupDetails = () => {
                 <Col lg="2" md="2">
                     <span style={{cursor:"pointer"}} className="cart__icon" onClick={toggleGroupCart}>
                         <i class="ri-shopping-basket-line"></i>
-                        <span className="cart__badge_x">{group.groupTotalQuantity}</span>
+                        <span className="cart__badge_x">{groupCart?.products?.length || 0}</span>
                     </span>
                 </Col>
             </Row>
@@ -101,14 +131,14 @@ const GroupDetails = () => {
                   <Button color="success" className="mb-4" onClick={toggleAddMember}>Add Member</Button>
                 </Col>
                 {group?.members?.map((member, index) => (
-                <Col lg="12" md="12" sm="6" xs="6" key={member.id} className="mb-4">
+                <Col lg="12" md="12" sm="6" xs="6" key={member.user_id} className="mb-4">
                     <Card className="p-4">
                         <Container>
                             <Row style={{display: "flex"}}>
                                 <Col lg="10" md="10">
                                     <CardTitle tag="h3">
-                                      { group.groupLeader === member.id ? <img src={crown_image} alt="crown" style={{width: "40px", height: "40px", marginRight :"5px"}} /> : null }
-                                        {member.name}
+                                      { group.group_owner_id === member.user_id ? <img src={crown_image} alt="crown" style={{width: "40px", height: "40px", marginRight :"5px"}} /> : null }
+                                        {member.username}
                                     </CardTitle>
                                 </Col>
                             </Row>
@@ -119,7 +149,7 @@ const GroupDetails = () => {
             </Row>
             <Row>
               <Col>
-                <Button onClick={() => seeRestaurants(group.id)}>Restaurants</Button>
+                <Button onClick={() => seeRestaurants(group.group_id)}>Restaurants</Button>
               </Col>
             </Row>
             {/** GROUP ADDRESS SELECTION MODAL */}
@@ -127,7 +157,7 @@ const GroupDetails = () => {
               <ModalHeader toggle={toggle}>Group Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>
-                  {groupAddresses.length > 0 ? groupAddresses.map(address => (
+                  {groupAddresses?.length > 0 ? groupAddresses?.map(address => (
                     <ListGroupItem style={{cursor: "pointer"}} active={address.id === selectedGroupAddress.id} onClick={() => changeSelAddress(address.id)}>
                       <ListGroupItemHeading>
                         {address.title}
@@ -182,7 +212,7 @@ const GroupDetails = () => {
               <Container>
                 <Row>
                   <Col lg="12">
-                    {group.groupTotalQuantity === 0 ? (
+                    {groupCart?.products?.length === 0 ? (
                       <h5 className="text-center">Your cart is empty</h5>
                     ) : (
                       <table className="table table-bordered">
@@ -191,13 +221,12 @@ const GroupDetails = () => {
                             <th>Image</th>
                             <th>Product Title</th>
                             <th>Price</th>
-                            <th>Quantity</th>
                             <th>Delete</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {group.groupCartItems.map((item) => (
-                            <Tr item={item} groupId={group.id} key={item.id} />
+                          {groupCart?.products?.map((item) => (
+                            <Tr item={item} groupId={group.group_id} key={item.id} setReload2={setReload2}/>
                           ))}
                         </tbody>
                       </table>
@@ -206,11 +235,11 @@ const GroupDetails = () => {
                     <div className="mt-4">
                       <h6>
                         Subtotal: $
-                        <span className="cart__subtotal">{group.groupTotalAmount}</span>
+                        <span className="cart__subtotal">{groupCart.total_price}</span>
                       </h6>
                       <p>Taxes and shipping will calculate at checkout</p>
                       <div className="cart__page-btn">
-                        <button className="addTOCart__btn me-4" onClick={() => seeRestaurants(group.id)}>
+                        <button className="addTOCart__btn me-4" onClick={() => seeRestaurants(group.group_id)}>
                           Continue Shopping
                         </button>
                         <button className="addTOCart__btn" onClick={groupCheckout}>
@@ -252,14 +281,11 @@ const GroupDetails = () => {
                               <th className="text-center">
                                   Price
                               </th>
-                              <th className="text-center">
-                                  Quantity
-                              </th>
                               </tr>
                           </thead>
                           <tbody>
-                              {group.groupCartItems.map((item) => (
-                                <Tr item={item} key={item.id} />
+                              {groupCart.products?.map((item) => (
+                                <Tr item={item} key={item.id} checkout={true} />
                               ))}
                           </tbody>
                           </Table>
@@ -282,14 +308,14 @@ const GroupDetails = () => {
                   <Col lg="4" md="6">
                     <div className="checkout__bill">
                       <h6 className="d-flex align-items-center justify-content-between mb-3">
-                        Subtotal: <span>${group.groupTotalAmount}</span>
+                        Subtotal: <span>${groupCart.total_price}</span>
                       </h6>
                       <h6 className="d-flex align-items-center justify-content-between mb-3">
-                        Shipping: <span>${30}</span>
+                        Shipping: <span>${0}</span>
                       </h6>
                       <div className="checkout__total">
                         <h5 className="d-flex align-items-center justify-content-between">
-                          Total: <span>${group.groupTotalAmount+30}</span>
+                          Total: <span>${groupCart.total_price}</span>
                         </h5>
                       </div>
                     </div>
@@ -312,10 +338,10 @@ const GroupDetails = () => {
                     <Col lg="4" md="4"></Col>
                     <Col>
                       <Dropdown isOpen={dropdownOpen} toggle={toggleDropDown} >
-                        <DropdownToggle caret>{selectedFriend}</DropdownToggle>
+                        <DropdownToggle caret>{friends.find(f => f.user_id === selectedFriend)?.username || "Selec Friend"}</DropdownToggle>
                         <DropdownMenu>
                           {friends?.map((friend, index) => (
-                            <DropdownItem onClick={() => setSelectedFriend(friend.username)} key={friend.id}>{friend.username}</DropdownItem>
+                            <DropdownItem onClick={() => setSelectedFriend(friend.user_id)} key={friend.user_id}>{friend.username}</DropdownItem>
                           ))}
                         </DropdownMenu>
                       </Dropdown>
@@ -340,29 +366,37 @@ const GroupDetails = () => {
         </Container>
       </section>
     </Helmet>
+    ) : <span>Loading...</span>}
+    </>
   );
 };
 
 
 const Tr = (props) => {
-  const { id, image01, title, price, quantity } = props.item;
+  const { food_id, food_name, price } = props.item.food;
   const groupId = props.groupId;
   const dispatch = useDispatch();
 
   const deleteItem = () => {
-    dispatch(groupsActions.deleteItem({id, groupId}));
+    dispatch(deleteFoodFromGroupPurchaseThunk({group_id: groupId, food_id, food_order: props.item.food_order}));
+    setTimeout(function(){
+        console.log("Executed after 1 second");
+        dispatch(getUnpaidGroupPurchaseThunk({userId: groupId}));
+        dispatch(getProductsUnpaidGroupPurchaseThunk({userId: groupId}));
+    }, 500);
   };
   return (
     <tr>
       <td className="text-center cart__img-box">
         <img src={image01} alt="" />
       </td>
-      <td className="text-center">{title}</td>
+      <td className="text-center">{food_name}</td>
       <td className="text-center">${price}</td>
-      <td className="text-center">{quantity}px</td>
-      <td className="text-center cart__item-del">
-        <i class="ri-delete-bin-line" onClick={deleteItem}></i>
-      </td>
+      {props.checkout ? null : (
+        <td className="text-center cart__item-del">
+          <i class="ri-delete-bin-line" onClick={deleteItem}></i>
+        </td>
+      )}
     </tr>
   );
 };

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
-import { addNewGroup, getAllGroups } from "../../lib/api/unsplashService";
+import { addMemberToGroup, addNewGroup, getAllGroups, getAllMembersOfGroup } from "../../lib/api/unsplashService";
 
 const items = groupId =>
   localStorage.getItem(`groupCartItems_${groupId}`) !== null
@@ -23,7 +23,7 @@ const setItemFunc = (item, totalAmount, totalQuantity, groupId) => {
 };
 
 
-export const getGroupsThunk = createAsyncThunk('user/getGroups', 
+export const getGroupsThunk = createAsyncThunk('group/getGroups', 
   async (data, thunkAPI) => {
     try {
       const  response = await getAllGroups(data.userId);
@@ -34,7 +34,7 @@ export const getGroupsThunk = createAsyncThunk('user/getGroups',
   }
 );
 
-export const addGroupsThunk = createAsyncThunk('user/addGroup', 
+export const addGroupsThunk = createAsyncThunk('group/addGroup', 
   async (data, thunkAPI) => {
     try {
       const  response = await addNewGroup(data.group);
@@ -45,61 +45,30 @@ export const addGroupsThunk = createAsyncThunk('user/addGroup',
   }
 );
 
+export const getGroupMembersThunk = createAsyncThunk('group/getGroupMembers', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getAllMembersOfGroup(data.group_id);
+      return {members: response.data, group_id: data.group_id};
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const addGroupMemberThunk = createAsyncThunk('group/addGroupMember', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addMemberToGroup(data.group_id, data.customer_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 const initialState = {
-    groups:[
-        {
-            id: 1,
-            balance: 300,
-            title: "Bros",
-            members: [
-                {
-                    id: 1,
-                    name: "Ali",
-                    email: "ali@gmail.com"
-                },
-                {
-                    id: 2,
-                    name: "Korhan",
-                    email: "korhan@gmail.com"
-                },
-                {
-                    id: 3,
-                    name: "Kaan",
-                    email: "kaan@gmail.com"
-                },
-            ],
-            groupCartItems: items(1),
-            groupTotalAmount: totalAmount(1),
-            groupTotalQuantity: totalQuantity(1),
-            groupLeader: 1
-        },
-        {
-            id: 2,
-            balance: 300,
-            title: "Family",
-            members: [
-                {
-                    id: 1,
-                    name: "Ali",
-                    email: "ali@gmail.com"
-                },
-                {
-                    id: 2,
-                    name: "Korhan",
-                    email: "korhan@gmail.com"
-                },
-                {
-                    id: 3,
-                    name: "Kaan",
-                    email: "kaan@gmail.com"
-                },
-            ],
-            groupCartItems: items(2),
-            groupTotalAmount: totalAmount(2),
-            groupTotalQuantity: totalQuantity(2),
-            groupLeader: 3
-        }
-    ]
+    groups:[]
 };
 
 const groupsSlice = createSlice({
@@ -184,6 +153,14 @@ const groupsSlice = createSlice({
         console.log(action.payload);
       })
       .addCase(addGroupsThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
+      .addCase(getGroupMembersThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.groups = [...state.groups.filter(group => `${group.group_id}` !== action.payload.group_id), 
+          {...state.groups.find(group => `${group.group_id}` === action.payload.group_id), members: action.payload.members }]
+      })
+      .addCase(addGroupMemberThunk.fulfilled, (state, action) => {
         console.log(action.payload);
       })
   },

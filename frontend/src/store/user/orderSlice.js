@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addFoodToGroupPurchase, addFoodToSinglePurchase, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
+import { addFoodToGroupPurchase, addFoodToSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
 
 export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidSingle', 
   async (data, thunkAPI) => {
@@ -67,6 +67,27 @@ export const addFoodToGroupPurchaseThunk = createAsyncThunk('purchase/addFoodGro
   }
 );
 
+export const deleteFoodFromSinglePurchaseThunk = createAsyncThunk('purchase/deleteFoodSingle', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await deleteFoodFromSinglePurchase(data.customer_id, data.food_id, data.food_order);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const deleteFoodFromGroupPurchaseThunk = createAsyncThunk('purchase/deleteFoodGroup', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await deleteFoodFromGroupPurchase(data.group_id, data.food_id, data.food_order);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 const initialState = {
     pastOrders: [
       {
@@ -138,7 +159,7 @@ const initialState = {
     ],
     currentCart: 0,
     unpaidSinglePurchase: JSON.parse(localStorage.getItem("singleCart")),
-    unpaidGroupPurchase: {},
+    unpaidGroupPurchase: JSON.parse(localStorage.getItem("groupCart")),
     itemAdded: 0
 };
 
@@ -164,10 +185,12 @@ const orderSlice = createSlice({
       .addCase(getUnpaidGroupPurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
         state.unpaidGroupPurchase = action.payload;
+        localStorage.setItem("groupCart", JSON.stringify(state.unpaidGroupPurchase));
       })
       .addCase(getProductsUnpaidGroupPurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
         state.unpaidGroupPurchase = {...state.unpaidGroupPurchase, products: action.payload};
+        localStorage.setItem("groupCart", JSON.stringify(state.unpaidGroupPurchase));
       })
       .addCase(getUnpaidSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
@@ -184,6 +207,14 @@ const orderSlice = createSlice({
         state.itemAdded = 1;
       })
       .addCase(addFoodToSinglePurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.itemAdded = 1;
+      })
+      .addCase(deleteFoodFromGroupPurchaseThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.itemAdded = 1;
+      })
+      .addCase(deleteFoodFromSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
         state.itemAdded = 1;
       })

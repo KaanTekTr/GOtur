@@ -5,30 +5,18 @@ import "../../../styles/cart-item.css";
 
 import image01 from "../../../assets/images/bread.png";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../../../store/shopping-cart/cartSlice";
+import { deleteFoodFromSinglePurchaseThunk } from "../../../store/user/orderSlice";
 
 const CartItem = ({ item }) => {
   const { food_id, food_name, price } = item.food;
+  const userId = useSelector(state => state.auth.userId);
 
   const dispatch = useDispatch();
 
-  const incrementItem = () => {
-    dispatch(
-      cartActions.addItem({
-        id: food_id,
-        title: food_name,
-        price,
-      })
-    );
-  };
-
-  const decreaseItem = () => {
-    dispatch(cartActions.removeItem(food_id));
-  };
-
   const deleteItem = () => {
-    dispatch(cartActions.deleteItem(food_id));
+    dispatch(deleteFoodFromSinglePurchaseThunk({customer_id: userId, food_id, food_order: item.food_order}));
   };
 
   return (

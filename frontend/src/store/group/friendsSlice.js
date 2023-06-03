@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getAllFriends } from "../../lib/api/unsplashService";
+import { addNewFriend, getAllFriends } from "../../lib/api/unsplashService";
 
 export const getFriendsThunk = createAsyncThunk('user/getFriends', 
   async (data, thunkAPI) => {
@@ -11,6 +11,17 @@ export const getFriendsThunk = createAsyncThunk('user/getFriends',
     }
   }
 );
+export const addFriendThunk = createAsyncThunk('user/addFriend', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewFriend(data.userId, data.friendEmail);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 
 const initialState = {
     friends:[]
@@ -34,7 +45,10 @@ const friendsSlice = createSlice({
       .addCase(getFriendsThunk.fulfilled, (state, action) => {
         state.friends = action.payload;
         console.log(action.payload);
-      });
+      })
+      .addCase(addFriendThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
   },
 });
 

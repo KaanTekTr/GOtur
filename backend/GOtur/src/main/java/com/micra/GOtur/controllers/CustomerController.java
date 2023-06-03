@@ -131,11 +131,24 @@ public class CustomerController {
         return new ResponseEntity<>("Address With ID: " + addressId + " Has Been Set As Primary!", HttpStatus.OK);
     }
 
-    @PostMapping("/addFriends/{customerId1}/{customerId2}")
+    @PostMapping("/addFriends/{customerId1}/{customer2Email}")
     public ResponseEntity<String> addFriends(@PathVariable("customerId1") int customerId1,
-                                             @PathVariable("customerId2") int customerId2) {
+                                             @PathVariable("customer2Email") String customer2Email) {
+
+        String checkUserSql = "SELECT EXISTS (SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND U.email = ?);";
+        boolean existsCustomer = jdbcTemplate.queryForObject(checkUserSql, Boolean.class, customer2Email);
+
+        String getUserSql = "SELECT * FROM Customer C, User U WHERE C.user_id = U.user_id AND U.email = ?;";
+        Customer customer;
+        if (existsCustomer) {
+            customer = jdbcTemplate.queryForObject(getUserSql, new CustomerMapper(), customer2Email );
+        }
+        else {
+            return new ResponseEntity<>("The user with mail " + customer2Email + "does not exist!", HttpStatus.BAD_REQUEST);
+        }
+
         String checkSql = "SELECT EXISTS (SELECT * FROM Friend F WHERE (F.customer1_id = ? AND F.customer2_id = ?) OR (F.customer1_id = ? AND F.customer2_id = ?));";
-        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId1, customerId2, customerId2, customerId1);
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, customerId1, customer.getUser_id(), customer.getUser_id(), customerId1);
 
         if (exists) {
             return new ResponseEntity<>("The friendship already exists!", HttpStatus.BAD_REQUEST);
@@ -143,7 +156,7 @@ public class CustomerController {
 
         String sql2 = "INSERT INTO Friend(customer1_id, customer2_id) VALUES (?, ?);";
         System.out.println(">>" + sql2);
-        jdbcTemplate.update(sql2, customerId1, customerId2);
+        jdbcTemplate.update(sql2, customerId1, customer.getUser_id());
 
         return new ResponseEntity<>("Friendship successfully added!", HttpStatus.OK);
     }

@@ -75,8 +75,8 @@ export const getAllFriends = (id) => (
   axios.get(`${baseURL}/customer/allFriends/${id}`)
 );
 
-export const addNewFriend = (user_id, friend_id) => (
-  axios.post(`${baseURL}/customer/addFriends/${user_id}/${friend_id}`)
+export const addNewFriend = (user_id, friend_email) => (
+  axios.post(`${baseURL}/customer/addFriends/${user_id}/${friend_email}`)
 );
 
 // GROUP

@@ -7,7 +7,7 @@ import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, Modal
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
-import { friendsActions, getFriendsThunk } from "../store/group/friendsSlice";
+import { addFriendThunk, friendsActions, getFriendsThunk } from "../store/group/friendsSlice";
 
 const Friends = () => {
 
@@ -18,6 +18,8 @@ const Friends = () => {
     const [modalAddMember, setModalAddMember] = useState(false);
 
     const toggleAddMember = () => setModalAddMember(!modalAddMember);
+  
+    const user = useSelector(state => state.auth.user);
 
     const dispatch = useDispatch();
 
@@ -27,7 +29,8 @@ const Friends = () => {
     }, [dispatch, userId]);
 
     const addMember = () => {
-
+      dispatch(addFriendThunk({ userId: user.user_id, friendEmail: email }));
+      alert('Friend has been successfully added!.');
     }
   return (
     <Helmet title="Friends">

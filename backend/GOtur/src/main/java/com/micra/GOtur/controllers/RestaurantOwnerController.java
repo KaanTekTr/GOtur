@@ -1,8 +1,10 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.helpers.HashPasswordHelper;
+import com.micra.GOtur.mappers.PurchaseMapper;
 import com.micra.GOtur.mappers.RestaurantMapper;
 import com.micra.GOtur.mappers.RestaurantOwnerMapper;
+import com.micra.GOtur.models.Purchase;
 import com.micra.GOtur.models.Restaurant;
 import com.micra.GOtur.models.RestaurantOwner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,13 @@ public class RestaurantOwnerController {
         List<Restaurant> list = jdbcTemplate.query(sql, new RestaurantMapper(), restaurantOwnerId);
 
         return list;
+    }
+
+    @GetMapping("/orders/{restaurantOwnerId}")
+    public List<Purchase> getOrdersOfAllRestaurants(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String sql = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 0 AND R.user_id = ?;";
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(),restaurantOwnerId );
+        return  list;
     }
 
     @PostMapping("/add")

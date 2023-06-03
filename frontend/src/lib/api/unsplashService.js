@@ -71,6 +71,10 @@ export const addNewRestaurant = (id, restaurant) => (
   })
 );
 
+export const getRestaurantOrders = (userId) => (
+  axios.get(`${baseURL}/restaurantOwner/orders/${userId}`)
+);
+
 export const getRestaurantsOfOwner = (id) => (
   axios.get(`${baseURL}/restaurantOwner/restaurants/${id}`)
 );

@@ -1,10 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addFoodToGroupPurchase, addFoodToSinglePurchase, completeGroupPurchase, completeSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getOldPurchases, getOldPurchasesFoods, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase } from "../../lib/api/unsplashService";
+import { addFoodToGroupPurchase, addFoodToSinglePurchase, completeGroupPurchase, completeSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getOldPurchases, getOldPurchasesFoods, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase, getRestaurantOrders } from "../../lib/api/unsplashService";
 
 export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidSingle', 
   async (data, thunkAPI) => {
     try {
       const  response = await getProductUnpaidSinglePurchase(data.userId);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getOrdersThunk = createAsyncThunk('user/getOrders', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await getRestaurantOrders(data.userId);
       return response.data;
     } catch (error) {
       console.log(error);
@@ -204,8 +215,8 @@ const initialState = {
       }
     ],
     currentCart: 0,
-    unpaidSinglePurchase: JSON.parse(localStorage.getItem("singleCart")),
-    unpaidGroupPurchase: JSON.parse(localStorage.getItem("groupCart")),
+    unpaidSinglePurchase: {},
+    unpaidGroupPurchase: {},
     itemAdded: 0
 };
 
@@ -259,6 +270,10 @@ const orderSlice = createSlice({
       .addCase(deleteFoodFromGroupPurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);
         state.itemAdded = 1;
+      })
+      .addCase(getOrdersThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.unpaidSinglePurchase = action.payload;
       })
       .addCase(deleteFoodFromSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);

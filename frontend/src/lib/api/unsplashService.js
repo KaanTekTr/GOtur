@@ -37,6 +37,12 @@ export const addNewAddress = (id, address) => (
   })
 );
 
+export const  deleteAddress = (userId, addressId) => (
+  axios.delete(`${baseURL}/customer/deleteAddress/${userId}/${addressId}`)
+);
+
+
+
 export const setAddressPrimary = (addressId) => (
   axios.post(`${baseURL}/customer/setAddressPrimary/${addressId}`)
 );

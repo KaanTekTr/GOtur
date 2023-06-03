@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addNewAddress, getCustomerAdresses, setAddressPrimary } from "../../lib/api/unsplashService";
+import { addNewAddress, deleteAddress, getCustomerAdresses, setAddressPrimary } from "../../lib/api/unsplashService";
 
 export const getAddressesThunk = createAsyncThunk('user/getAddresses', 
   async (data, thunkAPI) => {
@@ -16,6 +16,17 @@ export const addAddressesThunk = createAsyncThunk('user/addAddresses',
   async (data, thunkAPI) => {
     try {
       const  response = await addNewAddress(data.userId, data.address);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const deleteAddressesThunk = createAsyncThunk('user/deleteAddresses', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await deleteAddress(data.userId, data.addressId);
       return response.data;
     } catch (error) {
       console.log(error);
@@ -99,6 +110,9 @@ const addressSlice = createSlice({
         console.log(action.payload);
       })
       .addCase(addAddressesThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
+      .addCase(deleteAddressesThunk.fulfilled, (state, action) => {
         console.log(action.payload);
       })
       .addCase(setAddressPriThunk.fulfilled, (state, action) => {

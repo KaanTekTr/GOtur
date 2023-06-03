@@ -9,7 +9,7 @@ import { cartUiActions } from "../../store/shopping-cart/cartUiSlice";
 
 import "../../styles/header.css";
 import { authActions, logoutThunk } from "../../store/authSlice";
-import { addAddressesThunk, addressActions, getAddressesThunk, setAddressPriThunk } from "../../store/user/adressSlice";
+import { addAddressesThunk, addressActions, deleteAddressesThunk, getAddressesThunk, setAddressPriThunk } from "../../store/user/adressSlice";
 import { getProductsUnpaidSinglePurchaseThunk, getUnpaidSinglePurchaseThunk, orderActions } from "../../store/user/orderSlice";
 import { Drawer, Input, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 
@@ -112,6 +112,14 @@ const Header = () => {
     dispatch(cartUiActions.toggle());
   };
 
+  const deleteAddress = (id) => {
+    dispatch(deleteAddressesThunk({ userId: userId, addressId:id }));
+    setTimeout(function(){
+      dispatch(getAddressesThunk({userId}));
+        
+    },500);
+    alert('Address is successfully deleted!.');
+  }
   const logOut = () => {
     dispatch(logoutThunk({userId, authType}));
   }
@@ -213,6 +221,7 @@ const Header = () => {
               <ModalHeader toggle={toggle}>Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>
+                  
                   {addresses?.length > 0 ? addresses.map(address => (
                     <ListGroupItem style={{cursor: "pointer"}} active={address.is_primary} onClick={() => changeSelAddress(address.address_id)}>
                       <ListGroupItemHeading>
@@ -221,6 +230,8 @@ const Header = () => {
                       <ListGroupItemText>
                         {address.street_name + " street, street no: "+address.street_num + ", " + address.district + "/" + address.city}
                       </ListGroupItemText>
+                      <Button className="mt-2" color="error" onClick={() => deleteAddress(address.address_id)}>Delete</Button>
+
                     </ListGroupItem>
                   )) : <span>No Address To Select</span>}
                 </ListGroup>

@@ -11,6 +11,7 @@ export const userLogout = (authType, id) => (
     axios.post(`${baseURL}/profile/logout/${authType}/${id}`)
   );
 
+
 export const userRegister = (authType, user) => (
     fetch(`${baseURL}/${authType}/add`, {
       method: 'POST',
@@ -61,6 +62,16 @@ export const getAllRestaurants = () => (
   axios.get(`${baseURL}/restaurant/all`)
 );
 
+export const editRestaurant = (id, restaurant) => (
+  fetch(`${baseURL}/restaurant/updateRestaurant/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-type' : 'application/json'
+    }, 
+    body: JSON.stringify(restaurant)
+  })
+);
+
 export const addNewRestaurant = (id, restaurant) => (
   fetch(`${baseURL}/restaurantOwner/addRestaurant/${id}`, {
     method: 'POST',
@@ -70,6 +81,7 @@ export const addNewRestaurant = (id, restaurant) => (
     body: JSON.stringify(restaurant)
   })
 );
+
 
 export const getRestaurantOrders = (userId) => (
   axios.get(`${baseURL}/restaurantOwner/getAllRestaurantPurchases/${userId}`)

@@ -244,6 +244,10 @@ export const getOldPurchasesFoods = (id) => (
   axios.get(`${baseURL}/purchase/getAllFoodAndIngredients/${id}`)
 );
 
+export const setPurchaseDeparted = (id) => (
+    axios.post(`${baseURL}/purchase/markDeparted/${id}`)
+);
+
 // DISCOUNT
 export const getDiscountsOfCustomer = (user_id) => (
     axios.get(`${baseURL}/discountCoupon/getAllDiscountItems/${user_id}`)

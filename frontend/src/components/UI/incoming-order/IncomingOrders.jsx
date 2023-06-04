@@ -3,7 +3,7 @@ import Helmet from "../../Helmet/Helmet";
 import CommonSection from "../common-section/CommonSection";
 import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button } from "reactstrap";
 import ReactPaginate from "react-paginate";
-import { getOrdersThunk } from "../../../store/user/orderSlice.js";
+import { getOrdersThunk, setPurchaseDepartedThunk } from "../../../store/user/orderSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from 'react';
 
@@ -54,8 +54,13 @@ const IncomingOrders = (props) => {
   };
 
   const handleButtonClick = (id, status) => {
-    const updatedOrders = orders.map(order => order.purchase_id === id ? {...order, status: status} : order);
-    //setOrders(updatedOrders);
+    //dispatch(transferBalanceThunk({ group_id: group.group_id, customer_id: userId, balance: balance}));
+    alert('Transfer Completed Successfully!');
+  };
+
+  const setDeparted = (id) => {
+    dispatch(setPurchaseDepartedThunk({ purchase_id: id}));
+    alert('Purchase Has Been Set As Departed!');
   };
 
   return (
@@ -114,7 +119,7 @@ const IncomingOrders = (props) => {
                   </h6>
                   {!order.purchase.is_departed && !order.purchase.is_delivered &&
                             <div>
-                            <Button color="primary" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'On the Road')}>
+                            <Button color="primary" size="sm" className="mr-2" onClick={() => setDeparted(order.purchase.purchase_id)}>
                               Set Departed
                             </Button>
                             <Button color="danger" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'Canceled')}>

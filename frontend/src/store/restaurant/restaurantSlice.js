@@ -1,6 +1,17 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { addFavRestaurants, addNewFood, addNewMenuCategory, deleteFood, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
+import { addFavRestaurants, addNewFood, addNewMenuCategory, addNewRestaurant, deleteFood, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
+
+export const addNewRestaurantThunk = createAsyncThunk('rest/addRestaurant', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await addNewRestaurant(data.id, data.restaurant);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 export const getRestaurantsThunk = createAsyncThunk('user/getRestaurants', 
   async () => {

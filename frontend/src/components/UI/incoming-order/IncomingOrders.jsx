@@ -42,7 +42,7 @@ const IncomingOrders = (props) => {
 
   const orderPerPage = 5;
   const visitedPage = pageNumber * orderPerPage;
-  const displayPage = orders.slice(
+  const displayPage = orders?.slice(
     visitedPage,
     visitedPage + orderPerPage
   );

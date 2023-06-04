@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Container, Card, CardTitle, Button, Modal, ModalBody, ModalHeader, Input, Form, Row, Col, InputGroup, InputGroupText } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { getRestOfOwnerThunk } from '../store/restaurant/restaurantSlice';
+import { addNewRestaurantThunk, getRestOfOwnerThunk } from '../store/restaurant/restaurantSlice';
+import { addNewAddress } from '../lib/api/unsplashService';
 // import { updateRestaurant } from '../redux/actions/restaurantActions';
 
 const RestaurantInfoPage = () => {
@@ -47,7 +48,16 @@ const RestaurantInfoPage = () => {
   };
 
   const createRest = () => {
-    
+    const rest = {
+      restaurant_name: name,
+      district : district,
+      min_delivery_price: minPrice
+    }
+    dispatch(addNewRestaurantThunk({id:userId, restaurant: rest}));
+    setTimeout(function(){
+      dispatch(getRestOfOwnerThunk({userId}));
+        
+    },500);
   }
 
   const userId = useSelector(state => state.auth.userId);

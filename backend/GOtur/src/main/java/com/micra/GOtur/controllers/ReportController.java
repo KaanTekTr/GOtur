@@ -244,14 +244,14 @@ public class ReportController {
         String sql = "WITH temp( restaurant_id, couponCount ) AS (" +
                 " SELECT restaurant_id, count(*) AS count" +
                 " FROM DiscountCoupon" +
-                " WHERE expiration_date >= ?" +
+                " WHERE is_used = 0" +
                 " GROUP BY restaurant_id" +
                 " )" +
                 " SELECT R.restaurant_name, T.couponCount" +
                 " FROM temp T NATURAL JOIN Restaurant R" +
                 " WHERE couponCount = (SELECT MAX(couponCount)" +
                 " FROM temp);";
-        List<Map<String, Integer>> ls = jdbcTemplate.query(sql, new StringIntegerMapper(p1, p2), LocalDate.now());
+        List<Map<String, Integer>> ls = jdbcTemplate.query(sql, new StringIntegerMapper(p1, p2));
         StringBuilder detail = new StringBuilder();
         detail.append("");
         for (Map<String, Integer> map : ls) {

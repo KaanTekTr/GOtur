@@ -120,6 +120,24 @@ public class RestaurantController {
         return list;
     }
 
+    @GetMapping("/getAllNonDeliveredPurchases/{restaurantId}")
+    public List<Purchase> getAllNonDeliveredPurchasesOfRestaurant(@PathVariable("restaurantId") int restaurantId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.restaurant_id = ? AND P.is_paid = 1 AND P.is_delivered = 0;";
+
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), restaurantId);
+
+        return  list;
+    }
+
+    @GetMapping("/getAllDepartedNonDeliveredPurchases/{restaurantId}")
+    public List<Purchase> getAllDepartedNonDeliveredPurchasesOfRestaurant(@PathVariable("restaurantId") int restaurantId) {
+        String sql = "SELECT * FROM Purchase P WHERE P.restaurant_id = ? AND P.is_paid = 1 AND P.is_departed = 1 AND P.is_delivered = 0;";
+
+        List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(), restaurantId);
+
+        return  list;
+    }
+
     @PostMapping("/addMenuCategory")
     public ResponseEntity<String> addMenuCategoryByRestaurantId(@RequestBody MenuCategory menuCategory) {
         String sql = "INSERT INTO MenuCategory(restaurant_id, menu_category_name) VALUES (?, ?);";

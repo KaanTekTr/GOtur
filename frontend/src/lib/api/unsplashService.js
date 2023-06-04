@@ -79,6 +79,10 @@ export const getRestaurantsOfOwner = (id) => (
   axios.get(`${baseURL}/restaurantOwner/restaurants/${id}`)
 );
 
+export const addFavRestaurants = (id, rest_id) => (
+  axios.post(`${baseURL}/customer/addFavoriteRestaurant/${id}/${rest_id}`)
+);
+
 // FRIENDS
 
 export const getAllFriends = (id) => (

@@ -9,7 +9,7 @@ import image01 from "../../../assets/images/bread.png";
 
 
 import { useDispatch, useSelector } from "react-redux";
-import { restaurantActions } from "../../../store/restaurant/restaurantSlice";
+import { deleteFoodThunk, restaurantActions } from "../../../store/restaurant/restaurantSlice";
 
 const MenuItem = (props) => {
   const { food_id, food_name, price } = props.item;
@@ -20,8 +20,9 @@ const MenuItem = (props) => {
 
   // Function to handle deleting a product
   const deleteProduct = () => {
-    // dispatch(restaurantActions.deleteProduct(id));
-  };
+    dispatch(deleteFoodThunk({ foodId: food_id }));
+    alert('Food is successfully removed!');
+  }
 
   // Function to handle editing the price of a product
   const editPrice = () => {

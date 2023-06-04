@@ -308,7 +308,7 @@ const orderSlice = createSlice({
       })
       .addCase(getOrdersThunk.fulfilled, (state, action) => {
         console.log(action.payload);
-        state.unpaidSinglePurchase = action.payload;
+        state.orders = action.payload;
       })
       .addCase(deleteFoodFromSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);

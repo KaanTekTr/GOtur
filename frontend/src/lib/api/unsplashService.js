@@ -149,7 +149,9 @@ export const addNewFood= (food) => (
     body: JSON.stringify(food)
   })
 );
-
+export const deleteFood = (foodId) => (
+  axios.delete(`${baseURL}/restaurant/deleteFood/${foodId}`)
+);
 export const getAllFoodsOfRest = (id) => (
   axios.get(`${baseURL}/restaurant/allFood/restaurantId/${id}`)
 );

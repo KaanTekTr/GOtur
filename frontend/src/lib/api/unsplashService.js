@@ -248,6 +248,14 @@ export const setPurchaseDeparted = (id) => (
     axios.post(`${baseURL}/purchase/markDeparted/${id}`)
 );
 
+export const cancelPurchase = (id) => (
+    axios.post(`${baseURL}/purchase/cancelSinglePurchase/${id}`)
+);
+
+export const cancelGroupPurchase = (id) => (
+    axios.post(`${baseURL}/purchase/cancelGroupPurchase/${id}`)
+);
+
 // DISCOUNT
 export const getDiscountsOfCustomer = (user_id) => (
     axios.get(`${baseURL}/discountCoupon/getAllDiscountItems/${user_id}`)

@@ -62,7 +62,7 @@ public class RestaurantOwnerController {
 
     @GetMapping("/getAllRestaurantPurchases/{restaurantOwnerId}")
     public List<RestaurantPurchase> getAllRestaurantPurchasesByRestaurantOwnerId(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
-        String sql1 = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 1 AND R.user_id = ?;";
+        String sql1 = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 1 AND P.is_canceled = 0 AND R.user_id = ?;";
         List<Purchase> list = jdbcTemplate.query(sql1, new PurchaseMapper(),restaurantOwnerId );
         List<RestaurantPurchase> restaurantPurchaseList = new ArrayList<>();
 

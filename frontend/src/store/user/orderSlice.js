@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addFoodToGroupPurchase, addFoodToSinglePurchase, completeGroupPurchase, completeSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getOldPurchases, getOldPurchasesFoods, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase, getRestaurantOrders, setPurchaseDeparted } from "../../lib/api/unsplashService";
+import { addFoodToGroupPurchase, addFoodToSinglePurchase, completeGroupPurchase, completeSinglePurchase, deleteFoodFromGroupPurchase, deleteFoodFromSinglePurchase, getOldPurchases, getOldPurchasesFoods, getProductUnpaidGroupPurchase, getProductUnpaidSinglePurchase, getUnpaidGroupPurchase, getUnpaidSinglePurchase, getRestaurantOrders, setPurchaseDeparted, cancelPurchase, cancelGroupPurchase } from "../../lib/api/unsplashService";
 
 export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/getProductsUnpaidSingle', 
   async (data, thunkAPI) => {
@@ -185,6 +185,28 @@ export const setPurchaseDepartedThunk = createAsyncThunk('purchase/setPurchaseDe
   async (data, thunkAPI) => {
     try {
       const response = await setPurchaseDeparted(data.purchase_id);
+      return response.data
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const cancelPurchaseThunk = createAsyncThunk('purchase/cancelPurchase', 
+  async (data, thunkAPI) => {
+    try {
+      const response = await cancelPurchase(data.purchase_id);
+      return response.data
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const cancelGroupPurchaseThunk = createAsyncThunk('purchase/cancelGroupPurchase', 
+  async (data, thunkAPI) => {
+    try {
+      const response = await cancelGroupPurchase(data.purchase_id);
       return response.data
     } catch (error) {
       console.log(error);

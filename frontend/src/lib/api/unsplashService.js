@@ -120,6 +120,10 @@ export const addMemberToGroup = (group_id, customer_id) => (
   axios.post(`${baseURL}/purchaseGroup/add/${group_id}/${customer_id}`)
 );
 
+export const transferBalanceToGroup = (group_id, customer_id, transferAmount) => (
+    axios.post(`${baseURL}/purchaseGroup/transferToGroupBalance/${group_id}/${customer_id}?transferAmount=${transferAmount}`)
+);
+
 // FOOD CATEGORY
 export const addFoodCategory= (foodCategory) => (
   fetch(`${baseURL}/foodCategory/add`, {

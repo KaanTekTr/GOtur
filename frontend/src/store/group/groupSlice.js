@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
-import { addMemberToGroup, addNewGroup, getAllGroups, getAllMembersOfGroup } from "../../lib/api/unsplashService";
+import { addMemberToGroup, addNewGroup, getAllGroups, getAllMembersOfGroup, transferBalanceToGroup } from "../../lib/api/unsplashService";
 
 const items = groupId =>
   localStorage.getItem(`groupCartItems_${groupId}`) !== null
@@ -60,6 +60,17 @@ export const addGroupMemberThunk = createAsyncThunk('group/addGroupMember',
   async (data, thunkAPI) => {
     try {
       const  response = await addMemberToGroup(data.group_id, data.customer_id);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const transferBalanceThunk = createAsyncThunk('group/transferBalance', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await transferBalanceToGroup(data.group_id, data.customer_id, data.balance);
       return response.data;
     } catch (error) {
       console.log(error);

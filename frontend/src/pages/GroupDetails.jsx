@@ -10,9 +10,10 @@ import "../styles/pagination.css";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
-import { addGroupMemberThunk, getGroupMembersThunk, getGroupsThunk, groupsActions } from "../store/group/groupSlice";
+import { addGroupMemberThunk, getGroupMembersThunk, getGroupsThunk, groupsActions, transferBalanceThunk } from "../store/group/groupSlice";
 import { completeGroupPurchaseThunk, deleteFoodFromGroupPurchaseThunk, getProductsUnpaidGroupPurchaseThunk, getUnpaidGroupPurchaseThunk, orderActions } from "../store/user/orderSlice";
 import { getFriendsThunk } from "../store/group/friendsSlice";
+import { getUserThunk } from "../store/authSlice";
 
 import image01 from "../assets/images/bread.png"; 
 
@@ -28,6 +29,13 @@ const GroupDetails = () => {
 
     const groupAddresses = useSelector(state => state.address.groupAddress);
     const selectedGroupAddress = useSelector(state => state.address.selectedGroupAddress);
+
+    const userDispatch = useDispatch();
+    useEffect(() => {
+        userDispatch(getUserThunk({authType: "customer", userId}));
+     }, [userDispatch, userId]);
+   const user = useSelector(state => state.auth.user);
+   console.log(user)
 
     const [modal, setModal] = useState(false);
     const [modalAddMoney, setModalAddMoney] = useState(false);
@@ -100,6 +108,8 @@ const GroupDetails = () => {
     }
 
     const [note, setNote] = useState("");
+    const [balance, setBalance] = useState(0);
+
 
     const [info, setInfo] = useState("");
     const [visible, setVisible] = useState(false);
@@ -117,6 +127,20 @@ const GroupDetails = () => {
       toggleGroupCheckout();
       
       //navigate(`/payment`)
+    }
+    const [reload3, setReload3] = useState(false);
+
+    // Function to handle deleting a product
+    const transferBalance = () => {
+        dispatch(transferBalanceThunk({ group_id: group.group_id, customer_id: userId, balance: balance}));
+        alert('Transfer Completed Successfully!');
+        setTimeout(() => {
+            dispatch(getGroupsThunk({userId}));
+            setGroup(groups.find(group => `${group.group_id}` === id));
+        }, 200);
+        setReload3(!reload3);
+        setReload3(!reload3);
+        toggleAddMoney();
     }
   return (
     <>
@@ -204,19 +228,19 @@ const GroupDetails = () => {
                 <Container>
                   <Row>
                     <Col>
-                      My Balance: 100$
+                      My Balance: {user.balance}$
                     </Col>
                     <Col>
                       <InputGroup>
-                        <Input type="number" placeholder="1500" />
+                        <Input type="number" value={balance} onChange={e => setBalance(e.target.value)} placeholder="1500" />
                         <InputGroupText>
                           $
                         </InputGroupText>
                       </InputGroup>
-                      <Button color="danger" className="mt-4">Transfer Money</Button>
+                      <Button color="danger" className="mt-4" onClick={transferBalance}>Transfer Money</Button>
                     </Col>
                     <Col>
-                      Group Balance: 300$
+                      Group Balance: {group.group_balance}$
                     </Col>
                   </Row>
                 </Container>

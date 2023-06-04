@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Alert } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { authActions, registerThunk } from "../store/authSlice";
@@ -24,6 +24,10 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [authType, setUserType] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+
+  const [info, setInfo] = useState("");
+  const [visible, setVisible] = useState(false);
+  const onDismiss = () => setVisible(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -57,9 +61,9 @@ const Register = () => {
       gender,
     }
     if (authType === "customer") {
-      dispatch(registerThunk({authType, user:customer, navigate}));
+      dispatch(registerThunk({setInfo, setVisible, authType, user:customer, navigate}));
     } else {
-      dispatch(registerThunk({authType, user:restaurantOwner, navigate}));
+      dispatch(registerThunk({setInfo, setVisible, authType, user:restaurantOwner, navigate}));
     }
   };
 
@@ -165,6 +169,9 @@ const Register = () => {
           </Row>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+          {info}
+      </Alert>
     </Helmet>
   );
 };

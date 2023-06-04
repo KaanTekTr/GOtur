@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col, Card, CardTitle, Input, CardSubtitle, Table } from "reactstrap";
+import { Container, Row, Col, Card, CardTitle, Input, CardSubtitle, Table, Alert } from "reactstrap";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,11 +16,17 @@ const Checkout = () => {
   const addresses = useSelector(state => state.address.address);
   const [note, setNote] = useState("");
 
+  
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  const [info, setInfo] = useState("");
+  const [visible, setVisible] = useState(false);
+  const onDismiss = () => setVisible(false);
 
   const handlePayment = () => {
-    dispatch(completeSinglePurchaseThunk({purchase_id: cart.purchase_id, address_id: addresses.find(ad => ad.is_primary)?.address_id, note, coupon_id: -1}))
+    dispatch(completeSinglePurchaseThunk({ setInfo, setVisible,purchase_id: cart.purchase_id, address_id: addresses.find(ad => ad.is_primary)?.address_id, note, coupon_id: -1}))
     //navigate(`/payment`)
   }
 
@@ -93,6 +99,9 @@ const Checkout = () => {
           </Row>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+          {info}
+      </Alert>
     </Helmet>
   );
 };

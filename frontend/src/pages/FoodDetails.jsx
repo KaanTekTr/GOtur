@@ -48,7 +48,13 @@ const FoodDetails = () => {
 
   const selectedCart = useSelector(state => state.order.currentCart);
 
+  const [info, setInfo] = useState("");
+  const [visible, setVisible] = useState(false);
+
+  const onDismiss = () => setVisible(false);
+
   const addToCart = () => {
+    setInfo("Product added to cart!");
     if (selectedCart === 0) {
       const food = {
         food: {
@@ -59,7 +65,7 @@ const FoodDetails = () => {
         },
         ingredientList: []
       }
-      dispatch(addFoodToSinglePurchaseThunk({food, userId}))
+      dispatch(addFoodToSinglePurchaseThunk({setInfo, setVisible,food, userId}))
     } else {
       const food = {
         food: {
@@ -70,18 +76,13 @@ const FoodDetails = () => {
         },
         ingredientList: []
       }
-      dispatch(addFoodToGroupPurchaseThunk({food, userId: selectedCart}))
+      dispatch(addFoodToGroupPurchaseThunk({setInfo, setVisible,food, userId: selectedCart}))
     }
     setVisible(!visible);
     setTimeout(() => {
       setVisible(true);
     }, 100)
   };
-
-  
-  const [visible, setVisible] = useState(false);
-
-  const onDismiss = () => setVisible(false);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -199,8 +200,8 @@ const FoodDetails = () => {
           </Row>
         </Container>
       </section>
-      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="info" isOpen={visible} toggle={onDismiss}>
-          Product added to cart!
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+          {info}
       </Alert>
     </Helmet>
     ): <span>Loading...</span>}

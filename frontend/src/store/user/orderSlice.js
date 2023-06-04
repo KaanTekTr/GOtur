@@ -59,10 +59,23 @@ export const getUnpaidGroupPurchaseThunk = createAsyncThunk('purchase/getUnpaidG
 export const addFoodToSinglePurchaseThunk = createAsyncThunk('purchase/addFoodSingle', 
   async (data, thunkAPI) => {
     try {
-      const  response = await addFoodToSinglePurchase(data.food, data.userId);
+      const response = await addFoodToSinglePurchase(data.food, data.userId);
+      console.log(response);
+      if (response?.status === 400) {
+        data.setInfo("You have food from another restorant in your cart already!");
+        data.setVisible(v => !v);
+        setTimeout(() => {
+          data.setVisible(true);
+        }, 100)
+      }
       return response.data;
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 );
@@ -71,9 +84,21 @@ export const addFoodToGroupPurchaseThunk = createAsyncThunk('purchase/addFoodGro
   async (data, thunkAPI) => {
     try {
       const  response = await addFoodToGroupPurchase(data.food, data.userId);
+      if (response?.status === 400) {
+        data.setInfo("You have food from another restorant in group cart already!");
+        data.setVisible(v => !v);
+        setTimeout(() => {
+          data.setVisible(true);
+        }, 100)
+      }
       return response.data;
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 );
@@ -107,6 +132,11 @@ export const completeSinglePurchaseThunk = createAsyncThunk('purchase/completeSi
       return response.data;
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 );
@@ -118,6 +148,11 @@ export const completeGroupPurchaseThunk = createAsyncThunk('purchase/completeGro
       return response.data;
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 );

@@ -19,7 +19,10 @@ export const loginThunk = createAsyncThunk('auth/login',
     } catch (error) {
       console.log(error);
       data.setInfo(error.response.data);
-      data.setVisible(r => !r);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 )
@@ -42,6 +45,11 @@ export const registerThunk = createAsyncThunk('auth/register',
       return {response, nav: data.navigate};
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 )

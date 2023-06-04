@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { addBalanceCustomer, getUser, userLogin, userLogout, userRegister } from "../lib/api/unsplashService";
+import { addBalanceCustomer, createReportFavRest, createReportFavRestMaxPurch, createReportMaxCoup, createReportMaxRat, getUser, reportAll, reportDeleteAll, userLogin, userLogout, userRegister } from "../lib/api/unsplashService";
 
 export const loginThunk = createAsyncThunk('auth/login', 
   async (data, thunkAPI) => {
@@ -84,6 +84,73 @@ export const addBalanceThunk = createAsyncThunk('auth/addBalance',
   }
 )
 
+export const createReport1Thunk = createAsyncThunk('auth/createRep1', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await createReportFavRest(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const createReport2Thunk = createAsyncThunk('auth/createRep2', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await createReportMaxCoup(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const createReport3Thunk = createAsyncThunk('auth/createRep3', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await createReportFavRestMaxPurch(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const createReport4Thunk = createAsyncThunk('auth/createRep4', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await createReportMaxRat(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const reportAllThunk = createAsyncThunk('auth/repAll', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await reportAll(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+export const reportDeleteAllThunk = createAsyncThunk('auth/repDelAll', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await reportDeleteAll(11);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+)
+
+
 const authSlice = createSlice({
   name: "cartUi",
   initialState: {
@@ -91,7 +158,8 @@ const authSlice = createSlice({
     status: localStorage.getItem('userId') ? 'authenticated' : 'not-authenticated',
     key: localStorage.getItem('key'),
     userId: localStorage.getItem('userId'),
-    user: JSON.parse(localStorage.getItem('user'))
+    user: JSON.parse(localStorage.getItem('user')),
+    reports: [],
   },
 
 
@@ -134,6 +202,10 @@ const authSlice = createSlice({
           localStorage.setItem('user', JSON.stringify(action.payload));
         state.user = action.payload;
         console.log(action.payload);
+      })
+      .addCase(reportAllThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+        state.reports = action.payload;
       })
   },
 });

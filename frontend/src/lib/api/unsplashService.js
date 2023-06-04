@@ -272,3 +272,28 @@ export const cancelGroupPurchase = (id) => (
 export const getDiscountsOfCustomer = (user_id) => (
     axios.get(`${baseURL}/discountCoupon/getAllDiscountItems/${user_id}`)
 );
+
+// REPORTS
+export const createReportFavRest = (user_id) => (
+  axios.post(`${baseURL}/report/mostFavoritedRestaurant/11`)
+);
+
+export const createReportMaxRat = (user_id) => (
+  axios.post(`${baseURL}/report/maxRatingInRegion/11`)
+);
+
+export const createReportFavRestMaxPurch = (user_id) => (
+  axios.post(`${baseURL}/report/maxPurchaseInRegion/11`)
+);
+
+export const createReportMaxCoup = (user_id) => (
+  axios.post(`${baseURL}/report/maxDiscountCoupon/11`)
+);
+
+export const reportAll = (user_id) => (
+  axios.get(`${baseURL}/report/all`)
+);
+
+export const reportDeleteAll = (user_id) => (
+  axios.delete(`${baseURL}/report/deleteAll`)
+);

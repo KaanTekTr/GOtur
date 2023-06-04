@@ -25,6 +25,7 @@ import DiscountCoupons from "../pages/DiscountCoupons";
 import { useSelector } from "react-redux";
 import CustomerBalance from "../pages/CustomerBalance";
 import Payment from "../pages/Payment";
+import Reports from "../pages/Reports";
 
 
 
@@ -40,6 +41,7 @@ const Routers = () => {
     <Routes>
       <Route path="/" element={status=== "authenticated" ? <Navigate to="/home" />: <Navigate to="/Login" />} />
       <Route path="/home" element={<Home />} />
+      <Route path="/admin" element={<Reports />} />
       <Route path="/foods" element={<AllFoods />} />
       <Route path="/foods/:id" element={<FoodDetails />} />
       <Route path="/restaurants" element={<AllRestaurants />} />

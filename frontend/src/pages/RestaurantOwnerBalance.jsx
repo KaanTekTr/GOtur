@@ -13,12 +13,13 @@ import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, Modal
 
 import "../styles/all-foods.css";
 import "../styles/pagination.css";
+import { useSelector } from "react-redux";
 
 
 
 
 const RestaurantOwnerBalance = () => {
-    const [balance, setBalance] = useState(1000); // Initial balance can be fetched from backend
+    const restaurant = useSelector(state => state.restaurant.myRestaurant.info)
     const [amount, setAmount] = useState(0);
     const [modalWithdrawMoney, setModalWithdrawMoney] = useState(false);
 
@@ -35,8 +36,7 @@ const RestaurantOwnerBalance = () => {
             return;
         }
 
-        if (withdrawalAmount <= balance) {
-            setBalance(prevBalance => prevBalance - withdrawalAmount);
+        if (withdrawalAmount <= restaurant.total_earnings) {
             alert('Money has been successfully withdrawn from your account.');
 
         } else {
@@ -54,10 +54,10 @@ const RestaurantOwnerBalance = () => {
         <div>
             <Card body>
                 <CardTitle tag="h5">Restaurant Balance</CardTitle>
-                <p>Your current balance is: ${balance.toFixed(2)}</p>
+                <p>Your total earning is: ${restaurant?.total_earnings.toFixed(2)}</p>
                 <div>
                 
-                <Button color="success" onClick={toggleWithdrawMoney} disabled={balance === 0}>Withdraw Money</Button>
+                <Button color="success" onClick={toggleWithdrawMoney} disabled={restaurant.total_earnings === 0}>Withdraw Money</Button>
                 </div>
             </Card>
         </div>

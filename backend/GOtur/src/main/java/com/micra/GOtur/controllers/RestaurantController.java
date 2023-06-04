@@ -227,6 +227,30 @@ public class RestaurantController {
         return new ResponseEntity<>("Ingredient With ID: " + ingredientId + " Has Been Successfully Updated!", HttpStatus.OK);
     }
 
+    @GetMapping("/searchFood/{restaurantId}")
+    public List<Food> searchFood(
+            @PathVariable("restaurantId") int restaurantId,
+            @RequestParam int lowPrice,
+            @RequestParam int highPrice,
+            @RequestParam String chars
+    ) {
+
+        String checkSql = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";
+        boolean exists = jdbcTemplate.queryForObject(checkSql, Boolean.class, restaurantId);
+        if (!exists) {
+            return null;
+        }
+
+        String sql = "SELECT * FROM Food F " +
+                "WHERE F.restaurant_id = ? AND F.price BETWEEN ? AND ? " +
+                "AND F.food_name LIKE CONCAT('%', ?, '%');";
+        System.out.println(">>" + sql);
+        List<Food> list = jdbcTemplate.query(sql, new FoodMapper(), restaurantId, lowPrice, highPrice, chars);
+
+        return list;
+
+    }
+
     @DeleteMapping("/delete/{restaurantId}")
     public ResponseEntity<String> deleteRestaurantByRestaurantId(@PathVariable("restaurantId") int restaurantId) {
         String checkSql = "SELECT EXISTS (SELECT * FROM Restaurant R WHERE R.restaurant_id = ?);";

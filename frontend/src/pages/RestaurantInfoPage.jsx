@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Container, Card, CardTitle, Button, Modal, ModalBody, ModalHeader, Input, Form } from 'reactstrap';
+import { Container, Card, CardTitle, Button, Modal, ModalBody, ModalHeader, Input, Form, Row, Col, InputGroup, InputGroupText } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { getRestOfOwnerThunk } from '../store/restaurant/restaurantSlice';
 // import { updateRestaurant } from '../redux/actions/restaurantActions';
@@ -11,14 +11,24 @@ const RestaurantInfoPage = () => {
   const id = "01";
   const [orderModal, setOrderModal] = useState(false);
   const [hourModal, setHourModal] = useState(false);
+  const [createRestModal, setCreateRestModal] = useState(false);
 
   const [minOrderLimit, setMinOrderLimit] = useState("");
   const [openHours, setOpenHours] = useState("");
+
+  const [name, setName] = useState("");
+  const [district, setDistrict] = useState("");
+  const [minPrice, setMinPrice] = useState(0);
+
   
   const dispatch = useDispatch();
 
   const toggleOrderModal = () => {
     setOrderModal(!orderModal);
+  };
+
+  const toggleCreateRestModal = () => {
+    setCreateRestModal(!createRestModal);
   };
   const toggleHourModal = () => {
     setHourModal(!hourModal);
@@ -35,6 +45,10 @@ const RestaurantInfoPage = () => {
     // dispatch(updateRestaurant({ minOrderLimit, openHours }));
     toggleOrderModal();
   };
+
+  const createRest = () => {
+    
+  }
 
   const userId = useSelector(state => state.auth.userId);
 
@@ -93,7 +107,43 @@ const RestaurantInfoPage = () => {
       </Modal>
     </Card>
   </Container>
-    : <span>Loading...</span>}
+    : <div>
+        <h3 style={{margin: "100px 300px"}}>You don't have restaurant</h3>
+        <Button onClick={toggleCreateRestModal} style={{marginBottom: "300px", marginLeft: "30px"}} color="primary" type="submit">Create Restaurant</Button>
+        <Modal isOpen={createRestModal} toggle={toggleCreateRestModal}>
+          <ModalHeader toggle={toggleCreateRestModal}>Create Restaurant</ModalHeader>
+          <ModalBody>
+            <Container>
+              <Row className="mb-2">
+                <Col>
+                  <InputGroup>
+                    <InputGroupText>Restaurant Name</InputGroupText>
+                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Dominos" />
+                  </InputGroup>
+                </Col>
+              </Row>
+              <Row className="mb-2">
+                <Col>
+                  <InputGroup>
+                    <InputGroupText>District</InputGroupText>
+                    <Input value={district} onChange={e => setDistrict(e.target.value)} placeholder=" Çankaya" />
+                  </InputGroup>
+                </Col>
+              </Row>
+              <Row className="mb-2">
+                <Col>
+                  <InputGroup>
+                    <InputGroupText>Min Delivery Price</InputGroupText>
+                    <Input value={minPrice} onChange={e => setMinPrice(e.target.value)} placeholder=" 100" />
+                  </InputGroup>
+                </Col>
+              </Row>
+              <Button onClick={createRest} color="primary" type="submit">Create Restaurant</Button>
+
+            </Container>
+          </ModalBody>
+        </Modal>
+      </div>}
     </>
     
   );

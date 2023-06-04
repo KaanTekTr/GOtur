@@ -17,9 +17,20 @@ import restaurants from "../assets/fake-data/restaurants.js";
 
 import IncomingOrders from "../components/UI/incoming-order/IncomingOrders.jsx";
 import { getOrdersThunk } from "../store/user/orderSlice.js";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserThunk } from "../store/authSlice.js";
 
 
 const RestaurantOwnerHome = () => {
+
+  const userId = useSelector(state => state.auth.userId);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (userId !== 0) {
+      dispatch(getUserThunk({authType: "restaurantOwner", userId}));
+    }
+  })
 
   return (
     <Helmet title="Home">

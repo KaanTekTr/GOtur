@@ -5,10 +5,21 @@ export const loginThunk = createAsyncThunk('auth/login',
   async (data, thunkAPI) => {
     try {
       console.log(data);
-      const  response = await userLogin(data.authType, data.email, data.password);
-      return response.data;
+      const response = await userLogin(data.authType, data.email, data.password);
+      console.log(response);
+      if (response.status === 200 && data.authType==="customer") {
+        data.dispatch(authActions.changeAuthType("customer"));
+        data.navigate("/home");
+      } else if (response.status === 200){
+        data.dispatch(authActions.changeAuthType("restaurantOwner"));
+        data.navigate("/RestaurantOwnerHome");
+      }
+      console.log({ response: response, setVisible: data.setVisible });
+      return { response: response, setVisible: data.setVisible };
     } catch (error) {
-      
+      console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(r => !r);
     }
   }
 )
@@ -83,9 +94,15 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loginThunk.fulfilled, (state, action) => {
-        state.status = "authenticated";
-        localStorage.setItem('userId', action.payload);
-        state.userId = action.payload;
+        console.log(action.payload);
+        if (action.payload?.response?.status === 200) {
+          state.status = "authenticated";
+          localStorage.setItem('userId', action.payload.response.data);
+          state.userId = action.payload.response.data;
+        } 
+      })
+      .addCase(loginThunk.rejected, (state, action) => {
+        console.log(action.payload);
       })
       .addCase(logoutThunk.fulfilled, (state, action) => {
         state.status = "not-authenticated";

@@ -1,12 +1,8 @@
 package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.helpers.HashPasswordHelper;
-import com.micra.GOtur.mappers.PurchaseMapper;
-import com.micra.GOtur.mappers.RestaurantMapper;
-import com.micra.GOtur.mappers.RestaurantOwnerMapper;
-import com.micra.GOtur.models.Purchase;
-import com.micra.GOtur.models.Restaurant;
-import com.micra.GOtur.models.RestaurantOwner;
+import com.micra.GOtur.mappers.*;
+import com.micra.GOtur.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +55,58 @@ public class RestaurantOwnerController {
 
     @GetMapping("/orders/{restaurantOwnerId}")
     public List<Purchase> getOrdersOfAllRestaurants(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
-        String sql = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 1 AND AND R.user_id = ?;";
+        String sql = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 1 AND R.user_id = ?;";
         List<Purchase> list = jdbcTemplate.query(sql, new PurchaseMapper(),restaurantOwnerId );
         return  list;
+    }
+
+    @GetMapping("/getAllRestaurantPurchases/{restaurantOwnerId}")
+    public List<RestaurantPurchase> getAllRestaurantPurchasesByRestaurantOwnerId(@PathVariable("restaurantOwnerId") int restaurantOwnerId) {
+        String sql1 = "SELECT * FROM ManagedBy M, Purchase P, RestaurantOwner R WHERE R.user_id = M.restaurant_owner_id AND P.restaurant_id = M.restaurant_id AND P.is_paid = 1 AND P.being_prepared = 1 AND R.user_id = ?;";
+        List<Purchase> list = jdbcTemplate.query(sql1, new PurchaseMapper(),restaurantOwnerId );
+        List<RestaurantPurchase> restaurantPurchaseList = new ArrayList<>();
+
+        for (Purchase purchase : list) {
+            RestaurantPurchase restaurantPurchase = new RestaurantPurchase();
+            restaurantPurchase.setPurchase(purchase);
+
+            String sql2 = "SELECT * FROM Restaurant R WHERE R.restaurant_id = ?;";
+            Restaurant restaurant = jdbcTemplate.queryForObject(sql2, new RestaurantMapper(), purchase.getRestaurant_id());
+            restaurantPurchase.setRestaurant(restaurant);
+
+            String sql3 = "SELECT * FROM Address A WHERE A.address_id = ?;";
+            Address address = jdbcTemplate.queryForObject(sql3, new AddressMapper(), purchase.getAddress_id());
+            restaurantPurchase.setAddress(address);
+
+            String sql4 = "SELECT * FROM Customer R, User U WHERE U.user_id = R.user_id AND U.user_id = ?;";
+            Customer customer = jdbcTemplate.queryForObject(sql4, new CustomerMapper(), purchase.getCustomer_id());
+            restaurantPurchase.setCustomer(customer);
+
+            String sql = "SELECT * FROM FoodInPurchase FP WHERE FP.purchase_id = ?;";
+            List<FoodInPurchase> foodList = jdbcTemplate.query(sql, new FoodInPurchaseMapper(), purchase.getPurchase_id());
+            List<PurchaseItem> purchaseItemList = new ArrayList<>();
+
+            for (FoodInPurchase foodInPurchase: foodList) {
+                int food_id = foodInPurchase.getFood_id();
+                int food_order = foodInPurchase.getFood_order();
+
+                String foodSql = "SELECT * FROM Food F WHERE F.food_id = ?;";
+                Food food = jdbcTemplate.queryForObject(foodSql, new FoodMapper(), food_id);
+
+                String ingredientSql = "SELECT * FROM Ingredient I WHERE I.food_id = ? AND I.ingredient_id IN (SELECT IP.ingredient_id FROM IngredientInPurchase IP WHERE IP.purchase_id = ? AND IP.food_order = ?);";
+                List<Ingredient> ingredientList = jdbcTemplate.query(ingredientSql, new IngredientMapper(), food_id, purchase.getPurchase_id(), food_order);
+
+                PurchaseItem purchaseItem = new PurchaseItem();
+                purchaseItem.setFood(food);
+                purchaseItem.setIngredientList(ingredientList);
+                purchaseItem.setFood_order(food_order);
+                purchaseItemList.add(purchaseItem);
+            }
+            restaurantPurchase.setPurchaseItemList(purchaseItemList);
+            restaurantPurchaseList.add(restaurantPurchase);
+        }
+
+        return restaurantPurchaseList;
     }
 
     @PostMapping("/add")

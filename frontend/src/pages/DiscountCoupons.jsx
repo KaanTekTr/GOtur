@@ -55,7 +55,7 @@ const coupons = useSelector(state => state.discountCoupon.discountCoupons);
                   <CardSubtitle tag="h6" className="mb-2 text-muted">Restaurant: {coupon.restaurant.restaurant_name}</CardSubtitle>
                   <CardText>
                     Discount Percentage: {coupon.restaurant.discount_percentage}% <br/>
-                    Is Used: {coupon.is_used} 
+                    Status: {coupon.is_used && "Coupon Used"} {!coupon.is_used && "Active"}
                   </CardText>
                 </Card>
               </Col>

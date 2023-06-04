@@ -15,7 +15,8 @@ export const getProductsUnpaidSinglePurchaseThunk = createAsyncThunk('purchase/g
 export const getOrdersThunk = createAsyncThunk('user/getOrders', 
   async (data, thunkAPI) => {
     try {
-      const  response = await getRestaurantOrders(data.userId);
+        console.log(data.userId)
+      const response = await getRestaurantOrders(data.userId);
       return response.data;
     } catch (error) {
       console.log(error);
@@ -252,6 +253,7 @@ const initialState = {
     currentCart: 0,
     unpaidSinglePurchase: {},
     unpaidGroupPurchase: {},
+    paidWaitingPurchases: [],
     itemAdded: 0
 };
 
@@ -308,7 +310,7 @@ const orderSlice = createSlice({
       })
       .addCase(getOrdersThunk.fulfilled, (state, action) => {
         console.log(action.payload);
-        state.orders = action.payload;
+        state.paidWaitingPurchases = action.payload;
       })
       .addCase(deleteFoodFromSinglePurchaseThunk.fulfilled, (state, action) => {
         console.log(action.payload);

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Alert } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -13,34 +13,42 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [info, setInfo] = useState("");
 
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const authType = useSelector(state => state.auth.authType);
+  
+  const [visible, setVisible] = useState(false);
+
+  const onDismiss = () => setVisible(false);
 
   const submitHandler = (e) => {
 
     e.preventDefault();
-    dispatch(authActions.changeAuthType("customer"));
     dispatch(loginThunk({
-      authType,
+      authType: "customer",
       email,
-      password
+      password,
+      navigate,
+      dispatch,
+      setVisible,
+      setInfo,
     }));
-    navigate("/home");
   };
 
   const submitHandlerRestaurant = (e) => {
     e.preventDefault();
-    dispatch(authActions.changeAuthType("restaurantOwner"));
     dispatch(loginThunk({
-      authType,
+      authType: "restaurantOwner",
       email,
-      password
+      password,
+      navigate,
+      dispatch,
+      setVisible,
+      setInfo,
     }));
-    navigate("/RestaurantOwnerHome");
   };
 
   return (
@@ -86,6 +94,9 @@ const Login = () => {
           </Row>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+          {info}
+      </Alert>
     </Helmet>
   );
 };

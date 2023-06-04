@@ -9,6 +9,7 @@ import image01 from "../../../assets/images/bread.png";
 import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../../../store/shopping-cart/cartSlice";
 import { groupsActions } from "../../../store/group/groupSlice";
+import { addFoodToGroupPurchaseThunk } from "../../../store/user/orderSlice";
 
 const ProductCard = (props) => {
   const { food_id, food_name, price } = props.item;
@@ -16,34 +17,36 @@ const ProductCard = (props) => {
 
   const selectedCart = useSelector(state => state.order.currentCart);
 
+  /*
   const addToCart = () => {
     if (selectedCart === 0) {
-      dispatch(
-        cartActions.addItem({
-          id: food_id,
-          title: food_name,
-          image01,
-          price,
-        })
-      );
+      const food = {
+        food: {
+          food_id: food_id,
+          food_category_id: foodCategory.food_category_id,
+          menu_category_id: menuCategory.menu_category_id,
+          restaurant_id: product.restaurant_id, 
+        },
+        ingredientList: []
+      }
+      dispatch(addFoodToSinglePurchaseThunk({food, userId}))
     } else {
-      dispatch(
-        groupsActions.addItem({ 
-          newItem: {
-            id: food_id,
-            title: food_name,
-            image01,
-            price,
-          },
-          groupId: selectedCart
-        })
-      );
+      const food = {
+        food: {
+          food_id: product.food_id,
+          food_category_id: foodCategory.food_category_id,
+          menu_category_id: menuCategory.menu_category_id,
+          restaurant_id: product.restaurant_id, 
+        },
+        ingredientList: []
+      }
+      dispatch(addFoodToGroupPurchaseThunk({food, userId: selectedCart}))
     }
     props.setVisible(!props.visible);
     setTimeout(() => {
       props.setVisible(true);
     }, 100)
-  };
+  };*/
 
   const navigate = useNavigate();
   const navToFood = () => {
@@ -62,7 +65,7 @@ const ProductCard = (props) => {
         </h5>
         <div className=" d-flex align-items-center justify-content-between ">
           <span className="product__price">${price}</span>
-          <button className="addTOCart__btn" onClick={addToCart}>
+          <button className="addTOCart__btn" onClick={() => navigate(`/foods/${food_id}`)}>
             Add to Cart
           </button>
         </div>

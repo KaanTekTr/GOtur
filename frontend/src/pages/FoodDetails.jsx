@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Alert } from "reactstrap";
 
 import { useDispatch, useSelector } from "react-redux";
 import { cartActions } from "../store/shopping-cart/cartSlice";
@@ -72,7 +72,16 @@ const FoodDetails = () => {
       }
       dispatch(addFoodToGroupPurchaseThunk({food, userId: selectedCart}))
     }
+    setVisible(!visible);
+    setTimeout(() => {
+      setVisible(true);
+    }, 100)
   };
+
+  
+  const [visible, setVisible] = useState(false);
+
+  const onDismiss = () => setVisible(false);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -190,6 +199,9 @@ const FoodDetails = () => {
           </Row>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="info" isOpen={visible} toggle={onDismiss}>
+          Product added to cart!
+      </Alert>
     </Helmet>
     ): <span>Loading...</span>}
     </>

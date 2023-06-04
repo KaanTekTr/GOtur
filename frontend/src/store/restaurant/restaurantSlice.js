@@ -90,16 +90,23 @@ export const addFavRestaurantsThunk = createAsyncThunk('user/addFavRestaurants',
   }
 );
 
-const initialState = {
+const initialState = () => {
+  let info = {};
+  try {
+    info = JSON.parse(localStorage.getItem("info") )
+  } catch (error) {
+    console.log(error);
+  }
+  return {
     restaurants: [],
     lastVisited: localStorage.getItem("lastVisited"),
     foodCategories: [],
     menuCategories: [],
     products: [],
     myRestaurant: {
-      info: JSON.parse(localStorage.getItem("info"))
+      info,
     }
-};
+}};
 
 const restaurantSlice = createSlice({
   name: "restaurant",

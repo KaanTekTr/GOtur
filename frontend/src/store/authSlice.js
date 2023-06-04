@@ -42,6 +42,13 @@ export const registerThunk = createAsyncThunk('auth/register',
   async (data, thunkAPI) => {
     try {
       const  response = await userRegister(data.authType, data.user);
+      if (response?.status !== 200) {
+        data.setInfo("Something went wrong!");
+        data.setVisible(v => !v);
+        setTimeout(() => {
+          data.setVisible(true);
+        }, 100)
+      }
       return {response, nav: data.navigate};
     } catch (error) {
       console.log(error);
@@ -118,7 +125,8 @@ const authSlice = createSlice({
         state.userId = 0;
       })
       .addCase(registerThunk.fulfilled, (state, action) => {
-        action.payload.nav("/login");
+        if (action.payload.response.status === 200)
+          action.payload.nav("/login");
         console.log(action.payload);
       })
       .addCase(getUserThunk.fulfilled, (state, action) => {

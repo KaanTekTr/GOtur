@@ -109,27 +109,25 @@ const IncomingOrders = (props) => {
                       Subtotal: ${order.purchase.total_price.toFixed(2)}
                   </h6>
                   <h6>
-                      Status: {order.purchase.is_departed}
+                      Status: {!order.purchase.is_departed && "Waiting"} {order.purchase.is_departed && !order.purchase.is_delivered && "On The Road"}
+                      {order.purchase.is_departed && order.purchase.is_delivered && "Delivered"}
                   </h6>
-                  {order.purchase.is_departed === 0 &&
+                  {!order.purchase.is_departed && !order.purchase.is_delivered &&
                             <div>
                             <Button color="primary" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'On the Road')}>
-                              On the Road
+                              Set Departed
                             </Button>
                             <Button color="danger" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'Canceled')}>
                               Cancel Order
                             </Button>
                           </div>
                   }
-                  {order.status === 'On the Road' &&
+                  {order.purchase.is_departed && !order.purchase.is_delivered &&
                             <div>
-               
                       <Button color="success" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'Delivered')}>
-                        Delivered
+                        Set Delivered
                       </Button>
                       </div>
-                  
-               
                   }
                 </Card>
               </Col>

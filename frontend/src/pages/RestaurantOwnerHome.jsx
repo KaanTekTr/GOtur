@@ -16,16 +16,16 @@ import restaurants from "../assets/fake-data/restaurants.js";
 
 
 import IncomingOrders from "../components/UI/incoming-order/IncomingOrders.jsx";
-import { getOrdersThunk } from "../store/user/orderSlice.js";
 
 
 const RestaurantOwnerHome = () => {
 
+  const order = [];
   return (
     <Helmet title="Home">
 
       <section>
-        <IncomingOrders restaurants={restaurants} />
+        <IncomingOrders order={order} restaurants={restaurants} />
       </section>
     </Helmet>
   );

@@ -3,9 +3,11 @@ import Helmet from "../../Helmet/Helmet";
 import CommonSection from "../common-section/CommonSection";
 import { Container, Row, Col, Card, Table, CardTitle, CardSubtitle, Button } from "reactstrap";
 import ReactPaginate from "react-paginate";
-import { useSelector } from "react-redux";
+import { getOrdersThunk } from "../../../store/user/orderSlice.js";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from 'react';
 
-const IncomingOrders = () => {
+const IncomingOrders = (props) => {
   // Initial order data
   const initialOrders = [
     {
@@ -23,7 +25,19 @@ const IncomingOrders = () => {
     // add more orders as needed
   ];
 
-  const [orders, setOrders] = useState(initialOrders); // State for order data
+  const userId = useSelector(state => state.auth.userId);
+  console.log(userId)
+  const dispatch = useDispatch();
+  useEffect(() => {
+     dispatch(getOrdersThunk({userId}));
+   }, [dispatch, userId]);
+ const waitingPurchases = useSelector(state => state.order.paidWaitingPurchases);
+ console.log(waitingPurchases)
+
+  //const [orders, setOrders] = useState(waitingPurchases); // State for order data
+  const orders = waitingPurchases;
+  console.log(orders)
+  //console.log(orders)
   const [pageNumber, setPageNumber] = useState(0);
 
   const orderPerPage = 5;
@@ -40,8 +54,8 @@ const IncomingOrders = () => {
   };
 
   const handleButtonClick = (id, status) => {
-    const updatedOrders = orders.map(order => order.id === id ? {...order, status: status} : order);
-    setOrders(updatedOrders);
+    const updatedOrders = orders.map(order => order.purchase_id === id ? {...order, status: status} : order);
+    //setOrders(updatedOrders);
   };
 
   return (
@@ -61,11 +75,22 @@ const IncomingOrders = () => {
                       {order.date}
                   </CardSubtitle>
                   <h6>
-                      Customer Name: {order.name}
+                      Restaurant: {order.restaurant.restaurant_name}
                   </h6>
                   <h6>
-                      Customer Note: {order.customerNote}
+                      Customer Name: {order.customer.username}
                   </h6>
+                  <h6>
+                      Customer Note: {order.purchase.customer_note}
+                  </h6>
+                  <h8>
+                      <strong>Address Information: </strong>
+                      City: {order.address.city}, District: {order.address.district}, Street Num: {order.address.street_num}, 
+                      Street Name: {order.address.street_name}, Building Num: {order.address.building_num}
+                  </h8>
+                  <h8>
+                      <strong>Detailed Description: </strong> {order.address.detailed_desc}
+                  </h8>
                   <Table>
                     <thead>
                       <tr>
@@ -73,20 +98,20 @@ const IncomingOrders = () => {
                         <th className="text-center">Price</th>
                         <th className="text-center">Quantity</th>
                       </tr>
-                    </thead>
+                    </thead> 
                     <tbody>
-                      {order.products.map((product) => (
-                        <Tr key={product.id} product={product} />
-                      ))}
-                    </tbody>
+                        {order.purchaseItemList.map((product) => (
+                                <Tr key={product.food.food_id} product={{title: product.food.food_name, price: product.food.price, quantity: product.food.food_order}} />
+                            ))}
+                    </tbody> 
                   </Table>
                   <h6>
-                      Subtotal: ${order.total.toFixed(2)}
+                      Subtotal: ${order.purchase.total_price.toFixed(2)}
                   </h6>
                   <h6>
-                      Status: {order.status}
+                      Status: {order.purchase.is_departed}
                   </h6>
-                  {order.status === 'Preparing' &&
+                  {order.purchase.is_departed === 0 &&
                             <div>
                             <Button color="primary" size="sm" className="mr-2" onClick={() => handleButtonClick(order.id, 'On the Road')}>
                               On the Road

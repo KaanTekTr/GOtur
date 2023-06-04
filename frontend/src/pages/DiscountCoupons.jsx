@@ -52,10 +52,10 @@ const coupons = useSelector(state => state.discountCoupon.discountCoupons);
               <Col lg="6" md="6" sm="12" xs="12" key={coupon.code} className="mb-4">
                 <Card className="p-4">
                   <CardTitle tag="h4">{coupon.code}</CardTitle>
-                  <CardSubtitle tag="h6" className="mb-2 text-muted">{coupon.restaurant}</CardSubtitle>
+                  <CardSubtitle tag="h6" className="mb-2 text-muted">Restaurant: {coupon.restaurant.restaurant_name}</CardSubtitle>
                   <CardText>
-                    Discount Amount: ${coupon.restaurant_id} <br/>
-                    Expiry Date: {new Date(coupon.is_used).toLocaleDateString()}
+                    Discount Percentage: {coupon.restaurant.discount_percentage}% <br/>
+                    Is Used: {coupon.is_used} 
                   </CardText>
                 </Card>
               </Col>

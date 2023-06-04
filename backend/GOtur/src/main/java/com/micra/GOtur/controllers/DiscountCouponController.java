@@ -2,8 +2,11 @@ package com.micra.GOtur.controllers;
 
 import com.micra.GOtur.mappers.DiscountCouponMapper;
 import com.micra.GOtur.mappers.FoodCategoryMapper;
+import com.micra.GOtur.mappers.RestaurantMapper;
 import com.micra.GOtur.models.DiscountCoupon;
+import com.micra.GOtur.models.DiscountItem;
 import com.micra.GOtur.models.FoodCategory;
+import com.micra.GOtur.models.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,6 +53,26 @@ public class DiscountCouponController {
         String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ?;";
 
         return jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId);
+    }
+
+    @GetMapping("/getAllDiscountItems/{customerId}")
+    public List<DiscountItem> getAllDiscountItems(@PathVariable("customerId") int customerId) {
+        String sql = "SELECT * FROM DiscountCoupon D WHERE D.coupon_owner_id = ?;";
+
+        List<DiscountCoupon> couponList = jdbcTemplate.query(sql, new DiscountCouponMapper(), customerId);
+        List<DiscountItem> discountItemList = new ArrayList<>();
+
+        for (DiscountCoupon discountCoupon : couponList) {
+            String sql2 = "SELECT * FROM Restaurant R WHERE R.restaurant_id = ?;";
+            Restaurant restaurant = jdbcTemplate.queryForObject(sql2, new RestaurantMapper(), discountCoupon.getRestaurant_id());
+
+            DiscountItem discountItem = new DiscountItem();
+            discountItem.setDiscountCoupon(discountCoupon);
+            discountItem.setRestaurant(restaurant);
+            discountItemList.add(discountItem);
+        }
+
+        return discountItemList;
     }
 
     @GetMapping("/getAllActive/{customerId}")

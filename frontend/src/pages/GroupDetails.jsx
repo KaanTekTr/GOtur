@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/common-section/CommonSection";
 
-import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Table } from "reactstrap";
+import { Container, Row, Col, Card, CardTitle, Button, Modal, ModalHeader, ModalBody, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, ModalFooter, InputGroup, Input, InputGroupText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Table, Alert } from "reactstrap";
 
 import crown_image from "../assets/images/crown.jpeg"
 import "../styles/all-foods.css";
@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addressActions } from "../store/user/adressSlice";
 import { addGroupMemberThunk, getGroupMembersThunk, getGroupsThunk, groupsActions } from "../store/group/groupSlice";
-import { deleteFoodFromGroupPurchaseThunk, getProductsUnpaidGroupPurchaseThunk, getUnpaidGroupPurchaseThunk, orderActions } from "../store/user/orderSlice";
+import { completeGroupPurchaseThunk, deleteFoodFromGroupPurchaseThunk, getProductsUnpaidGroupPurchaseThunk, getUnpaidGroupPurchaseThunk, orderActions } from "../store/user/orderSlice";
 import { getFriendsThunk } from "../store/group/friendsSlice";
 
 import image01 from "../assets/images/bread.png"; 
@@ -61,7 +61,9 @@ const GroupDetails = () => {
     useEffect(() => {
       if (group) {
         dispatch(getUnpaidGroupPurchaseThunk({userId: group.group_id}));
-        dispatch(getProductsUnpaidGroupPurchaseThunk({userId: group.group_id}));
+        setTimeout(() => {
+          dispatch(getProductsUnpaidGroupPurchaseThunk({userId: group.group_id}));
+        }, 100);
       }
     }, [group, dispatch, reload2]);
 
@@ -95,6 +97,26 @@ const GroupDetails = () => {
       } else {
         console.error("Choose a friend!");
       }
+    }
+
+    const [note, setNote] = useState("");
+
+    const [info, setInfo] = useState("");
+    const [visible, setVisible] = useState(false);
+    const onDismiss = () => setVisible(false);
+
+    const handlePayment = () => {
+      dispatch(completeGroupPurchaseThunk({ setInfo, setVisible,purchase_id: groupCart.purchase_id, address_id: groupAddresses.find(ad => ad.is_primary)?.address_id, note, coupon_id: -1}))
+      setTimeout(() => {
+        dispatch(getUnpaidGroupPurchaseThunk({userId: group.group_id}));
+        dispatch(getProductsUnpaidGroupPurchaseThunk({userId: group.group_id}));
+        dispatch(getGroupsThunk({userId}));
+        setGroup(groups.find(group => `${group.group_id}` === id));
+
+      }, 200);
+      toggleGroupCheckout();
+      
+      //navigate(`/payment`)
     }
   return (
     <>
@@ -157,13 +179,13 @@ const GroupDetails = () => {
               <ModalHeader toggle={toggle}>Group Address Selection</ModalHeader>
               <ModalBody>   
                 <ListGroup>
-                  {groupAddresses?.length > 0 ? groupAddresses?.map(address => (
-                    <ListGroupItem style={{cursor: "pointer"}} active={address.id === selectedGroupAddress.id} onClick={() => changeSelAddress(address.id)}>
+                  {groupAddresses?.length > 0 ? groupAddresses.map(address => (
+                    <ListGroupItem style={{cursor: "pointer"}} active={address.is_primary} onClick={() => changeSelAddress(address.address_id)}>
                       <ListGroupItemHeading>
-                        {address.title}
+                        {address.address_name}
                       </ListGroupItemHeading>
                       <ListGroupItemText>
-                        {address.desc}
+                        {address.street_name + " street, street no: "+address.street_num + ", " + address.district + "/" + address.city}
                       </ListGroupItemText>
                     </ListGroupItem>
                   )) : <span>No Address To Select</span>}
@@ -294,10 +316,10 @@ const GroupDetails = () => {
                           Customer Note
                       </CardTitle>
                         <div>
-                          <Input placeholder="Add note..." className="mb-2"/>
+                          <Input placeholder="Add note..." value={note} onChange={e=>setNote(e.target.value)}  className="mb-2"/>
                         </div>
                         <div>
-                          <button type="submit" className="addTOCart__btn">
+                          <button type="submit" className="addTOCart__btn" onClick={handlePayment}>
                             Payment
                           </button>
                         </div>
@@ -365,6 +387,9 @@ const GroupDetails = () => {
             </Modal>
         </Container>
       </section>
+      <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+          {info}
+      </Alert>
     </Helmet>
     ) : <span>Loading...</span>}
     </>

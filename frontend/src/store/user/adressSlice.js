@@ -107,6 +107,7 @@ const addressSlice = createSlice({
     builder
       .addCase(getAddressesThunk.fulfilled, (state, action) => {
         state.address = action.payload;
+        state.groupAddress = action.payload;
         console.log(action.payload);
       })
       .addCase(addAddressesThunk.fulfilled, (state, action) => {

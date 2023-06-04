@@ -54,13 +54,13 @@ const PastOrders = () => {
               <Col lg="12" md="12" sm="6" xs="6" key={item.id} className="mb-4">
                 <Card className="p-4">
                     <CardTitle tag="h3">
-                        Order {index + 1}
+                      {item.is_group_purchase ? "Group" : ""}  Order {index + 1}
                     </CardTitle>
                     <CardSubtitle
                         className="mb-2 text-muted"
                         tag="h6"
                     >
-                        {item.date}
+                        {item.purchase_time}
                     </CardSubtitle>
                 <Table>
                     <thead>

@@ -2,12 +2,23 @@ import React from 'react';
 import Helmet from '../components/Helmet/Helmet';
 import CommonSection from '../components/UI/common-section/CommonSection';
 import { Container, Row, Col, Card, CardTitle, CardSubtitle, CardText } from 'reactstrap';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
+import { getDiscountsThunk } from "../store/user/discountSlice";
+import { useEffect } from 'react';
 
 const DiscountCoupons = () => {
   // Assume coupons data exists in your Redux store and each coupon item has code, discount, restaurant, and expiryDate properties.
 //   const coupons = useSelector((state) => state.user.currentCustomer.coupons);
  // Dummy coupons data
+ const userId = useSelector(state => state.auth.userId);
+ console.log(userId)
+ const dispatch = useDispatch();
+ useEffect(() => {
+    dispatch(getDiscountsThunk({userId}));
+  }, [dispatch, userId]);
+const coupons = useSelector(state => state.discountCoupon.discountCoupons);
+
+/*
  const coupons = [
     {
       code: 'COUPON10',
@@ -28,6 +39,7 @@ const DiscountCoupons = () => {
       expiryDate: '2024-07-01',
     },
   ];
+  */
   
   return (
     <Helmet title="Discount Coupons">
@@ -42,8 +54,8 @@ const DiscountCoupons = () => {
                   <CardTitle tag="h4">{coupon.code}</CardTitle>
                   <CardSubtitle tag="h6" className="mb-2 text-muted">{coupon.restaurant}</CardSubtitle>
                   <CardText>
-                    Discount Amount: ${coupon.discount} <br/>
-                    Expiry Date: {new Date(coupon.expiryDate).toLocaleDateString()}
+                    Discount Amount: ${coupon.restaurant_id} <br/>
+                    Expiry Date: {new Date(coupon.is_used).toLocaleDateString()}
                   </CardText>
                 </Card>
               </Col>

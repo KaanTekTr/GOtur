@@ -7,6 +7,7 @@ import addressSlice from "./user/adressSlice";
 import orderSlice from "./user/orderSlice";
 import groupsSlice from "./group/groupSlice";
 import friendsSlice from "./group/friendsSlice";
+import discountSlice from "./user/discountSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     restaurant: restaurantSlice.reducer,
     address: addressSlice.reducer,
     order: orderSlice.reducer,
+    discountCoupon: discountSlice.reducer
   },
 });
 

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Container, Card, CardTitle, Button, Modal, ModalBody, ModalHeader, Input, Form, Row, Col, InputGroup, InputGroupText } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { addNewRestaurantThunk, getRestOfOwnerThunk } from '../store/restaurant/restaurantSlice';
+import { addNewRestaurantThunk, editRestaurantThunk, getRestOfOwnerThunk } from '../store/restaurant/restaurantSlice';
 import { addNewAddress } from '../lib/api/unsplashService';
+import { SettingsApplicationsRounded } from '@material-ui/icons';
 // import { updateRestaurant } from '../redux/actions/restaurantActions';
 
 const RestaurantInfoPage = () => {
@@ -16,12 +17,12 @@ const RestaurantInfoPage = () => {
 
   const [minOrderLimit, setMinOrderLimit] = useState("");
   const [openHours, setOpenHours] = useState("");
+  const [closeHours, setCloseHours] = useState("");
 
   const [name, setName] = useState("");
   const [district, setDistrict] = useState("");
   const [minPrice, setMinPrice] = useState(0);
-
-  
+  const restaurant = useSelector(state => state.restaurant.myRestaurant);
   const dispatch = useDispatch();
 
   const toggleOrderModal = () => {
@@ -36,14 +37,33 @@ const RestaurantInfoPage = () => {
   };
 
   const updateHourInfo = () => {
-    setOpenHours(openHours);
-    // dispatch(updateRestaurant({ minOrderLimit, openHours }));
+    const rest = {
+      restaurant_name: restaurant.info.restaurant_name,
+      district : restaurant.info.district,
+      min_delivery_price: restaurant.info.min_delivery_price,
+      open_hour : openHours,
+      close_hour : closeHours
+    }
+    dispatch(editRestaurantThunk( { id: restaurant.info.restaurant_id, restaurant:rest}));
+    setTimeout(function(){
+      dispatch(getRestOfOwnerThunk({userId}));
+        
+    },500);
     toggleHourModal();
   };
   const updateOrderInfo = () => {
-    setMinOrderLimit(minOrderLimit);
-
-    // dispatch(updateRestaurant({ minOrderLimit, openHours }));
+    const rest = {
+      restaurant_name: restaurant.info.restaurant_name,
+      district : restaurant.info.district,
+      min_delivery_price: minOrderLimit,
+      open_hour : restaurant.info.open_hour,
+      close_hour : restaurant.info.close_hour
+    }
+    dispatch(editRestaurantThunk( { id: restaurant.info.restaurant_id, restaurant:rest}));
+    setTimeout(function(){
+      dispatch(getRestOfOwnerThunk({userId}));
+        
+    },500);
     toggleOrderModal();
   };
 
@@ -66,7 +86,7 @@ const RestaurantInfoPage = () => {
     dispatch(getRestOfOwnerThunk({userId}));
   }, [dispatch, userId]);
 
-  const restaurant = useSelector(state => state.restaurant.myRestaurant);
+ 
 
   return (
     <>
@@ -90,29 +110,32 @@ const RestaurantInfoPage = () => {
       <Modal isOpen={orderModal} toggle={toggleOrderModal}>
         <ModalHeader toggle={toggleOrderModal}>Edit Information</ModalHeader>
         <ModalBody>
-          <Form onSubmit={updateOrderInfo}>
             <Input 
               type="text" 
               placeholder="Minimum Order Limit" 
               value={minOrderLimit} 
               onChange={e => setMinOrderLimit(e.target.value)}
             />
-            <Button color="primary" type="submit">Update</Button>
-          </Form>
+            <Button color="primary"onClick={updateOrderInfo} type="submit">Update</Button>
         </ModalBody>
       </Modal>
       <Modal isOpen={hourModal} toggle={toggleHourModal}>
         <ModalHeader toggle={toggleHourModal}>Edit Information</ModalHeader>
         <ModalBody>
-          <Form onSubmit={updateHourInfo}>
+          
             <Input 
               type="text" 
-              placeholder="Open Hours" 
+              placeholder="Opening at" 
               value={openHours} 
               onChange={e => setOpenHours(e.target.value)}
             />
-            <Button color="primary" type="submit">Update</Button>
-          </Form>
+            <Input 
+              type="text" 
+              placeholder="Closing at" 
+              value={closeHours} 
+              onChange={e => setCloseHours(e.target.value)}
+            />
+            <Button color="primary" onClick={updateHourInfo} type="submit">Update</Button>
         </ModalBody>
       </Modal>
     </Card>

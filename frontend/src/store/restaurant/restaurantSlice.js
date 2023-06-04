@@ -1,11 +1,22 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { addFavRestaurants, addNewFood, addNewMenuCategory, addNewRestaurant, deleteFood, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
+import { addFavRestaurants, addNewFood, addNewMenuCategory, addNewRestaurant, deleteFood, editRestaurant, getAllFoodCategory, getAllFoodsOfRest, getAllMenuCategories, getAllRestaurants, getRestaurantsOfOwner } from "../../lib/api/unsplashService";
 
 export const addNewRestaurantThunk = createAsyncThunk('rest/addRestaurant', 
   async (data, thunkAPI) => {
     try {
       const  response = await addNewRestaurant(data.id, data.restaurant);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const editRestaurantThunk = createAsyncThunk('rest/editRestaurant', 
+  async (data, thunkAPI) => {
+    try {
+      const  response = await editRestaurant(data.id, data.restaurant);
       return response.data;
     } catch (error) {
       console.log(error);
@@ -150,6 +161,12 @@ const restaurantSlice = createSlice({
     builder
       .addCase(getRestaurantsThunk.fulfilled, (state, action) => {
         state.restaurants = action.payload;
+        console.log(action.payload);
+      })
+      .addCase(addNewRestaurantThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
+      .addCase(editRestaurantThunk.fulfilled, (state, action) => {
         console.log(action.payload);
       })
       .addCase(getAllFoodCategoryThunk.fulfilled, (state, action) => {

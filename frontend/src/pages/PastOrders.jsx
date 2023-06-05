@@ -87,6 +87,10 @@ const PastOrders = () => {
                         Subtotal: $
                         <span className="cart__subtotal">{item.total_price}</span>
                     </h6>
+                    <h6>
+                      Status: {!item.is_departed && "Waiting"} {item.is_departed && !item.is_delivered && "On The Road"}
+                      {item.is_departed && item.is_delivered && "Delivered"}
+                    </h6>
 
                     <Card className="p-2 mt-4">
                       <CardTitle tag="h5">

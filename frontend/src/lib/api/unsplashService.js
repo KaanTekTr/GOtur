@@ -275,19 +275,19 @@ export const getDiscountsOfCustomer = (user_id) => (
 
 // REPORTS
 export const createReportFavRest = (user_id) => (
-  axios.post(`${baseURL}/report/mostFavoritedRestaurant/11`)
+  axios.post(`${baseURL}/report/mostFavoritedRestaurant/1`)
 );
 
 export const createReportMaxRat = (user_id) => (
-  axios.post(`${baseURL}/report/maxRatingInRegion/11`)
+  axios.post(`${baseURL}/report/maxRatingInRegion/1`)
 );
 
 export const createReportFavRestMaxPurch = (user_id) => (
-  axios.post(`${baseURL}/report/maxPurchaseInRegion/11`)
+  axios.post(`${baseURL}/report/maxPurchaseInRegion/1`)
 );
 
 export const createReportMaxCoup = (user_id) => (
-  axios.post(`${baseURL}/report/maxDiscountCoupon/11`)
+  axios.post(`${baseURL}/report/maxDiscountCoupon/1`)
 );
 
 export const reportAll = (user_id) => (

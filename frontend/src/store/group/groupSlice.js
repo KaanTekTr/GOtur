@@ -74,6 +74,11 @@ export const transferBalanceThunk = createAsyncThunk('group/transferBalance',
       return response.data;
     } catch (error) {
       console.log(error);
+      data.setInfo(error.response.data);
+      data.setVisible(v => !v);
+      setTimeout(() => {
+        data.setVisible(true);
+      }, 100)
     }
   }
 );

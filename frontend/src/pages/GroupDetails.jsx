@@ -132,12 +132,16 @@ const GroupDetails = () => {
 
     // Function to handle deleting a product
     const transferBalance = () => {
-        dispatch(transferBalanceThunk({ group_id: group.group_id, customer_id: userId, balance: balance}));
-        alert('Transfer Completed Successfully!');
+        dispatch(transferBalanceThunk({ setVisible, setInfo, group_id: group.group_id, customer_id: userId, balance: balance}));
+        setInfo("Transfer completed successfully");
         setTimeout(() => {
             dispatch(getGroupsThunk({userId}));
             setGroup(groups.find(group => `${group.group_id}` === id));
         }, 200);
+        setVisible(v => !v);
+        setTimeout(() => {
+          setVisible(true);
+        }, 100)
         setReload3(!reload3);
         setReload3(!reload3);
         toggleAddMoney();

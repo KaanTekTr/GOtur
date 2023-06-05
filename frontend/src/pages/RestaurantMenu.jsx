@@ -26,6 +26,7 @@ const RestaurantMenu = () => {
     const restaurant = useSelector(state => state.restaurant.myRestaurant);
     
     const [searchTerm, setSearchTerm] = useState("");
+    const [info, setInfo] = useState("");
     const [pageNumber, setPageNumber] = useState(0);
     const [reload, setReload] = useState(false);
   
@@ -93,14 +94,8 @@ const RestaurantMenu = () => {
   
     const [newCategory, setNewCategory] = useState('');
   
-  
-    const deleteProduct = (productId) => {
-      // Use an action from your Redux store to delete the product
-      dispatch(restaurantActions.deleteProduct(productId));
-    };
-  
     const addProduct = () => {
-      if (newProduct && newProductPrice && menuCategory !== "0" && foodCategory !== "0") {
+      if (newProduct && newProductPrice > 0 && menuCategory !== "0" && foodCategory !== "0") {
         const food = {
           food_category_id: foodCategory,
           restaurant_id: restaurant.info.restaurant_id,
@@ -119,7 +114,11 @@ const RestaurantMenu = () => {
         setMenuCategory("0");
         setFoodCategory("0");
       } else {
-        console.error('All fields must be filled out to add a new product');
+        setInfo('All fields must be filled out and price can not be lower than 0 to add a new product');
+        setVisible(!visible);
+        setTimeout(() => {
+          setVisible(true);
+        }, 100);
       }
     };
   
@@ -133,7 +132,11 @@ const RestaurantMenu = () => {
   
         setNewCategory('');
       } else {
-        console.error('The category field must be filled out to add a new category');
+        setInfo('The category field must be filled out to add a new category');
+        setVisible(!visible);
+        setTimeout(() => {
+          setVisible(true);
+        }, 100);
       }
     };
   
@@ -273,6 +276,9 @@ const RestaurantMenu = () => {
               </Row>
             </Container>
           </section>
+          <Alert style={{ position:"fixed", bottom: "30px",  right:"30px"}} color="danger" isOpen={visible} toggle={onDismiss}>
+            {info}
+        </Alert>
         </Helmet>
       );
     };
